@@ -93,6 +93,12 @@
     <Compile Include="NombrarImagenes.Designer.cs">
       <DependentUpon>NombrarImagenes.cs</DependentUpon>
     </Compile>
+    <Compile Include="RandomString.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RandomString.Designer.cs">
+      <DependentUpon>RandomString.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reaction.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,6 +133,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="NombrarImagenes.resx">
       <DependentUpon>NombrarImagenes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RandomString.resx">
+      <DependentUpon>RandomString.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reaction.resx">
       <DependentUpon>Reaction.cs</DependentUpon>
