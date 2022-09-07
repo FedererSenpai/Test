@@ -91,9 +91,10 @@ namespace WindowsFormsApp1
         {
             if (dataGridView1.Columns[e.ColumnIndex].GetType() == typeof(DataGridViewButtonColumn) && (dataGridView1.Columns[e.ColumnIndex] as DataGridViewButtonColumn).Text == "Editar")
             {
-                if (dataGridView1.Rows[e.RowIndex].Cells[1].Value != null)
+                if (e.RowIndex > -1 && dataGridView1.Rows[e.RowIndex].Cells[1].Value != null)
+                {
                     new InsertText((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
-                switch (dataGridView1.Rows[e.RowIndex].Cells[1].Value)
+                    switch (dataGridView1.Rows[e.RowIndex].Cells[1].Value)
                     {
                         case "Text":
                             break;
@@ -102,8 +103,9 @@ namespace WindowsFormsApp1
                         case "Bool":
                             break;
                     }
+                }
             }
-            (dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert).ToString();
+            //(dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert).ToString();
             return;
         }
 
@@ -111,5 +113,13 @@ namespace WindowsFormsApp1
         {
             bs.Add(new DatosInsert());
         }
+
+        //PTE: Bindings controles
+        //PTE: Meter botón para borrar linea.
+        //PTE: Meter elegir numero de inserts.
+        //PTE: Crear insert
+        //PTE: Crear Editar Num
+        //PTE: Crear Editar Bool
+        
     }
 }
