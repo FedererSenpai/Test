@@ -38,8 +38,9 @@ namespace WindowsFormsApp1
         public string RepetirText { get => repetirText; set => repetirText = value; }
         public int Longitud { get => longitud; set => longitud = value; }
         public int Maximo { get => maximo; set => maximo = value; }
-        public int Mininmo { get => mininmo; set => mininmo = value; }
-        public bool Fijo { get => fijo; set => fijo = value; }
+        public int Minimo { get => mininmo; set => mininmo = value; }
+        public bool Fijo { get => fijo;
+            set => fijo = value; }
         public bool Minusculas { get => minusculas; set => minusculas = value; }
         public bool Mayusculas { get => mayusculas; set => mayusculas = value; }
         public bool Numeros { get => numeros; set => numeros = value; }
