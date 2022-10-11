@@ -92,20 +92,49 @@ namespace WindowsFormsApp1
             {
                 if (e.RowIndex > -1 && dataGridView1.Rows[e.RowIndex].Cells[1].Value != null)
                 {
-                    new InsertText((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
                     switch (dataGridView1.Rows[e.RowIndex].Cells[1].Value)
                     {
                         case "Text":
+                            new InsertText((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
                             break;
                         case "Num":
                             break;
                         case "Bool":
+                            new InsertBool((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
                             break;
                     }
                 }
             }
             //(dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert).ToString();
             return;
+        }
+
+        private string[] CrearFilaBool(DatosInsert di, int filas)
+        {
+            string[] valores = new string[filas];
+            string valor;
+            if (di.Aleatorio)
+            {
+                if (di.Repetir)
+                {
+                    valor = GenerarBool();
+                    valores = Enumerable.Repeat(valor, filas).ToArray();
+                }
+                else
+                {
+                    for (int i = 0; i < filas; i++)
+                    {
+                        valor = GenerarBool();
+                        valores[i] = valor;
+                    }
+                }
+            }
+            else
+            {
+                valor = di.TrueFalse.ToString();
+                valores = Enumerable.Repeat(valor, filas).ToArray();
+            }
+            return valores;
         }
 
         private string[] CrearFilaString(DatosInsert di, int filas)
@@ -170,7 +199,7 @@ namespace WindowsFormsApp1
             {
                 for(int i = 0; i<valores.Length;i++)
                 {
-                    valores[i] = valores[i].Substring(0, 2).ToUpper() + valores[i].Substring(2);
+                    valores[i] = valores[i].Substring(0, 2).ToUpper() + valores[i].Substring(2).ToLower();
                 }
             }
             return valores;
@@ -194,6 +223,13 @@ namespace WindowsFormsApp1
             {
                 resultado += cadena[r.Next(cadena.Length)];
             }
+            return resultado;
+        }
+
+        private string GenerarBool()
+        {
+            string resultado = string.Empty;
+            resultado = Convert.ToBoolean(r.Next(2)).ToString();
             return resultado;
         }
 
@@ -246,6 +282,11 @@ namespace WindowsFormsApp1
                     valores[cont] = CrearFilaString(di, filas);
                     cont++;
                 }
+                else if(di.Tipo.Equals("Bool"))
+                {
+                    valores[cont] = CrearFilaBool(di, filas);
+                    cont++;
+                }
             }
             GenerarSql(valores, filas);
         }
@@ -257,12 +298,17 @@ namespace WindowsFormsApp1
                 e.Handled = true;
             }
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                bs.RemoveAt(dataGridView1.CurrentRow.Index);
+            }
+            catch { }
+        }
         //PTE: Bindings controles
-        //PTE: Meter botón para borrar linea.
-        //PTE: Meter elegir numero de inserts.
         //PTE: Crear insert
         //PTE: Crear Editar Num
-        //PTE: Crear Editar Bool
-
     }
 }

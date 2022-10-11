@@ -90,6 +90,6 @@ namespace WindowsFormsApp1
                 radioButton3.Checked = true;
             else
                 radioButton4.Checked = true;
-            }
+        }
     }
 }
