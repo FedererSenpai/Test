@@ -35,7 +35,9 @@ namespace WindowsFormsApp1
             dr = ds.Tables[0].NewRow();
             dr[0] = "Bool";
             ds.Tables[0].Rows.Add(dr);
-            this.Tipo.ValueMember = ds.Tables[0].Columns["Tipo"].ToString();
+            dr = ds.Tables[0].NewRow();
+            dr[0] = "Custom";
+            ds.Tables[0].Rows.Add(dr); this.Tipo.ValueMember = ds.Tables[0].Columns["Tipo"].ToString();
             this.Tipo.DisplayMember = ds.Tables[0].Columns["Tipo"].ToString();
             this.Tipo.DataSource = ds.Tables[0];
 
@@ -108,6 +110,17 @@ namespace WindowsFormsApp1
             //(dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert).ToString();
             return;
         }
+        private string[] CrearFilaCustom(DatosInsert di, int filas)
+        {
+            string[] valores = new string[filas];
+            return valores;
+        }
+
+        private string[] CrearFilaNum(DatosInsert di, int filas)
+        {
+            string[] valores = new string[filas];
+            return valores;
+        }
 
         private string[] CrearFilaBool(DatosInsert di, int filas)
         {
@@ -157,9 +170,16 @@ namespace WindowsFormsApp1
                 if (di.Caracteresespeciales)
                     todos += especiales;
 
+                if (string.IsNullOrEmpty(todos))
+                {
+                    valor = "''";
+                    valores = Enumerable.Repeat(valor, filas).ToArray();
+                    return valores;
+                }
+
                 if (di.Repetir)
                 {
-                    if(di.Fijo)
+                    if (di.Fijo)
                     {
                         valor = $"'{GenerarString(todos, di.Longitud)}'";
                         valores = Enumerable.Repeat(valor, filas).ToArray();
@@ -176,8 +196,8 @@ namespace WindowsFormsApp1
                     {
                         for (int i = 0; i < filas; i++)
                         {
-                        valor = GenerarString(todos, di.Longitud);
-                        valores[i] = $"'{valor}'";
+                            valor = GenerarString(todos, di.Longitud);
+                            valores[i] = $"'{valor}'";
                         }
                     }
                     else
@@ -219,9 +239,12 @@ namespace WindowsFormsApp1
         public string GenerarString(string cadena, int longitud)
         {
             string resultado = string.Empty;
-            for (int i = 0; i < longitud; i++)
+            if (!string.IsNullOrEmpty(cadena))
             {
-                resultado += cadena[r.Next(cadena.Length)];
+                for (int i = 0; i < longitud; i++)
+                {
+                    resultado += cadena[r.Next(cadena.Length)];
+                }
             }
             return resultado;
         }
@@ -282,9 +305,19 @@ namespace WindowsFormsApp1
                     valores[cont] = CrearFilaString(di, filas);
                     cont++;
                 }
+                else if (di.Tipo.Equals("Num"))
+                {
+                    valores[cont] = CrearFilaNum(di, filas);
+                    cont++;
+                }
                 else if(di.Tipo.Equals("Bool"))
                 {
                     valores[cont] = CrearFilaBool(di, filas);
+                    cont++;
+                }
+                else if (di.Tipo.Equals("Custom"))
+                {
+                    valores[cont] = CrearFilaCustom(di, filas);
                     cont++;
                 }
             }
