@@ -17,7 +17,7 @@ namespace WindowsFormsApp1
         Random r = new Random();
         TextBox tb = new TextBox();
         string[] personajesNaruto = new string[] { "NARUTO", "SASUKE", "SAKURA", "KAKASHI", "MINATO", "OROCHIMARU", "OBITO", "AKAMARU", "ASUMA", "BORUTO", "ITACHI", "MADARA", "DANZO", "KUSHINA", "CHOJI", "ROCKLEE", "SARADA", "MITSUKI", "KONOHAMARU", "HINATA", "KIBA", "SHINO", "KURENAI", "SHIKAMARU", "INO", "NEJI", "TENTEN", "MIGHTGUY", "GAARA", "KANKURO", "TEMARI", "ZABUZA", "HAKU", "KABUTO", "ZETSU", "KISAME", "KONAN", "NAGATO", "DEIDARA", "HIDAN", "KAKUZU", "SASORI", "KAGUYA", "IRUKA", "HASHIRAMA", "TSUANDE", "TOBIRAMA", "JIRAIYA", "SAI", "YAMATO", "KILLERBEE", "KURAMA", "KARIN", "JUGO", "RIN", "SHISUI"};
-        string[] personajesOnePiece = new string[] { "LUFFY", "NAMI","ZORO","SANJI","CHOPPER","ROBIN", "FRANKY", "BROOK", "JIMBEI", "ARLONG", "FOXY", "AOKIJI", "SENGOKU", "AKAINU", "KIZARU", "MIHAWK", "VIVI", "CROCODILE", "GARP", "SMOKER", "SHANKS", "ICEBURG", "ROB", "ENEL", "DOFLAMINGO", "BELLAMY", "KAIDO", "BIGMOM", "SHIROHIGE", "KUROHIGE", "LAW", "KID", "MORIA", "ODEN", "YAMATO", "ROGER", "ACE", "SABO", "BUGGY", "HANCOCK", "KUMA", "VEGAPUNK", "FUJITORA", "KOBY", "MOMONOSUKE", "RAYLEIGH", "DRAGON", "KATAKURI", "HAWKINS", "BARTOLOMEO", "ROSINANTE", "UTA", "MARCO", "KING", "QUEEN" };
+        string[] personajesOnePiece = new string[] { "LUFFY", "NAMI","ZORO","SANJI","CHOPPER","ROBIN", "FRANKY", "BROOK", "JINBE", "ARLONG", "FOXY", "AOKIJI", "SENGOKU", "AKAINU", "KIZARU", "MIHAWK", "VIVI", "CROCODILE", "GARP", "SMOKER", "SHANKS", "ICEBURG", "ROB", "ENEL", "DOFLAMINGO", "BELLAMY", "KAIDO", "BIGMOM", "SHIROHIGE", "KUROHIGE", "LAW", "KID", "MORIA", "ODEN", "YAMATO", "ROGER", "ACE", "SABO", "BUGGY", "HANCOCK", "KUMA", "VEGAPUNK", "FUJITORA", "KOBY", "MOMONOSUKE", "RAYLEIGH", "DRAGON", "KATAKURI", "HAWKINS", "BARTOLOMEO", "ROSINANTE", "UTA", "MARCO", "KING", "QUEEN" };
         private static int puntero = 0;
         TextBox[][] tbl;
         private static int countf = 0;
@@ -104,21 +104,24 @@ namespace WindowsFormsApp1
         private bool CheckGuess()
         {
             string s = string.Concat(tbl[countf].ToList().Select(x=>x.Text));
-            for(int i = puntero - guess.Length; i < puntero; i++)
+            for(int i = 0; i < guess.Length; i++)
             {
-                if (guess.Contains(tbl[countf][i].Text.First()))
-                {
-                    if (guess[i % guess.Length].ToString() == tbl[countf][i].Text)
-                        tbl[countf][i].BackColor = Color.DarkOrange;
-                    else
-                        tbl[countf][i].BackColor = Color.LightBlue;
-                }
-                else
+                if (guess[i].ToString() == tbl[countf][i].Text)
+                    tbl[countf][i].BackColor = Color.DarkOrange;
+            }
+            for (int i = 0; i < guess.Length; i++)
+            {
+                if(tbl[countf][i].BackColor != Color.DarkOrange)
                 {
                     tbl[countf][i].BackColor = Color.Black;
+                    int a = guess.ToCharArray().Count(x => x == tbl[countf][i].Text.First());
+                    int b = tbl[countf].Count(x => x.BackColor != Color.DarkOrange && x.BackColor != Color.Black && guess.Contains(tbl[countf][i].Text.First()));
+                    if (b > a)
+                        tbl[countf][i].BackColor = Color.LightBlue;
+
                 }
             }
-            if (personajesNaruto.Concat(personajesOnePiece).ToArray().Contains(s))
+                if (personajesNaruto.Concat(personajesOnePiece).ToArray().Contains(s))
             {
                 countf++;
                 puntero = 0;
