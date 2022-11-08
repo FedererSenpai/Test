@@ -16,7 +16,8 @@ namespace WindowsFormsApp1
         private double letraX = 0.0;
         Random r = new Random();
         TextBox tb = new TextBox();
-        string[] personajes = new string[] { "NARUTO", "SASUKE", "SAKURA", "KAKASHI", "MINATO", "OROCHIMARU", "OBITO", "AKAMARU", "ASUMA", "BORUTO", "ITACHI", "MADARA", "DANZO", "KUSHINA", "CHOJI", "ROCKLEE", "SARADA", "MITSUKI", "KONOHAMARU", "HINATA", "KIBA", "SHINO", "KURENAI", "SHIKAMARU", "INO", "NEJI", "TENTEN", "MIGHTGUY", "GAARA", "KANKURO", "TEMARI", "ZABUZA", "HAKU", "KABUTO", "ZETSU", "KISAME", "KONAN", "NAGATO", "DEIDARA", "HIDAN", "KAKUZU", "SASORI", "KAGUYA", "IRUKA", "HASHIRAMA", "TSUANDE", "TOBIRAMA", "JIRAIYA", "SAI", "YAMATO", "KILLERBEE", "KURAMA", "KARIN", "JUGO", "RIN", "SHISUI"};
+        string[] personajesNaruto = new string[] { "NARUTO", "SASUKE", "SAKURA", "KAKASHI", "MINATO", "OROCHIMARU", "OBITO", "AKAMARU", "ASUMA", "BORUTO", "ITACHI", "MADARA", "DANZO", "KUSHINA", "CHOJI", "ROCKLEE", "SARADA", "MITSUKI", "KONOHAMARU", "HINATA", "KIBA", "SHINO", "KURENAI", "SHIKAMARU", "INO", "NEJI", "TENTEN", "MIGHTGUY", "GAARA", "KANKURO", "TEMARI", "ZABUZA", "HAKU", "KABUTO", "ZETSU", "KISAME", "KONAN", "NAGATO", "DEIDARA", "HIDAN", "KAKUZU", "SASORI", "KAGUYA", "IRUKA", "HASHIRAMA", "TSUANDE", "TOBIRAMA", "JIRAIYA", "SAI", "YAMATO", "KILLERBEE", "KURAMA", "KARIN", "JUGO", "RIN", "SHISUI"};
+        string[] personajesOnePiece = new string[] { "LUFFY", "NAMI","ZORO","SANJI","CHOPPER","ROBIN", "FRANKY", "BROOK", "JIMBEI", "ARLONG", "FOXY", "AOKIJI", "SENGOKU", "AKAINU", "KIZARU", "MIHAWK", "VIVI", "CROCODILE", "GARP", "SMOKER", "SHANKS", "ICEBURG", "ROB", "ENEL", "DOFLAMINGO", "BELLAMY", "KAIDO", "BIGMOM", "SHIROHIGE", "KUROHIGE", "LAW", "KID", "MORIA", "ODEN", "YAMATO", "ROGER", "ACE", "SABO", "BUGGY", "HANCOCK", "KUMA", "VEGAPUNK", "FUJITORA", "KOBY", "MOMONOSUKE", "RAYLEIGH", "DRAGON", "KATAKURI", "HAWKINS", "BARTOLOMEO", "ROSINANTE", "UTA", "MARCO", "KING", "QUEEN" };
         private static int puntero = 0;
         TextBox[][] tbl;
         private static int countf = 0;
@@ -37,7 +38,9 @@ namespace WindowsFormsApp1
 
         private string GetRandomPersonaje()
         {
-            return personajes[r.Next(personajes.Count() - 1)];
+            string[] ss = personajesNaruto.Concat(personajesOnePiece).ToArray();
+            ss = ss.OrderBy(x => r.Next()).ToArray();
+            return ss[r.Next(ss.Count() - 1)];
         }
 
         private void CrearCajas(int longi)
@@ -115,7 +118,7 @@ namespace WindowsFormsApp1
                     tbl[countf][i].BackColor = Color.Black;
                 }
             }
-            if (personajes.Contains(s))
+            if (personajesNaruto.Concat(personajesOnePiece).ToArray().Contains(s))
             {
                 countf++;
                 puntero = 0;
