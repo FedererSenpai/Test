@@ -12,8 +12,6 @@ namespace WindowsFormsApp1
 {
     public partial class Narudle : Form
     {
-        private double letraY = Screen.PrimaryScreen.Bounds.Height / 2.0;
-        private double letraX = 0.0;
         Random r = new Random();
         TextBox tb = new TextBox();
         string[] personajesNaruto = new string[] { "NARUTO", "SASUKE", "SAKURA", "KAKASHI", "MINATO", "OROCHIMARU", "OBITO", "AKAMARU", "ASUMA", "BORUTO", "ITACHI", "MADARA", "DANZO", "KUSHINA", "CHOJI", "ROCKLEE", "SARADA", "MITSUKI", "KONOHAMARU", "HINATA", "KIBA", "SHINO", "KURENAI", "SHIKAMARU", "INO", "NEJI", "TENTEN", "MIGHTGUY", "GAARA", "KANKURO", "TEMARI", "ZABUZA", "HAKU", "KABUTO", "ZETSU", "KISAME", "KONAN", "NAGATO", "DEIDARA", "HIDAN", "KAKUZU", "SASORI", "KAGUYA", "IRUKA", "HASHIRAMA", "TSUANDE", "TOBIRAMA", "JIRAIYA", "SAI", "YAMATO", "KILLERBEE", "KURAMA", "KARIN", "JUGO", "RIN", "SHISUI"};
@@ -79,10 +77,16 @@ namespace WindowsFormsApp1
 
         private void Narudle_KeyDown(object sender, KeyEventArgs e)
         {
+            bool result = false;
             if(e.KeyValue == (int)Keys.Enter)
             {
                 if (puntero % guess.Length == 0)
-                    CheckGuess();
+                    result = CheckGuess();
+                if (result && countf == 6)
+                {
+                    MessageBox.Show("Fin");
+                    Application.Exit();
+                }
             }
             else if (e.KeyValue == (int)Keys.Back)
             {
@@ -114,11 +118,10 @@ namespace WindowsFormsApp1
                 if(tbl[countf][i].BackColor != Color.DarkOrange)
                 {
                     tbl[countf][i].BackColor = Color.Black;
-                    int a = guess.ToCharArray().Count(x => x == tbl[countf][i].Text.First());
-                    int b = tbl[countf].Count(x => x.BackColor != Color.DarkOrange && x.BackColor != Color.Black && guess.Contains(tbl[countf][i].Text.First()));
-                    if (b > a)
+                    int a = guess.ToCharArray().Where(x => (char)x == tbl[countf][i].Text.First()).Count();
+                    int b = tbl[countf].Where(x => (x.BackColor == Color.DarkOrange || x.BackColor == Color.LightBlue) && x.Text == tbl[countf][i].Text).Count();
+                    if (a != b)
                         tbl[countf][i].BackColor = Color.LightBlue;
-
                 }
             }
                 if (personajesNaruto.Concat(personajesOnePiece).ToArray().Contains(s))
@@ -133,7 +136,7 @@ namespace WindowsFormsApp1
                 else
                 {
                     MessageBox.Show("false");
-                    return false;
+                    return true;
                 }
             }
             else
