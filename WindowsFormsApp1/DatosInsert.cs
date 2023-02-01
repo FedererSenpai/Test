@@ -14,11 +14,10 @@ namespace WindowsFormsApp1
 
         //Text
         private bool aleatorio;
-        private string repetirText;
         private int longitud;
         private int maximo;
         private int mininmo;
-        private int fijo;
+        private bool fijo;
         private bool minusculas;
         private bool mayusculas;
         private bool numeros;
@@ -30,14 +29,15 @@ namespace WindowsFormsApp1
         //Num
 
         //Bool
+        private bool trueFalse;
+
         public string Campo { get => campo; set => campo = value; }
         public string Tipo { get => tipo; set => tipo = value; }
         public bool Aleatorio { get => aleatorio; set => aleatorio = value; }
-        public string RepetirText { get => repetirText; set => repetirText = value; }
         public int Longitud { get => longitud; set => longitud = value; }
         public int Maximo { get => maximo; set => maximo = value; }
-        public int Mininmo { get => mininmo; set => mininmo = value; }
-        public int Fijo { get => fijo; set => fijo = value; }
+        public int Minimo { get => mininmo; set => mininmo = value; }
+        public bool Fijo { get => fijo; set => fijo = value; }
         public bool Minusculas { get => minusculas; set => minusculas = value; }
         public bool Mayusculas { get => mayusculas; set => mayusculas = value; }
         public bool Numeros { get => numeros; set => numeros = value; }
@@ -45,6 +45,7 @@ namespace WindowsFormsApp1
         public bool Primermayuscula { get => primermayuscula; set => primermayuscula = value; }
         public bool Repetir { get => repetir; set => repetir = value; }
         public string Texto { get => texto; set => texto = value; }
+        public bool TrueFalse { get => trueFalse; set => trueFalse = value; }
 
         public DatosInsert(string _campo, string _tipo)
         {
@@ -59,7 +60,8 @@ namespace WindowsFormsApp1
 
         public DatosInsert()
         {
-
+            Aleatorio = true;
+            Fijo = true;
         }
     }
 }

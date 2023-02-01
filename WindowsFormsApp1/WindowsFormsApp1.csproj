@@ -81,11 +81,23 @@
     <Compile Include="Insert.Designer.cs">
       <DependentUpon>Insert.cs</DependentUpon>
     </Compile>
+    <Compile Include="InsertBool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InsertBool.Designer.cs">
+      <DependentUpon>InsertBool.cs</DependentUpon>
+    </Compile>
     <Compile Include="InsertText.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="InsertText.Designer.cs">
       <DependentUpon>InsertText.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Narudle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Narudle.Designer.cs">
+      <DependentUpon>Narudle.cs</DependentUpon>
     </Compile>
     <Compile Include="NombrarImagenes.cs">
       <SubType>Form</SubType>
@@ -128,8 +140,14 @@
     <EmbeddedResource Include="Insert.resx">
       <DependentUpon>Insert.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="InsertBool.resx">
+      <DependentUpon>InsertBool.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="InsertText.resx">
       <DependentUpon>InsertText.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Narudle.resx">
+      <DependentUpon>Narudle.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NombrarImagenes.resx">
       <DependentUpon>NombrarImagenes.cs</DependentUpon>
