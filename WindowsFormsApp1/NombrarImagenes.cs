@@ -33,7 +33,7 @@ namespace WindowsFormsApp1
             comboBox1.DataSource = ds.Tables[0];
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             string [] files = Directory.GetFiles(textBox1.Text);
             int i = 1;

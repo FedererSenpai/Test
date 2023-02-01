@@ -285,6 +285,7 @@
             this.radioButton1.Text = "Aleatorio";
             this.radioButton1.UseVisualStyleBackColor = true;
             this.radioButton1.CheckedChanged += new System.EventHandler(this.radioButton_CheckedChanged);
+            this.radioButton1.Checked = true;
             // 
             // radioButton2
             // 
@@ -296,6 +297,7 @@
             this.radioButton2.Text = "Personalizado";
             this.radioButton2.UseVisualStyleBackColor = true;
             this.radioButton2.CheckedChanged += new System.EventHandler(this.radioButton_CheckedChanged);
+            this.radioButton2.Checked = false;
             // 
             // button1
             // 
@@ -303,7 +305,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 7;
-            this.button1.Text = "button1";
+            this.button1.Text = "Salir";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
