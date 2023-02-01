@@ -12,9 +12,11 @@ namespace WindowsFormsApp1
         private string campo;
         private string tipo;
 
-        //Text
-        private bool aleatorio;
+        //Comun
         private int longitud;
+        private bool aleatorio;
+
+        //Text
         private int maximo;
         private int mininmo;
         private bool fijo;
@@ -27,6 +29,10 @@ namespace WindowsFormsApp1
         private string texto;
 
         //Num
+        private bool numdecimal;
+        private int decimalesmax;
+        private bool nocero;
+        private bool autoincremento;
 
         //Bool
         private bool trueFalse;
@@ -46,6 +52,10 @@ namespace WindowsFormsApp1
         public bool Repetir { get => repetir; set => repetir = value; }
         public string Texto { get => texto; set => texto = value; }
         public bool TrueFalse { get => trueFalse; set => trueFalse = value; }
+        public bool NumDecimal { get => numdecimal; set => numdecimal = value; }
+        public int Decimalesmax { get => decimalesmax; set => decimalesmax = value; }
+        public bool NoCero { get => nocero; set => nocero = value; }
+        public bool Autoincremento { get => autoincremento; set => autoincremento = value; }
 
         public DatosInsert(string _campo, string _tipo)
         {

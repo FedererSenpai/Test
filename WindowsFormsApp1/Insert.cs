@@ -65,15 +65,15 @@ namespace WindowsFormsApp1
         {
             string s = string.Empty;
             int max = maxchar;
-            if(!constchar)
+            if (!constchar)
             {
                 max = r.Next(minchar, maxchar + 1);
             }
             for (int i = 0; i < max; i++)
             {
-                s += (char)r.Next(33,127);
+                s += (char)r.Next(33, 127);
             }
-            if(rellenar)
+            if (rellenar)
             {
                 for (int j = s.Length; j < maxchar; j++)
                     s += '*';
@@ -100,16 +100,18 @@ namespace WindowsFormsApp1
                             new InsertText((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
                             break;
                         case "Num":
+                            new InsertNum((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
                             break;
                         case "Bool":
                             new InsertBool((dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert)).ShowDialog();
                             break;
                     }
                 }
+            (dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert).ToString();
+                return;
             }
-            //(dataGridView1.Rows[e.RowIndex].DataBoundItem as DatosInsert).ToString();
-            return;
         }
+
         private string[] CrearFilaCustom(DatosInsert di, int filas)
         {
             string[] valores = new string[filas];
@@ -119,6 +121,33 @@ namespace WindowsFormsApp1
         private string[] CrearFilaNum(DatosInsert di, int filas)
         {
             string[] valores = new string[filas];
+            string valor;
+            int decimales = 0;
+            if (di.NumDecimal)
+                decimales = di.Decimalesmax;
+
+            if (di.Aleatorio)
+            {
+                if (di.Autoincremento)
+                {
+                    for (int i = 0; i < valores.Length; i++)
+                    {
+                        valores[i] = (di.Minimo + i).ToString();
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < valores.Length; i++)
+                    {
+                        valores[i] = GenerarNumero(di.Minimo, di.Maximo, decimales, di.NoCero);
+                    }
+                }
+            }
+            else
+            {
+                valor = $"{di.Texto}";
+                valores = Enumerable.Repeat(valor, filas).ToArray();
+            }
             return valores;
         }
 
@@ -249,6 +278,15 @@ namespace WindowsFormsApp1
             return resultado;
         }
 
+        public string GenerarNumero(int minimo, int maximo, int decimales, bool cero)
+        {
+            string resultado = string.Empty;
+            decimal potencia = (decimal)Math.Pow(10, decimales);
+            resultado = ((decimal)r.Next(minimo * (int)potencia, maximo * (int)potencia) / potencia).ToString().Replace(",",".");
+            if (cero && decimal.Parse(resultado) == 0)
+                resultado = GenerarNumero(minimo, maximo, decimales, cero);
+            return resultado;
+        }
         private string GenerarBool()
         {
             string resultado = string.Empty;
@@ -276,9 +314,9 @@ namespace WindowsFormsApp1
             sw.Close();
         }
 
-        private string GenerarCabeceraSql()
+        private string GenerarCabeceraSql(string tabla)
         {
-            string sql = "INSERT INTO dat_articulo (";
+            string sql = "INSERT INTO " + tabla + " (";
             foreach (DatosInsert di in bs)
             {
                 sql += $"{di.Campo},";
