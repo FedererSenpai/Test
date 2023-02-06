@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WindowsFormsApp1</RootNamespace>
     <AssemblyName>WindowsFormsApp1</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -28,6 +28,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,10 +56,16 @@
     <ManifestKeyFile>WindowsFormsApp1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MasterSlave_WebService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -104,6 +111,12 @@
     </Compile>
     <Compile Include="InsertBool.Designer.cs">
       <DependentUpon>InsertBool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InsertNum.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InsertNum.Designer.cs">
+      <DependentUpon>InsertNum.cs</DependentUpon>
     </Compile>
     <Compile Include="InsertText.cs">
       <SubType>Form</SubType>
@@ -175,6 +188,9 @@
     <EmbeddedResource Include="InsertBool.resx">
       <DependentUpon>InsertBool.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="InsertNum.resx">
+      <DependentUpon>InsertNum.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="InsertText.resx">
       <DependentUpon>InsertText.cs</DependentUpon>
     </EmbeddedResource>
@@ -216,6 +232,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Properties\app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -226,7 +243,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="WindowsFormsApp1_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
