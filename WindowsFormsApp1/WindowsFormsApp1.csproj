@@ -61,8 +61,20 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MasterSlave_WebService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\source\repos\MasterSlave_WebService\MasterSlave_WebService\bin\MasterSlave_WebService.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.9.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -74,6 +86,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="APITest.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="APITest.Designer.cs">
+      <DependentUpon>APITest.cs</DependentUpon>
+    </Compile>
     <Compile Include="DatosInsert.cs" />
     <Compile Include="Insert.cs">
       <SubType>Form</SubType>
@@ -99,6 +117,12 @@
     <Compile Include="Narudle.Designer.cs">
       <DependentUpon>Narudle.cs</DependentUpon>
     </Compile>
+    <Compile Include="Net.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Net.Designer.cs">
+      <DependentUpon>Net.cs</DependentUpon>
+    </Compile>
     <Compile Include="NombrarImagenes.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -116,6 +140,11 @@
     </Compile>
     <Compile Include="Reaction.Designer.cs">
       <DependentUpon>Reaction.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Resource1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource1.resx</DependentUpon>
     </Compile>
     <Compile Include="Smite.cs">
       <SubType>Form</SubType>
@@ -137,6 +166,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="APITest.resx">
+      <DependentUpon>APITest.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Insert.resx">
       <DependentUpon>Insert.cs</DependentUpon>
     </EmbeddedResource>
@@ -149,6 +181,9 @@
     <EmbeddedResource Include="Narudle.resx">
       <DependentUpon>Narudle.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Net.resx">
+      <DependentUpon>Net.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="NombrarImagenes.resx">
       <DependentUpon>NombrarImagenes.cs</DependentUpon>
     </EmbeddedResource>
@@ -157,6 +192,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reaction.resx">
       <DependentUpon>Reaction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Smite.resx">
       <DependentUpon>Smite.cs</DependentUpon>
@@ -177,6 +216,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
