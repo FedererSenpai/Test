@@ -39,7 +39,6 @@ namespace WindowsFormsApp1
                 lista.Clear();
                 foreach (string dir in Directory.GetDirectories(carpeta))
                 {
-                    Properties.Settings.
                     Proyecto proyecto = new Proyecto();
                     proyecto.Carpeta = new FileInfo(dir).Name;
                     lista.Add(proyecto);
@@ -54,6 +53,8 @@ namespace WindowsFormsApp1
                                 {
                                     proyecto.Fichero = file;
                                     string tmp = file + ".tmp";
+                                    if (File.Exists(tmp))
+                                        File.Delete(tmp);
                                     File.Move(file, tmp);
                                     string[] lines = File.ReadAllLines(tmp);
                                     string[] newlines = new string[lines.Length];
@@ -87,18 +88,22 @@ namespace WindowsFormsApp1
         {
             string nuevaversion = version;
             string[] versiones = version.Split('.');
-            int revision = Convert.ToInt16(versiones.Last().Trim());
-            if (revision >= 26)
+            int i = versiones.Length;
+            if (versiones.All(x => int.TryParse(x, out int num)))
             {
-                revision = 1;
-                int build = Convert.ToInt16(versiones[2].Trim());
-                build++;
-                versiones[2] = build.ToString();
+                int revision = Convert.ToInt16(versiones.Last().Trim());
+                if (revision >= 26)
+                {
+                    revision = 1;
+                    int build = Convert.ToInt16(versiones[i - 2].Trim());
+                    build++;
+                    versiones[i - 2] = build.ToString();
+                }
+                else
+                    revision++;
+                versiones[i - 1] = revision.ToString();
+                nuevaversion = string.Join(".", versiones);
             }
-            else
-                revision++;
-            versiones[3] = revision.ToString();
-            nuevaversion = string.Join(".", versiones);
             return nuevaversion;
         }
 
