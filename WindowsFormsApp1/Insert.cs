@@ -296,7 +296,7 @@ namespace WindowsFormsApp1
 
         private void GenerarSql(string[][] valores, int filas)
         {
-            string sql = GenerarCabeceraSql();
+            string sql = GenerarCabeceraSql(textbox1.Text);
             for (int i = 0; i < filas; i++)
             {
                 for(int j = 0; j < valores.Length; j++)
