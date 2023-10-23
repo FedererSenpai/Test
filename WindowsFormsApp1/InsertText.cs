@@ -13,6 +13,7 @@ namespace WindowsFormsApp1
     public partial class InsertText : Form
     {
         DatosInsert di;
+        bool cargado = false;
 
         public InsertText(DatosInsert di)
         {
@@ -36,6 +37,9 @@ namespace WindowsFormsApp1
 
         private void radioButton_CheckedChanged(object sender, EventArgs e)
         {
+            if (!cargado)
+                return;
+
             switch((sender as RadioButton).Name)
             {
                 case "radioButton1":
@@ -90,6 +94,7 @@ namespace WindowsFormsApp1
                 radioButton3.Checked = true;
             else
                 radioButton4.Checked = true;
+            cargado = true;
         }
     }
 }

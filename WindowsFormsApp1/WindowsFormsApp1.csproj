@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WindowsFormsApp1</RootNamespace>
     <AssemblyName>WindowsFormsApp1</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -100,6 +100,12 @@
       <DependentUpon>APITest.cs</DependentUpon>
     </Compile>
     <Compile Include="DatosInsert.cs" />
+    <Compile Include="FindFile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FindFile.Designer.cs">
+      <DependentUpon>FindFile.cs</DependentUpon>
+    </Compile>
     <Compile Include="Insert.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -181,6 +187,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="APITest.resx">
       <DependentUpon>APITest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FindFile.resx">
+      <DependentUpon>FindFile.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Insert.resx">
       <DependentUpon>Insert.cs</DependentUpon>
