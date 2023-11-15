@@ -16,9 +16,10 @@ namespace WindowsFormsApp1
         [STAThread]
         static void Main()
         {
+            Dibal.EST();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Insert());
+            Application.Run(new FindFile());
         }
 
     }
