@@ -177,8 +177,21 @@
     <Compile Include="APITest.Designer.cs">
       <DependentUpon>APITest.cs</DependentUpon>
     </Compile>
+    <Compile Include="Assembly.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Assembly.Designer.cs">
+      <DependentUpon>Assembly.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Beeper.cs" />
     <Compile Include="DatosInsert.cs" />
     <Compile Include="Dibal.cs" />
+    <Compile Include="DibalScop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DibalScop.Designer.cs">
+      <DependentUpon>DibalScop.cs</DependentUpon>
+    </Compile>
     <Compile Include="FindFile.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -265,8 +278,15 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WinUtil.cs" />
     <EmbeddedResource Include="APITest.resx">
       <DependentUpon>APITest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Assembly.resx">
+      <DependentUpon>Assembly.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DibalScop.resx">
+      <DependentUpon>DibalScop.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FindFile.resx">
       <DependentUpon>FindFile.cs</DependentUpon>
