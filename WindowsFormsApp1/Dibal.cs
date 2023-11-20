@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,9 @@ namespace WindowsFormsApp1
     {
         public static void EST()
         {
+#if Cursor
+                        return;
+#endif
             byte[] fichero;
             fichero = File.ReadAllBytes("U:\\AMA\\TX_LogosUSB.bck");
                 DateTime q = DateTime.Now;

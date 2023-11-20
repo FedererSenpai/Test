@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExcelDataReader;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,10 +16,15 @@ namespace WindowsFormsApp1
     public partial class Assembly : Form
     {
         const string repos = @"C:\Users\dzhang\source\repos";
+        const string solutions = "Solutions";
+        const string projects = "Projects";
+        const string name = "Name";
+        const string id = "Id";
+        const string path = "Path";
         public List<Proyecto> lista = new List<Proyecto>();
         Image si = WindowsFormsApp1.Properties.Resources.comprobado;
         Image no = WindowsFormsApp1.Properties.Resources.comprobado;
-
+        DataSet datosExcel;
         public Assembly()
         {
             InitializeComponent();
@@ -28,59 +34,109 @@ namespace WindowsFormsApp1
             dataGridView1.Columns[3].DataPropertyName = "NuevaVersion";
         }
 
+        private void Form_Load(object sender, EventArgs e)
+        {
+            IExcelDataReader excelReader = null;
+            Stream stream;
+            string storePath = Path.Combine(Application.StartupPath, "resources", "Assembly.xlsx");
+            string fileExtension = Path.GetExtension(storePath);
+            if (File.Exists(storePath))
+            {
+                stream = File.Open(storePath, FileMode.Open, FileAccess.Read);
+            }
+            else
+            {
+                stream = new StreamReader(new MemoryStream(Properties.Resources.Assembly)).BaseStream;
+            }
+            if (fileExtension == ".xls")
+            {
+                excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+            }
+            else if (fileExtension == ".xlsx")
+            {
+                excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+            }
+            datosExcel = excelReader.AsDataSet(new ExcelDataSetConfiguration()
+            {
+                ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                {
+                    UseHeaderRow = true
+                }
+            });
+            comboBox1.DataSource = datosExcel.Tables[solutions];
+            comboBox1.DisplayMember = name;
+            comboBox1.ValueMember = id;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog fd = new FolderBrowserDialog();
-            fd.SelectedPath = repos;
-            fd.ShowNewFolderButton = false;
-            if (fd.ShowDialog() == DialogResult.OK && !string.IsNullOrEmpty(fd.SelectedPath))
+            Solution solutionRow = (comboBox1.SelectedItem as DataRowView).Row.ToObject<Solution>();
+            string solutionPath;
+            if(Convert.ToInt16(solutionRow.Id) == 0)
             {
-                string carpeta = fd.SelectedPath;
-                lista.Clear();
-                foreach (string dir in Directory.GetDirectories(carpeta))
+                solutionPath = Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(solutionRow.Path).FullName).FullName).FullName).FullName;
+            }
+            else
+            {
+                solutionPath = Path.Combine(repos, Convert.ToString(solutionRow.Path));
+            }
+
+            lista.Clear();
+            foreach (Project p in datosExcel.Tables[projects].Select("Id = " + solutionRow.Id).ToList<Project>())
+            {
+                string projectPath = Path.Combine(solutionPath, p.Path);
+                if(Directory.Exists(projectPath))
                 {
-                    Proyecto proyecto = new Proyecto();
-                    proyecto.Carpeta = new FileInfo(dir).Name;
-                    lista.Add(proyecto);
-                    foreach (string subdir in Directory.GetDirectories(dir))
-                    {
-                        if (new FileInfo(subdir).Name.Equals("Properties"))
+                    string carpeta = projectPath;
+                        foreach (string subdir in Directory.GetDirectories(carpeta))
                         {
-                            proyecto.Encontrado = si;
-                            foreach (string file in Directory.GetFiles(subdir))
+                            if (new FileInfo(subdir).Name.Equals("Properties"))
                             {
-                                if (new FileInfo(file).Name.Equals("AssemblyInfo.cs"))
+                                Proyecto proyecto = new Proyecto();
+                                proyecto.Carpeta = new FileInfo(carpeta).Name;
+                                lista.Add(proyecto);
+                                proyecto.Encontrado = si;
+                                foreach (string file in Directory.GetFiles(subdir))
                                 {
-                                    proyecto.Fichero = file;
-                                    string tmp = file + ".tmp";
-                                    if (File.Exists(tmp))
-                                        File.Delete(tmp);
-                                    File.Move(file, tmp);
-                                    string[] lines = File.ReadAllLines(tmp);
-                                    string[] newlines = new string[lines.Length];
-                                    int i = 0;
-                                    foreach (string line in lines)
+                                    if (new FileInfo(file).Name.Equals("AssemblyInfo.cs"))
                                     {
-                                        if (line.Contains("assembly: AssemblyVersion") || line.Contains("assembly: AssemblyFileVersion"))
+                                        proyecto.Fichero = file;
+                                        //string tmp = file + ".tmp";
+                                        //if (File.Exists(tmp))
+                                            //File.Delete(tmp);
+                                        //File.Move(file, tmp);
+                                        string[] lines = File.ReadAllLines(file);
+                                        //string[] newlines = new string[lines.Length];
+                                        int i = 0;
+                                        foreach (string line in lines)
                                         {
-                                            proyecto.Version = line.Split('"')[1];
-                                            proyecto.Nuevaversion = SubirVersion(proyecto.Version);
-                                            newlines[i] = line.Replace(proyecto.Version, proyecto.Nuevaversion);
+                                            if (line.Contains("assembly: AssemblyVersion") || line.Contains("assembly: AssemblyFileVersion"))
+                                            {
+                                                proyecto.Version = line.Split('"')[1];
+                                                proyecto.Nuevaversion = SubirVersion(proyecto.Version);
+                                                //newlines[i] = line.Replace(proyecto.Version, proyecto.Nuevaversion);
+                                            }
+                                            //else
+                                                //newlines[i] = line;
+                                            i++;
                                         }
-                                        else
-                                            newlines[i] = line;
-                                        i++;
+                                        //File.WriteAllLines(file, newlines);
                                     }
-                                    File.WriteAllLines(file, newlines);
                                 }
+                                break;
                             }
-                            break;
                         }
-                    }
                 }
-                dataGridView1.AutoGenerateColumns = false;
-                dataGridView1.DataSource = lista;
-                dataGridView1.Refresh();
+            }
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.DataSource = null;
+            dataGridView1.RowCount = lista.Count();
+            dataGridView1.DataSource = lista;
+            dataGridView1.Refresh();
+            if (lista.Select(x => x.Version).AreAllSame())
+            {
+                textBox1.Text = lista.First().Nuevaversion;
+                this.button2.Enabled = true;
             }
         }
 
@@ -91,19 +147,30 @@ namespace WindowsFormsApp1
             int i = versiones.Length;
             if (versiones.All(x => int.TryParse(x, out int num)))
             {
-                int revision = Convert.ToInt16(versiones.Last().Trim());
-                if (revision >= 26)
+                if (radioButton2.Checked)
                 {
-                    revision = 1;
-                    int build = Convert.ToInt16(versiones[i - 2].Trim());
-                    build++;
-                    versiones[i - 2] = build.ToString();
+                    int revision = Convert.ToInt16(versiones.Last().Trim());
+                    if (revision >= 26)
+                    {
+                        revision = 1;
+                        int build = Convert.ToInt16(versiones[i - 2].Trim());
+                        build++;
+                        versiones[i - 2] = build.ToString();
+                    }
+                    else
+                        revision++;
+                    versiones[i - 1] = revision.ToString();
                 }
                 else
-                    revision++;
-                versiones[i - 1] = revision.ToString();
-                nuevaversion = string.Join(".", versiones);
+                {
+                    int build = Convert.ToInt16(versiones[i - 1].Trim());
+                    build++;
+                    versiones[i - 2] = build.ToString();
+                    versiones[i - 1] = 1.ToString();
+                }
             }
+            nuevaversion = string.Join(".", versiones);
+
             return nuevaversion;
         }
 
@@ -117,11 +184,52 @@ namespace WindowsFormsApp1
         {
             foreach(Proyecto p in lista)
             {
-                if (!string.IsNullOrEmpty(p.Fichero))
-                    File.Delete(p.Fichero + ".tmp");
+                string tmp = p.Fichero + ".tmp";
+                if (File.Exists(tmp))
+                File.Delete(tmp);
+                File.Move(p.Fichero, tmp);
+                string[] lines = File.ReadAllLines(tmp);
+                string[] newlines = new string[lines.Length];
+                int i = 0;
+                foreach (string line in lines)
+                {
+                    if (line.Contains("assembly: AssemblyVersion") || line.Contains("assembly: AssemblyFileVersion"))
+                    {
+                        newlines[i] = line.Replace(p.Version, p.Nuevaversion);
+                    }
+                    else
+                    newlines[i] = line;
+                    i++;
+                }
+                File.WriteAllLines(p.Fichero, newlines);
             }
         }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.DataSource == null)
+                return;
+            if(radioButton1.Checked)
+            {
+                lista.ForEach(x => x.Nuevaversion = SubirVersion(x.Version));
+            }
+            else if(radioButton2.Checked)
+            {
+                lista.ForEach(x => x.Nuevaversion = SubirVersion(x.Version));
+            }
+            else
+            {
+                lista.ForEach(x => x.Nuevaversion = textBox1.Text);
+            }
+            if (lista.Select(x => x.Version).AreAllSame())
+            {
+                textBox1.Text = lista.First().Nuevaversion;
+                this.button2.Enabled = true;
+            }
+            dataGridView1.Refresh();
+        }
     }
+
 
     public class Proyecto
     {
@@ -136,5 +244,27 @@ namespace WindowsFormsApp1
         public string Version { get => version; set => version = value; }
         public string Nuevaversion { get => nuevaversion; set => nuevaversion = value; }
         public string Fichero { get => fichero; set => fichero = value; }
+    }
+
+    public class Solution
+    {
+        private int id;
+        private string name;
+        private string path;
+
+        public int Id { get => id; set => id = value; }
+        public string Name { get => name; set => name = value; }
+        public string Path { get => path; set => path = value; }
+    }
+
+    public class Project
+    {
+        private int id;
+        private string name;
+        private string path;
+
+        public int Id { get => id; set => id = value; }
+        public string Name { get => name; set => name = value; }
+        public string Path { get => path; set => path = value; }
     }
 }

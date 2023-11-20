@@ -14,12 +14,30 @@ namespace WindowsFormsApp1
         /// Punto de entrada principal para la aplicación.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            Dibal.EST();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FindFile());
+            if (args.Length == 0)
+            {
+                Dibal.EST();
+                Application.Run(new FindFile());
+            }
+            else
+            {
+                switch (args[0])
+                {
+                    case "Cursor":
+                        Application.Run(new Cursor());
+                        break;
+                    case "Assembly":
+                        Application.Run(new Assembly());
+                        break;
+                    default:
+                        Application.Exit();
+                        break;
+                }
+            }
         }
 
     }
