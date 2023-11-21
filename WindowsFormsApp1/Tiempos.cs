@@ -339,6 +339,7 @@ namespace WindowsFormsApp1
             string[] texto = s.Split(new char[2] { '\r', '\n' }, StringSplitOptions.None);
         }
 
+
         private void button1_Click(object sender, EventArgs e)
         {
             QR();

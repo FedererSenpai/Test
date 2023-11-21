@@ -20,8 +20,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Dibal.EST();
-                Application.Run(new FindFile());
+                Application.Run(new PingNet());
             }
             else
             {
