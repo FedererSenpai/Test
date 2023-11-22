@@ -182,6 +182,11 @@ namespace WindowsFormsApp1
 
         private void button2_Click(object sender, EventArgs e)
         {
+            int total = lista.Count;
+            progressBar1.Maximum = total;
+            int c = 0;
+            int porcentaje = 0;
+            button2.Text = "0% (0/" + total +")";
             foreach(Proyecto p in lista)
             {
                 string tmp = p.Fichero + ".tmp";
@@ -202,6 +207,12 @@ namespace WindowsFormsApp1
                     i++;
                 }
                 File.WriteAllLines(p.Fichero, newlines);
+                c++;
+                progressBar1.Value = c;
+                progressBar1.Update();
+                porcentaje = c / total * 100;
+                button2.Text = porcentaje +"% ("+c+"/" + total + ")";
+                Application.DoEvents();
             }
         }
 
