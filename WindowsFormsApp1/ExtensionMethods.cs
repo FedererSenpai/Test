@@ -7,11 +7,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Office.Interop.Excel;
 
 namespace WindowsFormsApp1
 {
     static class ExtensionMethods
     {
+        private enum weekday
+        {
+            D = 0,
+            L = 1,
+            M = 2,
+            X = 3,
+            J = 4,
+            V = 5,
+            S = 6
+        }
+
         public static List<T> ToList<T>(this DataRow[] datarows) 
             where T : new()
         {
@@ -92,6 +104,33 @@ namespace WindowsFormsApp1
             }
 
             return true;
+        }
+
+        public static string ToString (this DateTime dt, int format)
+        {
+            string datetime = string.Empty;
+            switch(format)
+            {
+                case 0:
+                    datetime = ((weekday)(int)dt.DayOfWeek).ToString() + dt.ToString("dd HH:mm:ss");
+                    break;
+            }
+            return datetime;
+        }
+
+        public static int NextRow(this _Worksheet w, int column)
+        {
+            int row = 0;
+            for (int i = 1; i < 1000; i++)
+            {
+                if (w.Cells[i, column].Value == null)
+                {
+                    row = i;
+                    break;
+                }
+                    
+            }
+            return row;
         }
     }
 }

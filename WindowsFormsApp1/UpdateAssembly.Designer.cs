@@ -2,7 +2,7 @@
 
 namespace WindowsFormsApp1
 {
-    partial class Assembly
+    partial class UpdateAssembly
     {
         /// <summary>
         /// Required designer variable.

@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace WindowsFormsApp1
 {
-    public partial class Assembly : Form
+    public partial class UpdateAssembly : Form
     {
         const string repos = @"C:\Users\dzhang\source\repos";
         const string solutions = "Solutions";
@@ -25,7 +25,7 @@ namespace WindowsFormsApp1
         Image si = WindowsFormsApp1.Properties.Resources.comprobado;
         Image no = WindowsFormsApp1.Properties.Resources.comprobado;
         DataSet datosExcel;
-        public Assembly()
+        public UpdateAssembly()
         {
             InitializeComponent();
             dataGridView1.Columns[0].DataPropertyName = "Carpeta";

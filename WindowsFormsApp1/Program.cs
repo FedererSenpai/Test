@@ -20,7 +20,8 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Application.Run(new PingNet());
+                Dibal.Codepages();
+                Application.Run(new TwoList());
             }
             else
             {
@@ -30,7 +31,13 @@ namespace WindowsFormsApp1
                         Application.Run(new Cursor());
                         break;
                     case "Assembly":
-                        Application.Run(new Assembly());
+                        Application.Run(new UpdateAssembly());
+                        break;
+                    case "Activity":
+                        if (args[1].Equals("/a"))
+                            Activity.WriteStart();
+                        else if (args[1].Equals("/z"))
+                            Activity.WriteShutDown();
                         break;
                     default:
                         Application.Exit();
