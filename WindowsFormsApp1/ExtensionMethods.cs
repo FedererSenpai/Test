@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Office.Interop.Excel;
+//using Microsoft.Office.Interop.Excel;
+using Newtonsoft.Json;
 
 namespace WindowsFormsApp1
 {
@@ -118,7 +119,7 @@ namespace WindowsFormsApp1
             return datetime;
         }
 
-        public static int NextRow(this _Worksheet w, int column)
+        /*public static int NextRow(this _Worksheet w, int column) 
         {
             int row = 0;
             for (int i = 1; i < 1000; i++)
@@ -131,6 +132,11 @@ namespace WindowsFormsApp1
                     
             }
             return row;
+        }*/
+
+        public static string ToJson<T>(this List<T> l)
+        {
+            return JsonConvert.SerializeObject(l);
         }
     }
 }

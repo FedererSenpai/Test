@@ -1,4 +1,5 @@
 ﻿using ExcelDataReader;
+using Org.BouncyCastle.Cms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +13,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using Excel = Microsoft.Office.Interop.Excel;
+using HtmlAgilityPack;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
+//using Excel = Microsoft.Office.Interop.Excel;
 
 namespace WindowsFormsApp1
 {
@@ -29,6 +32,8 @@ namespace WindowsFormsApp1
 
         static List<string> names = new List<string>();
         static List<string> links = new List<string>();
+        static List<Anime> animes = new List<Anime>();
+        static List<string> nodes = new List<string>();
         static string[] header = new string[] { "Name", "URL", "Type", "Song", "Artist" };
 
         private void LoadDefault()
@@ -45,45 +50,113 @@ namespace WindowsFormsApp1
                 string downloadString = client.DownloadString($"https://myanimelist.net/anime/season/{numericUpDown1.Value}/{comboBox1.SelectedItem}");
                 File.WriteAllText(Path.Combine(Application.StartupPath, "api.txt"), downloadString);
             }
-            Process();
-            Write($"{comboBox1.SelectedItem} {numericUpDown1.Value}");
+            ProcessSeason();
+            //Write($"{comboBox1.SelectedItem} {numericUpDown1.Value}");
             return;
         }
 
-        public void Process()
+        public void ProcessSeason()
         {
             string[] lines = File.ReadAllLines(Path.Combine(Application.StartupPath, "api.txt"));
             progressBar1.Maximum = lines.Length;
-            int progress = 0;         
+            Anime anime = new Anime();
             foreach (string line in lines)
             {
                 try
                 {
-                    Node(line);
+                    Node(line, ref anime);
                 }
                 catch (Exception ex)
                 {
                     try
                     {
-                        Node(line.Replace("</div>", string.Empty));
+                        Node(line.Replace("</div>", string.Empty), ref anime);
                     }
                     catch (Exception exex)
                     {
 
                     }
                 }
-                UpdateProgress();
+                UpdateProgress(progressBar1);
+            }
+            File.WriteAllText(Path.Combine(Application.StartupPath, "anime.json"), animes.ToJson());
+        }
+         
+        private void GetChild(HtmlNodeCollection list)
+        {
+            foreach(HtmlNode node in list)
+            {
+                if(!nodes.Contains(node.Name))
+                {
+                    nodes.Add(node.Name);
+                }
+                if(node.Name.Equals("h2") && node.InnerText.Equals("Opening Theme"))
+                {
+                    
+                }
+                if(node.Name.Equals("table"))
+                {
+
+                }
+                GetChild(node.ChildNodes);
             }
         }
-        //js-anime-category-producer seasonal-anime js-seasonal-anime js-anime-type-all js-anime-type-1
 
-        private void UpdateProgress()
+        private void ProcessAnime(Anime animeBase)
         {
-            progressBar1.Value = progressBar1.Value + 1;
-            progressBar1.Update();
+            string path = Path.Combine(Application.StartupPath, $"{animeBase.Name}.txt");
+            HtmlDocument doc = new HtmlDocument();
+            using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
+            {
+                string downloadString = client.DownloadString(animeBase.URL);
+                File.WriteAllText(path, downloadString);
+                doc.LoadHtml(downloadString);
+            }
+
+            HtmlNode n = doc.DocumentNode.SelectSingleNode("//h2[.='Opening Theme']").SelectSingleNode("//span[@class='theme-song-artist']");
+            GetChild(doc.DocumentNode.SelectSingleNode("//h2[.='Opening Theme']").ChildNodes);
+            GetChild(doc.DocumentNode.ChildNodes);
+
+            string[] lines = File.ReadAllLines(path);
+            progressBar2.Maximum = lines.Length;
+            string tipo = string.Empty;
+
+            Anime anime = animeBase;
+            bool anadir = false;
+
+            foreach (string line in lines)
+            {
+                try
+                {
+                    if (NodeAnime(line, ref anime))
+                        anadir = true;
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        NodeAnime(line.Replace("&nbsp;", string.Empty), ref anime);
+                    }
+                    catch (Exception exex)
+                    {
+
+                    }
+                }                
+                UpdateProgress(progressBar2);
+                if(anadir)
+                {
+                    animes.Add(anime);
+                    anime = animeBase;
+                }
+            }
+       }
+        private void UpdateProgress(ProgressBar pb)
+        {
+            pb.Value = pb.Value + 1;
+            pb.Update();
         }
 
-        private static void Node(string line)
+        private void Node(string line, ref Anime anime)
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(line);
@@ -91,15 +164,42 @@ namespace WindowsFormsApp1
 
             if (newNode.Name.Equals("h2") && newNode.Attributes["class"] != null && newNode.Attributes["class"].Value == "h2_anime_title")
             {
-                names.Add(newNode.FirstChild.Attributes["href"].Value);
+                links.Add(newNode.FirstChild.Attributes["href"].Value);
+                anime.URL = links.Last();
             }
 
-            if (newNode.Name.Equals("span") && newNode.Attributes["class"] != null & newNode.Attributes["class"].Value == "js-title")
+            if (newNode.Name.Equals("span") && newNode.Attributes["class"] != null && newNode.Attributes["class"].Value == "js-title")
             {
-                links.Add(newNode.InnerText);
+                names.Add(newNode.InnerText);
+                anime.Name = names.Last();
+                ProcessAnime(anime);
             }
         }
+         private bool NodeAnime(string line, ref Anime anime)
+        {
+            if(line.Contains("theme-song-index"))
+            {
 
+            }
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(line);
+            XmlNode newNode = doc.DocumentElement;
+
+            if (newNode.Name.Equals("h2") && newNode.InnerText.Equals("Opening Theme"))
+            {
+                anime.Type = "Opening";
+            }
+            if (newNode.Name.Equals("h2") && newNode.InnerText.Equals("Ending Theme"))
+            {
+                anime.Type = "Ending";
+            }
+
+            if(newNode.FirstChild.Name.Equals("span"))
+            { 
+            }
+
+            return false;
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             Read();
@@ -120,7 +220,7 @@ namespace WindowsFormsApp1
             LoadDefault();
         }
 
-        private static void Write(string sheet)
+        /*private static void Write(string sheet)
         {
             string path = Path.Combine(Application.StartupPath, "resources", "MAL.xlsx");
             DataSet datosExcel = new DataSet();
@@ -165,7 +265,7 @@ namespace WindowsFormsApp1
                 xlRange.BorderAround2(Weight: Excel.XlBorderWeight.xlThick);
                 xlRange.Value = header;
                 xlRange = (Excel.Range)xlWorksheet.Range[xlWorksheet.Cells[2, 1], xlWorksheet.Cells[2 + names.Count, 2]];
-                xlRange.Value = ListsToArray(names, links);
+                xlRange.Value = ListsToArray();
             }
             finally
             {
@@ -178,7 +278,7 @@ namespace WindowsFormsApp1
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(xlApp);
             }
         }
-
+        
         private static void CreateExcelColumn(string FileName, string sheetName, string columnName)
         {
             Excel.Application xlApp = null;
@@ -201,7 +301,7 @@ namespace WindowsFormsApp1
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(xlApp);
             }
         }
-
+        */
         public static void WriteResourceToFile(byte[] resourceName, string fileName)
         {
             System.IO.File.WriteAllBytes(fileName, resourceName);
@@ -236,6 +336,21 @@ namespace WindowsFormsApp1
             }
             return matrix;
         }
+    }
+
+    public class Anime
+    {
+        private string name;
+        private string url;
+        private string type;
+        private string song;
+        private string artist;
+
+        public string Name { get => name; set => name = value; }
+        public string URL { get => url; set => url = value; }
+        public string Type { get => type; set => type = value; }
+        public string Song { get => song; set => song = value; }
+        public string Artist { get => artist; set => artist = value; }
     }
 }
 

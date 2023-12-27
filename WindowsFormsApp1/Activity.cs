@@ -7,13 +7,13 @@ using ExcelDataReader;
 using System.Windows.Forms;
 using System.IO;
 using System.Data;
-using Excel = Microsoft.Office.Interop.Excel;
+//using Excel = Microsoft.Office.Interop.Excel;
 using System.Reflection;
 using System.Globalization;
 
 namespace WindowsFormsApp1
 {
-    public static class Activity
+    /*public static class Activity
     {
          static string path;
         static DataSet datosExcel;
@@ -182,5 +182,5 @@ namespace WindowsFormsApp1
         }
 
        
-    }
+    }*/
 }
