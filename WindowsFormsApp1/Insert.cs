@@ -27,16 +27,16 @@ namespace WindowsFormsApp1
             ds.Tables.Add(new DataTable());
             DataRow dr = ds.Tables[0].NewRow();
             ds.Tables[0].Columns.Add(new DataColumn("Tipo"));
-            dr[0] = "Text";
+            dr[0] = DatosInsert.typo.Text.ToString();
             ds.Tables[0].Rows.Add(dr);
             dr = ds.Tables[0].NewRow();
-            dr[0] = "Num";
+            dr[0] = DatosInsert.typo.Num.ToString();
             ds.Tables[0].Rows.Add(dr);
             dr = ds.Tables[0].NewRow();
-            dr[0] = "Bool";
+            dr[0] = DatosInsert.typo.Bool.ToString();
             ds.Tables[0].Rows.Add(dr);
             dr = ds.Tables[0].NewRow();
-            dr[0] = "Custom";
+            dr[0] = DatosInsert.typo.Custom.ToString();
             ds.Tables[0].Rows.Add(dr); this.Tipo.ValueMember = ds.Tables[0].Columns["Tipo"].ToString();
             this.Tipo.DisplayMember = ds.Tables[0].Columns["Tipo"].ToString();
             this.Tipo.DataSource = ds.Tables[0];
@@ -114,7 +114,7 @@ namespace WindowsFormsApp1
 
         private string[] CrearFilaCustom(DatosInsert di, int filas)
         {
-            string[] valores = new string[filas];
+            string[] valores = Enumerable.Repeat("'"+DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")+"'", filas).ToArray();//new string[filas];
             return valores;
         }
 
@@ -139,7 +139,8 @@ namespace WindowsFormsApp1
                 {
                     for (int i = 0; i < valores.Length; i++)
                     {
-                        valores[i] = GenerarNumero(di.Minimo, di.Maximo, decimales, di.NoCero);
+                        di.Maximo = 100;
+                        valores[i] = GenerarNumero(di.Minimo, di.Maximo, decimales, di.NoCero, di.Rango);
                     }
                 }
             }
@@ -186,7 +187,7 @@ namespace WindowsFormsApp1
             string minusculas = "qwertyuiopasdfghjklñzxcvbnm";
             string mayusculas = "QWERTYUIOPASDFGHJKLÑZXCVBNM";
             string numeros = "0123456789";
-            string especiales = @"$%#@!*?;:^&,.-_{}[]+ç|\/~¬¿¡()";
+            string especiales = @"$%#@!*?;:^&,.-_{}[]+ç|/~¬¿¡()";//no esta el caracter \
             string todos = string.Empty;
             if (di.Aleatorio)
             {
@@ -278,13 +279,13 @@ namespace WindowsFormsApp1
             return resultado;
         }
 
-        public string GenerarNumero(int minimo, int maximo, int decimales, bool cero)
+        public string GenerarNumero(int minimo, int maximo, int decimales, bool cero, bool rango)
         {
             string resultado = string.Empty;
             decimal potencia = (decimal)Math.Pow(10, decimales);
-            resultado = ((decimal)r.Next(minimo * (int)potencia, maximo * (int)potencia) / potencia).ToString().Replace(",",".");
+            resultado = (r.Next(minimo * (int)potencia, maximo * (int)potencia) / potencia).ToString().Replace(",", ".");
             if (cero && decimal.Parse(resultado) == 0)
-                resultado = GenerarNumero(minimo, maximo, decimales, cero);
+                resultado = GenerarNumero(minimo, maximo, decimales, cero, rango);
             return resultado;
         }
         private string GenerarBool()
@@ -338,22 +339,22 @@ namespace WindowsFormsApp1
             int cont = 0;
             foreach (DatosInsert di in bs)
             {
-                if(di.Tipo.Equals("Text"))
+                if(di.Tipo.Equals(DatosInsert.typo.Text.ToString()))
                 {
                     valores[cont] = CrearFilaString(di, filas);
                     cont++;
                 }
-                else if (di.Tipo.Equals("Num"))
+                else if (di.Tipo.Equals(DatosInsert.typo.Num.ToString()))
                 {
                     valores[cont] = CrearFilaNum(di, filas);
                     cont++;
                 }
-                else if(di.Tipo.Equals("Bool"))
+                else if(di.Tipo.Equals(DatosInsert.typo.Bool.ToString()))
                 {
                     valores[cont] = CrearFilaBool(di, filas);
                     cont++;
                 }
-                else if (di.Tipo.Equals("Custom"))
+                else if (di.Tipo.Equals(DatosInsert.typo.Custom.ToString()))
                 {
                     valores[cont] = CrearFilaCustom(di, filas);
                     cont++;
@@ -377,6 +378,71 @@ namespace WindowsFormsApp1
                 bs.RemoveAt(dataGridView1.CurrentRow.Index);
             }
             catch { }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+            BBDD bbdd = new BBDD();
+            if (bbdd.ShowDialog() == DialogResult.OK)
+            {
+                textbox1.Text = bbdd.Datatable;
+                DataTable dt = MySQL.GetColumns(bbdd.Database, bbdd.Datatable);
+                bbdd.Close();
+                bs.Clear();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    DatosInsert di = new DatosInsert();
+                    di.Tipo = GetTipo(dr["COLUMN_TYPE"].ToString());
+                    di.Campo = dr["COLUMN_NAME"].ToString();
+                    di.Autoincremento = dr["ORDINAL_POSITION"].ToString().Equals("1") && dr["COLUMN_KEY"].ToString().Equals("PRI");
+                    di.Longitud = Math.Min(10,GetLength(dr["COLUMN_TYPE"].ToString()));
+                    di.Maximo = di.Longitud;
+                    di.Fijo = false;
+                    di.NumDecimal = dr["COLUMN_TYPE"].ToString().Contains("double") || dr["COLUMN_TYPE"].ToString().Contains("decimal");
+                    di.Decimalesmax = 3;
+                    di.Minusculas = true;
+                    di.Mayusculas = true;
+                    di.Numeros = true;
+                    di.Caracteresespeciales = true;
+                    bs.Add(di);
+                }
+            }
+        }
+
+        private int GetDecimals(string type)
+        {
+            if (type.Contains('(') && type.Contains(')') && type.Contains(','))
+                return Convert.ToInt16(type.Split('(', ')')[1].Split(',')[1]);
+            else
+                return 0;
+
+        }
+
+        private int GetLength(string type)
+        {
+            if (type.Contains('(') && type.Contains(')'))
+                return Convert.ToInt16(type.Split('(', ')')[1].Split(',')[0]);
+            else
+                return new Random().Next(0,1000);
+        }
+
+        private string GetTipo(string type)
+        {
+            switch(type)
+            {
+                case string a when a.Contains("char"):
+                case string b when b.Contains("text"):
+                    return DatosInsert.typo.Text.ToString();
+                case string a when a.Contains("tiny"):
+                    return DatosInsert.typo.Bool.ToString();
+                case string a when a.Contains("int"):
+                case string b when b.Contains("double"):
+                case string c when c.Contains("decimal"):
+                    return DatosInsert.typo.Num.ToString();
+                default:
+                    return DatosInsert.typo.Custom.ToString();
+            }
         }
         //PTE: Bindings controles
         //PTE: Crear insert

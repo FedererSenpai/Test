@@ -91,9 +91,15 @@ namespace WindowsFormsApp1
                 radioButton2.Checked = true;
 
             if (di.Fijo)
+            {
                 radioButton3.Checked = true;
+                panel2.Enabled = false;
+            }
             else
+            {
+                panel1.Enabled = false;
                 radioButton4.Checked = true;
+            }
             cargado = true;
         }
     }

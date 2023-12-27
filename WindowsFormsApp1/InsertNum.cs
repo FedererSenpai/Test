@@ -28,6 +28,7 @@ namespace WindowsFormsApp1
             this.checkBox1.DataBindings.Add("Checked", di, "NumDecimal");
             this.checkBox2.DataBindings.Add("Checked", di, "NoCero");
             this.checkBox3.DataBindings.Add("Checked", di, "Autoincremento");
+            this.checkBox4.DataBindings.Add("Checked", di, "Rango");
             this.textBox1.DataBindings.Add("Text", di, "Texto");
         }
 

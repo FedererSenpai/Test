@@ -6,7 +6,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace WindowsFormsApp1
 {
@@ -199,6 +199,12 @@ namespace WindowsFormsApp1
                 {
                 }
             }
+        }
+
+        public static DataTable GetColumns(string database, string datatable)
+        {
+            string sql = string.Format("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{0}' AND TABLE_NAME = '{1}'; ", database, datatable);
+            return EjecutaQuery(Connection, sql).Tables[0];
         }
     }
 }

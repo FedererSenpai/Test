@@ -20,8 +20,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Dibal.Codepages();
-                Application.Run(new TwoList());
+                Application.Run(new Insert());
             }
             else
             {

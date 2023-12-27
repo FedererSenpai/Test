@@ -9,6 +9,14 @@ namespace WindowsFormsApp1
 
     public partial class DatosInsert
     {
+        public enum typo
+        {
+            Text, 
+            Num, 
+            Bool,
+            Custom
+        }
+
         private string campo;
         private string tipo;
 
@@ -33,6 +41,7 @@ namespace WindowsFormsApp1
         private int decimalesmax;
         private bool nocero;
         private bool autoincremento;
+        private bool rango;
 
         //Bool
         private bool trueFalse;
@@ -56,6 +65,7 @@ namespace WindowsFormsApp1
         public int Decimalesmax { get => decimalesmax; set => decimalesmax = value; }
         public bool NoCero { get => nocero; set => nocero = value; }
         public bool Autoincremento { get => autoincremento; set => autoincremento = value; }
+        public bool Rango { get => rango; set => rango = value; }
 
         public DatosInsert(string _campo, string _tipo)
         {

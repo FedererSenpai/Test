@@ -228,7 +228,7 @@ namespace WindowsFormsApp1
             // 
             this.numericUpDown1.Location = new System.Drawing.Point(106, 8);
             this.numericUpDown1.Maximum = new decimal(new int[] {
-            9,
+            15,
             0,
             0,
             0});
