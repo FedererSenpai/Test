@@ -339,6 +339,12 @@
       <DependentUpon>BBDD.cs</DependentUpon>
     </Compile>
     <Compile Include="LoL.cs" />
+    <Compile Include="MAL.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MAL.Designer.cs">
+      <DependentUpon>MAL.cs</DependentUpon>
+    </Compile>
     <Compile Include="TwoList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -467,6 +473,9 @@
     <EmbeddedResource Include="BBDD.resx">
       <DependentUpon>BBDD.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MAL.resx">
+      <DependentUpon>MAL.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TwoList.resx">
       <DependentUpon>TwoList.cs</DependentUpon>
     </EmbeddedResource>
@@ -543,6 +552,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="resources\MAL.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -563,7 +573,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="resources\Assembly.xlsx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="resources\Activity.xlsx" />
     <None Include="resources\Logos_183.TXT" />

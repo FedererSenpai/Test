@@ -111,5 +111,15 @@ namespace WindowsFormsApp1.Properties {
                 return ResourceManager.GetString("Logos_183", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] MAL {
+            get {
+                object obj = ResourceManager.GetObject("MAL", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

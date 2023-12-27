@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Application.Run(new Insert());
+                Application.Run(new APITest());
             }
             else
             {
@@ -37,6 +37,9 @@ namespace WindowsFormsApp1
                             Activity.WriteStart();
                         else if (args[1].Equals("/z"))
                             Activity.WriteShutDown();
+                        break;
+                    case "MAL":
+                        Application.Run(new MAL());
                         break;
                     default:
                         Application.Exit();
