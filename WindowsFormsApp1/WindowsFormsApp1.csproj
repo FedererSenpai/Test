@@ -480,6 +480,12 @@
       <DependentUpon>Dumb.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Web.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Web.Designer.cs">
+      <DependentUpon>Web.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinUtil.cs" />
     <EmbeddedResource Include="APITest.resx">
       <DependentUpon>APITest.cs</DependentUpon>
@@ -555,6 +561,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Web.resx">
+      <DependentUpon>Web.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
