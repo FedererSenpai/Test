@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-//using Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
+using System.IO;
+using HtmlAgilityPack;
 
 namespace WindowsFormsApp1
 {
@@ -119,7 +121,7 @@ namespace WindowsFormsApp1
             return datetime;
         }
 
-        /*public static int NextRow(this _Worksheet w, int column) 
+        public static int NextRow(this _Worksheet w, int column) 
         {
             int row = 0;
             for (int i = 1; i < 1000; i++)
@@ -132,11 +134,38 @@ namespace WindowsFormsApp1
                     
             }
             return row;
-        }*/
+        }
 
         public static string ToJson<T>(this List<T> l)
         {
             return JsonConvert.SerializeObject(l);
+        }
+
+        public static void WriteToFile(string filePath, string content)
+        {
+            System.IO.FileInfo file = new System.IO.FileInfo(filePath);
+            file.Directory.Create(); // If the directory already exists, this method does nothing.
+            System.IO.File.WriteAllText(file.FullName, content);
+        }
+
+        public static string CheckFileName(this string file)
+        {
+            if (file.IndexOfAny(Path.GetInvalidFileNameChars()) > 0)
+            {
+                foreach(char c in Path.GetInvalidFileNameChars())
+                {
+                    file = file.Replace(c.ToString(), string.Empty);
+                }
+            }
+            return file;
+        }
+
+        public static int Count(this HtmlNode node, string exp)
+        {
+            if (node.SelectSingleNode(".//td[@width='84%']") != null)
+                return node.SelectNodes(".//td[@width='84%']").Count();
+            else
+                return 0;
         }
     }
 }
