@@ -141,6 +141,11 @@ namespace WindowsFormsApp1
             return JsonConvert.SerializeObject(l);
         }
 
+        public static void ToFile(this string content, string filePath)
+        {
+            WriteToFile(filePath, content);
+        }
+
         public static void WriteToFile(string filePath, string content)
         {
             System.IO.FileInfo file = new System.IO.FileInfo(filePath);

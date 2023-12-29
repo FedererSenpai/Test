@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
-    public partial class Insert : Form
+    public partial class Insert : Base
     {
         BindingSource bs = new BindingSource();
         private static Random r = new Random((int)DateTime.Now.Ticks);
@@ -19,6 +19,7 @@ namespace WindowsFormsApp1
         public Insert()
         {
             InitializeComponent();
+            FolderPath = Path.Combine(Application.StartupPath, "Result");
             //while(true)
             //{
             //    RandomString(0,15,false,true);
@@ -307,12 +308,7 @@ namespace WindowsFormsApp1
                 sql = sql.Substring(0, sql.Length - 2) + "), (";
             }
             sql = sql.Substring(0, sql.Length - 3) + ";";
-            string path = Application.StartupPath + "/sql.txt";
-            if (System.IO.File.Exists(path));
-            System.IO.File.Delete(path);
-            StreamWriter sw = new StreamWriter(path);
-            sw.WriteLine(sql);
-            sw.Close();
+            sql.ToFile(Path.Combine(Application.StartupPath, "Result", "sql.txt"));       
         }
 
         private string GenerarCabeceraSql(string tabla)
@@ -361,6 +357,7 @@ namespace WindowsFormsApp1
                 }
             }
             GenerarSql(valores, filas);
+            ExtensionMethods.WriteToFile(Path.Combine(Application.StartupPath, "Result", "Design.json"),bs.Cast<DatosInsert>().ToList().ToJson());
         }
 
         private void numericUpDown1_KeyPress(object sender, KeyPressEventArgs e)

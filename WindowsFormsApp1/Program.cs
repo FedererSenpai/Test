@@ -32,14 +32,17 @@ namespace WindowsFormsApp1
                     case "Assembly":
                         Application.Run(new UpdateAssembly());
                         break;
-                    //case "Activity":
-                        //if (args[1].Equals("/a"))
-                            //Activity.WriteStart();
-                        //else if (args[1].Equals("/z"))
-                            //Activity.WriteShutDown();
-                        //break;
+                    case "Activity":
+                        if (args[1].Equals("/a"))
+                            Activity.WriteStart();
+                        else if (args[1].Equals("/z"))
+                            Activity.WriteShutDown();
+                        break;
                     case "MAL":
                         Application.Run(new MAL());
+                        break;
+                    case "Insert":
+                        Application.Run(new Insert());
                         break;
                     default:
                         Application.Exit();
