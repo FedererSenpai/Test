@@ -48,6 +48,17 @@ namespace WindowsFormsApp1
 
         public static string Password_defecto => password_defecto;
 
+        public static int EjecutaNonQuery(string sql)
+        {
+            return EjecutaNonQuery(Connection, sql);
+        }
+
+        public static IDbConnection NewConnection(string server ,string database)
+        {
+            MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder(string.Empty) { Database = database, Server = server };
+            return new MySqlConnection(builder.ToString());
+        }
+
         public static int EjecutaNonQuery(IDbConnection con, string sql)
         {
             int registros;
@@ -205,6 +216,70 @@ namespace WindowsFormsApp1
         {
             string sql = string.Format("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{0}' AND TABLE_NAME = '{1}'; ", database, datatable);
             return EjecutaQuery(Connection, sql).Tables[0];
+        }
+    }
+
+    public class MySqlConnectionStringBuilder   // por Javier Sanz
+    {
+        // Si queremos hacer databinding con instancias de esta clase no podemos heredar, hay que delegar.
+        // Ver http://www.winterdom.com/weblog/2006/07/22/ICustomTypeDescriptorAndDataBindingInNET20.aspx
+        readonly DbConnectionStringBuilder _stringBuilder = new DbConnectionStringBuilder();
+
+        public MySqlConnectionStringBuilder(string cadena)
+        {
+            _stringBuilder.ConnectionString = cadena;//DesEncriptada;
+            if (!_stringBuilder.ContainsKey("port")) this.Port = 3306;
+            //148D DI -> 155A
+            //if (!_stringBuilder.ContainsKey("connection timeout")) this.ConnectionTimeout = 180000;
+            if (!_stringBuilder.ContainsKey("database")) this.Database = MySQL.Bd_defecto;
+            if (!_stringBuilder.ContainsKey("user id")) this.UserID = MySQL.Usuario_defecto;
+            if (!_stringBuilder.ContainsKey("password")) this.Password = MySQL.Password_defecto;
+            if (!_stringBuilder.ContainsKey("server")) this.Server = "localhost";
+
+            //148D DI -> 155A
+            //a las balanzas esclavas establecemos el timeout en pocos segundos para que si pierde la conexión en el momento de hacer el open
+            //no se quede indefinidamente esperando
+            if (!this.Server.ToLower().Contains("localhost"))
+                this.ConnectionTimeout = 10;
+        }
+        public int Port
+        {
+            get { return int.Parse(_stringBuilder["port"].ToString()); }
+            set { _stringBuilder["port"] = value.ToString(); }
+        }
+        public int ConnectionTimeout
+        {
+            get { return int.Parse(_stringBuilder["connection timeout"].ToString()); }
+            set { _stringBuilder["connection timeout"] = value.ToString(); }
+        }
+        public string Database
+        {
+            get { return _stringBuilder["database"].ToString(); }
+            set { _stringBuilder["database"] = value; }
+        }
+        public string UserID
+        {
+            get { return _stringBuilder["user id"].ToString(); }
+            set { _stringBuilder["user id"] = value; }
+        }
+        public string Password
+        {
+            get { return _stringBuilder["password"].ToString(); }
+            set { _stringBuilder["password"] = value; }
+        }
+        public string Server
+        {
+            get { return _stringBuilder["server"].ToString(); }
+            set { _stringBuilder["server"] = value; }
+        }
+
+        public void Remove(string s)
+        {
+            this._stringBuilder.Remove(s);
+        }
+        public override string ToString()
+        {
+            return this._stringBuilder.ToString();
         }
     }
 }

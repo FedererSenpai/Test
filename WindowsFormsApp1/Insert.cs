@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -46,7 +47,28 @@ namespace WindowsFormsApp1
             this.Tipo.DataPropertyName = "Tipo";
             this.Campo.DataPropertyName = "Campo";
 
+            dataGridView1.AutoGenerateColumns = false;
         }
+
+        public void LoadJson(object sender, EventArgs e)
+        {
+            bs.Clear();
+            foreach(DatosInsert di in JsonConvert.DeserializeObject<List<DatosInsert>>(File.ReadAllText(Path.Combine(FolderPath, "Design.json"))))
+            {
+                bs.Add(di);
+            }
+        }
+
+        public void Query(object sender, EventArgs e)
+        {
+            BBDD bbdd = new BBDD();
+            if (bbdd.ShowDialog() == DialogResult.OK)
+            {
+                MySQL.EjecutaNonQuery(MySQL.NewConnection(bbdd.Server, bbdd.Database), File.ReadAllText(Path.Combine(FolderPath, "sql.txt")));
+                bbdd.Close();
+            }
+        }
+
 
         public int RandomInt(int max, int min)
         {
@@ -140,7 +162,6 @@ namespace WindowsFormsApp1
                 {
                     for (int i = 0; i < valores.Length; i++)
                     {
-                        di.Maximo = 100;
                         valores[i] = GenerarNumero(di.Minimo, di.Maximo, decimales, di.NoCero, di.Rango);
                     }
                 }
@@ -395,6 +416,8 @@ namespace WindowsFormsApp1
                     di.Autoincremento = dr["ORDINAL_POSITION"].ToString().Equals("1") && dr["COLUMN_KEY"].ToString().Equals("PRI");
                     di.Longitud = Math.Min(10,GetLength(dr["COLUMN_TYPE"].ToString()));
                     di.Maximo = di.Longitud;
+                    if (di.Tipo == DatosInsert.typo.Num.ToString())
+                        di.Maximo = 100;
                     di.Fijo = false;
                     di.NumDecimal = dr["COLUMN_TYPE"].ToString().Contains("double") || dr["COLUMN_TYPE"].ToString().Contains("decimal");
                     di.Decimalesmax = 3;
@@ -440,6 +463,12 @@ namespace WindowsFormsApp1
                 default:
                     return DatosInsert.typo.Custom.ToString();
             }
+        }
+
+        private void Insert_Load(object sender, EventArgs e)
+        {
+            AddMenu("Load", new EventHandler(LoadJson));
+            AddMenu("Query", new EventHandler(Query));
         }
         //PTE: Bindings controles
         //PTE: Crear insert

@@ -22,14 +22,17 @@ namespace WindowsFormsApp1
 
         private string database;
         private string datatable;
+        private string server;
 
         public BBDD()
         {
             InitializeComponent();
             textBox1.DataBindings.Add("Text", this, "Database");
             textBox2.DataBindings.Add("Text", this, "Datatable");
+            textBox3.DataBindings.Add("Text", this, "Server");
             database = "sys_datos";
             datatable = "dat_";
+            server = "localhost";
         }
 
         public string Database { get => database; set
@@ -42,6 +45,13 @@ namespace WindowsFormsApp1
             {
                 datatable = value;
                 InvokePropertyChanged(new PropertyChangedEventArgs("Datatable"));
+            }
+        }
+
+        public string Server { get => server; set
+            {
+                server = value;
+                InvokePropertyChanged(new PropertyChangedEventArgs("Server"));
             }
         }
 
@@ -59,7 +69,7 @@ namespace WindowsFormsApp1
 
         private void BBDD_Load(object sender, EventArgs e)
         {
-            this.ActiveControl = textBox1;
+            this.ActiveControl = textBox3;
         }
 
         private void textBox1_Focus(object sender, EventArgs e)
