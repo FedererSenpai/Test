@@ -58,7 +58,7 @@ namespace WindowsFormsApp1
             }
 
             ProcessSeason(doc.DocumentNode);
-            Write(season);
+            //Write(season);
             return;
         }
 
@@ -480,7 +480,7 @@ namespace WindowsFormsApp1
                     if (anime.Song.Split(new string[] { " by " }, StringSplitOptions.None).Length == 2)
                     {
                         anime.Song = anime.Song.Substring(0, anime.Song.IndexOf(" by "));
-                        anime.Artist = anime.Song.Substring(anime.Artist.IndexOf(" by "));
+                        anime.Artist = anime.Artist.Substring(anime.Artist.IndexOf(" by "));
                     }
                 }
 
@@ -495,7 +495,7 @@ namespace WindowsFormsApp1
 
             }
             anime.Song = anime.Song.Trim();
-            anime.Artist = anime.Artist.Trim();
+            anime.Artist = anime.Artist.Trim().TrimStart("by").Trim();
             return anime;
         }
     }

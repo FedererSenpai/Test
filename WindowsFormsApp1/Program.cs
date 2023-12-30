@@ -20,6 +20,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
+                Performance.Compare();
                 Application.Run(new Web());
             }
             else

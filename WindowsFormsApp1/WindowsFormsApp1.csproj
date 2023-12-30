@@ -396,6 +396,7 @@
     <Compile Include="MAL.Designer.cs">
       <DependentUpon>MAL.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance.cs" />
     <Compile Include="TwoList.cs">
       <SubType>Form</SubType>
     </Compile>

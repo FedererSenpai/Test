@@ -172,5 +172,43 @@ namespace WindowsFormsApp1
             else
                 return 0;
         }
+
+        public static int Distance(string s1, string s2)
+        {
+            if (s1.Length == 0)
+            {
+                return s2.Length;
+            }
+            else if (s2.Length == 0)
+            {
+                return s1.Length;
+            }
+            else if (s1[0] == s2[0])
+            {
+                return Distance(s1.Substring(1), s2.Substring(1));
+            }
+            else
+            {
+                return 1 - Enumerable.Min(new int[] { Distance(s1.Substring(1), s2), Distance(s2.Substring(1), s1), Distance(s1.Substring(1), s2.Substring(1)) });
+            }
+        }
+
+        public static void ToFile<T>(this List<T> l, string path)
+        {
+            l.ToJson().ToFile(path);
+        }
+
+        public static string TrimStart(this string target, string trimString)
+        {
+            if (string.IsNullOrEmpty(trimString)) return target;
+
+            string result = target;
+            while (result.StartsWith(trimString))
+            {
+                result = result.Substring(trimString.Length);
+            }
+
+            return result;
+        }
     }
 }
