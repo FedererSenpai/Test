@@ -21,7 +21,7 @@ using System.Text.RegularExpressions;
 
 namespace WindowsFormsApp1
 {
-    public partial class MAL : Form
+    public partial class MAL : Base
     {
         private enum Seasons
         {
@@ -53,7 +53,7 @@ namespace WindowsFormsApp1
             using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
             {
                 string downloadString = client.DownloadString($"https://myanimelist.net/anime/season/{numericUpDown1.Value}/{comboBox1.SelectedItem}");
-                ExtensionMethods.WriteToFile(Path.Combine(Application.StartupPath, "api.txt"), downloadString);
+                ExtensionMethods.WriteToFile(Path.Combine(FolderPath, "api.txt"), downloadString);
                 doc.LoadHtml(downloadString);
             }
 
@@ -99,7 +99,7 @@ namespace WindowsFormsApp1
                 }
                 UpdateProgress(progressBar1);
             }*/
-            ExtensionMethods.WriteToFile(Path.Combine(Application.StartupPath,"Result", $"{season}.json"), animes.ToJson());
+            ExtensionMethods.WriteToFile(Path.Combine(ResultPath,"MAL", $"{season}.json"), animes.ToJson());
             string asuidfha = animes.ToJson();
         }
          

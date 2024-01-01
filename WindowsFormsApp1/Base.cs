@@ -15,13 +15,14 @@ namespace WindowsFormsApp1
     public partial class Base : Form
     {
         private string folderPath = Application.StartupPath;
-
+        private string resultPath = Path.Combine(Application.StartupPath, "Result");
         public Base()
         {
             InitializeComponent();
         }
 
         public string FolderPath { get => folderPath; set => folderPath = value; }
+        public string ResultPath { get => resultPath; set => resultPath = value; }
 
         private void Base_Load(object sender, EventArgs e)
         {

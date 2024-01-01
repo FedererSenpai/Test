@@ -11,6 +11,10 @@ using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
 using System.IO;
 using HtmlAgilityPack;
+using Org.BouncyCastle.Asn1.Crmf;
+using System.Windows.Forms;
+using System.Runtime.CompilerServices;
+using System.Drawing;
 
 namespace WindowsFormsApp1
 {
@@ -209,6 +213,63 @@ namespace WindowsFormsApp1
             }
 
             return result;
+        }
+
+        public static List<List<T>> Split<T>(this List<T> list, int size)
+        {
+            List<List<T>> bigList = new List<List<T>>();
+            int max = size;
+            int i = 0;
+            while(i<list.Count)
+            {
+                List<T> smallList = new List<T>();
+                if (max > list.Count)
+                    max = list.Count;
+                while(i < max)
+                {
+                    smallList.Add(list[i]);
+                    i++;
+                }
+                bigList.Add(smallList);
+                max += size;
+            }
+            return bigList;
+        }
+
+        public static void Center(this Control c)
+        {
+            if (c.Parent == null)
+                return;
+            c.Location = new System.Drawing.Point((c.Parent.Width - c.Width) / 2 , (c.Parent.Height - c.Height) / 2);
+        }
+
+        public static bool isOK(this Form f)
+        {
+            return f.ShowDialog() == DialogResult.OK;
+        }
+
+        public static string FirstLetterToUpperCase(this string s)
+        {
+            char[] a = s.ToCharArray();
+            a[0] = char.ToUpper(a[0]);
+            return new string(a);
+        }
+
+        public static void AutoResize(this Control c)
+        {
+            if (c is ComboBox)
+            {
+                ComboBox cb = c as ComboBox;
+                Graphics g = cb.CreateGraphics();
+                int max = cb.Width;
+                foreach (object o in cb.Items)
+                {
+                    float width = g.MeasureString(cb.GetItemText(o), cb.Font).Width;
+                    if (width > max)
+                        max = (int)width;
+                }
+                cb.Width = max;
+            }
         }
     }
 }
