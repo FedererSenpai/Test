@@ -18,6 +18,7 @@ using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.Windows.Documents;
 
 namespace WindowsFormsApp1
 {
@@ -64,19 +65,30 @@ namespace WindowsFormsApp1
 
         public void ProcessSeason(HtmlNode doc)
         {
-            HtmlNodeCollection list = doc.SelectNodes("//div[@class='js-anime-category-producer seasonal-anime js-seasonal-anime js-anime-type-all js-anime-type-1']");
-            progressBar1.Maximum = list.Count();
-            Anime anime;
-            foreach (HtmlNode node in list)
+            button1.Enabled = false;
+            animes.Clear();
+            string header = "New";
+            HtmlNodeCollection principal = doc.SelectNodes("//div[@class='seasonal-anime-list js-seasonal-anime-list js-seasonal-anime-list-key-1']");
+            foreach (HtmlNode headnode in principal)
             {
-                anime = new Anime();
-                HtmlNode mynode = node.SelectNodes(".//h2[@class='h2_anime_title']").First();
-                anime.URL = mynode.FirstChild.GetAttributeValue("href", string.Empty);
-                anime.Name = node.SelectSingleNode(".//span[@class='js-title']").InnerText;
-                ProcessAnime(anime.Clone());
-                UpdateProgress(progressBar1);
-            }
+                if (headnode.SelectNodes(".//div[@class='anime-header']").FirstOrDefault().InnerText.Equals("TV (Continuing)"))
+                    header = "Continuing";
 
+                HtmlNodeCollection list = headnode.SelectNodes(".//div[@class='js-anime-category-producer seasonal-anime js-seasonal-anime js-anime-type-all js-anime-type-1']");
+                progressBar1.Maximum = list.Count();
+                Anime anime;
+                foreach (HtmlNode node in list)
+                {
+                    anime = new Anime();
+                    anime.Header = header;
+                    HtmlNode mynode = node.SelectNodes(".//h2[@class='h2_anime_title']").First();
+                    anime.URL = mynode.FirstChild.GetAttributeValue("href", string.Empty);
+                    anime.Name = node.SelectSingleNode(".//span[@class='js-title']").InnerText;
+                    if (!Anime.Ignore.Contains(anime.Name) && !anime.Name.Contains("Crayon Shin-chan"))
+                        ProcessAnime(anime.Clone());
+                    UpdateProgress(progressBar1);
+                }
+            }
             /*string[] lines = File.ReadAllLines(Path.Combine(Application.StartupPath, "api.txt"));
             progressBar1.Maximum = lines.Length;
             Anime anime = new Anime();
@@ -101,6 +113,7 @@ namespace WindowsFormsApp1
             }*/
             ExtensionMethods.WriteToFile(Path.Combine(ResultPath,"MAL", $"{season}.json"), animes.ToJson());
             string asuidfha = animes.ToJson();
+            button1.Enabled = true;
         }
          
         private void GetChild(HtmlNodeCollection list)
@@ -252,7 +265,7 @@ namespace WindowsFormsApp1
 
         private void UpdateProgress(ProgressBar pb)
         {
-            pb.Value = pb.Value + 1;
+            pb.Value = pb.Maximum;
             pb.Update();
             Application.DoEvents();
             Thread.Sleep(1);
@@ -447,21 +460,32 @@ namespace WindowsFormsApp1
 
     public class Anime
     {
+        private static readonly List<string> ignore = new List<string>() { "One Piece", "Meitantei Conan", "Crayon Shin Chan", "Hirogaru Sky! Precure", "Sazae-san", "Chibi Maruko-chan (1995)", "Bonobono (TV 2016)", "Chiikawa", "Ninjala(TV)", "Shikaru Neko", "Kamiusagi Rope: Warau Asa ni wa Fukuraitaru tte Maji ssuka!?", "Teikou Penguin", "Shiawase Haitatsu Taneko", "Kirin the Noop", "Ochibi-san", "Manul no Yuube", "Chickip Dancers 3rd Season", "Saekomdalkom Catch! Tiniping", "Shin Nippon History", "Riseman", "Totonoe! Sakuma-kun by &sauna", "Hero Inside", "Shuwawan!" };
+        
         private string name = string.Empty;
         private string url = string.Empty;
         private string type = string.Empty;
         private string song = string.Empty;
         private string artist = string.Empty;
+        private string header = string.Empty;
 
         public string Name { get => name; set => name = value; }
         public string URL { get => url; set => url = value; }
         public string Type { get => type; set => type = value; }
         public string Song { get => song; set => song = value; }
         public string Artist { get => artist; set => artist = value; }
+        public static List<string> Ignore => ignore;
+
+        public string Header { get => header; set => header = value; }
+
+        public override string ToString()
+        {
+            return Name + " - " + song + " (" + artist + ")";
+        }
 
         public Anime Clone()
         {
-            Anime anime = new Anime() { Name = this.name, URL = this.url, Type = this.type, Song = this.song, Artist = this.artist };
+            Anime anime = new Anime() { Name = this.name, URL = this.url, Type = this.type, Song = this.song, Artist = this.artist, Header = this.header };
             if (!string.IsNullOrEmpty(anime.Artist))
             {
                 anime.Artist = System.Web.HttpUtility.HtmlDecode(anime.Artist).Replace("\n", string.Empty).Replace("\"", string.Empty);
@@ -498,6 +522,7 @@ namespace WindowsFormsApp1
             anime.Artist = anime.Artist.Trim().TrimStart("by").Trim();
             return anime;
         }
+
     }
 }
 

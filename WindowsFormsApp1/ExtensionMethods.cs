@@ -262,7 +262,7 @@ namespace WindowsFormsApp1
                 ComboBox cb = c as ComboBox;
                 Graphics g = cb.CreateGraphics();
                 int max = cb.Width;
-                foreach (object o in cb.Items)
+                foreach (object o in (List<string>)cb.DataSource)
                 {
                     float width = g.MeasureString(cb.GetItemText(o), cb.Font).Width;
                     if (width > max)
