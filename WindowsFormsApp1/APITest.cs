@@ -13,6 +13,8 @@ using System.Net.Http.Headers;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using Newtonsoft.Json;
+using System.Net.Http.Formatting;
 
 namespace WindowsFormsApp1
 {
@@ -27,17 +29,13 @@ namespace WindowsFormsApp1
         public APITest()
         {
             InitializeComponent();
-            client.BaseAddress = new Uri("http://localhost:8888/");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
-            client.Timeout = TimeSpan.FromMilliseconds(10000);
             CheckForIllegalCrossThreadCalls = false;
             ResponseScaleWS res = Newtonsoft.Json.JsonConvert.DeserializeObject<ResponseScaleWS>("{ \"Result\":\"OK\",\"Description\":\"Connected\"}");
-            StreamReader sr = new StreamReader(@"C:\Users\dzhang\Desktop\json.json");
-            string texto = sr.ReadToEnd();
+            //StreamReader sr = new StreamReader(@"C:\Users\dzhang\Desktop\json.json");
+            //string texto = sr.ReadToEnd();
             //string respues = PostMethod("http://localhost:8888/tickets/insert", texto, 5000);
             string respues = GetMethod("http://10.2.11.103:8888/infos/status", 2500);
+            textBox1.Text = "http://nortmaticcloudlab.nortconsulting.com/nortmaticapi/api/";
         }
 
         public static string PostMethod(string url, string data, int timeout = 1500)
@@ -478,6 +476,134 @@ namespace WindowsFormsApp1
             Thread.Sleep(1000);
             Application.DoEvents();
         }
+
+        private async void button9_Click(object sender, EventArgs e)
+        {
+            string result = SendPeticionGet(textBox1.Text + "check/ping");
+            HttpResponseMessage response = await client.GetAsync("check/ping");
+            if (response.IsSuccessStatusCode)
+            {
+                button9.ForeColor = await response.Content.ReadAsAsync<bool>() ? Color.Green : Color.Red;
+            }
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch ((sender as TabControl).SelectedIndex)
+            {
+                case 0:
+                    client.BaseAddress = new Uri("http://localhost:8888/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.Timeout = TimeSpan.FromMilliseconds(10000);
+                    break;
+                case 1:
+                    client.BaseAddress = new Uri(textBox1.Text);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(
+                        new MediaTypeWithQualityHeaderValue("*/*"));
+                    client.Timeout = TimeSpan.FromMilliseconds(10000);
+                    break;
+            }
+        }
+
+        private async void button10_Click(object sender, EventArgs e)
+        {
+            textBox2.Text = JsonConvert.SerializeObject(JsonConvert.DeserializeObject< NormaticResponse>(SendPeticion(textBox1.Text + "counter/getvalue", JsonConvert.SerializeObject(new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 }))), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            HttpResponseMessage response = await client.PostAsJsonAsync("counter/getvalue", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
+            response.EnsureSuccessStatusCode();
+            //textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() {NullValueHandling = NullValueHandling.Ignore });
+        }
+
+        private async void button11_Click(object sender, EventArgs e)
+        {
+            HttpResponseMessage response = await client.PostAsJsonAsync("counter/next", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
+            response.EnsureSuccessStatusCode();
+            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+        }
+
+        private async void button12_Click(object sender, EventArgs e)
+        {
+            HttpResponseMessage response = await client.PostAsJsonAsync("counter/recall", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 1 });
+            response.EnsureSuccessStatusCode();
+            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+
+        }
+
+        private async void button13_Click(object sender, EventArgs e)
+        {
+            HttpResponseMessage response = await client.PostAsJsonAsync("counter/previous", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
+            response.EnsureSuccessStatusCode();
+            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+
+        }
+
+        private async void button14_Click(object sender, EventArgs e)
+        {
+            HttpResponseMessage response = await client.PostAsJsonAsync("counter/reset", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
+            response.EnsureSuccessStatusCode();
+            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+
+        }
+
+        private static string SendPeticionGet(string peticion)
+        {
+            string responseFromServer = string.Empty;
+            try
+            {
+                WebRequest request = WebRequest.Create(peticion);
+                request.Credentials = CredentialCache.DefaultCredentials;
+                request.Timeout = 5000;
+                request.Headers = new WebHeaderCollection();
+
+                WebResponse response = request.GetResponse();
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                responseFromServer = reader.ReadToEnd();
+                reader.Close();
+                response.Close();
+                reader.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Log.EscribirError(ex.StackTrace, ex.Message);
+            }
+            return responseFromServer;
+        }
+
+        private static string SendPeticion(string peticion, string data)
+        {
+            string responseFromServer = string.Empty;
+            try
+            {
+                WebRequest request = WebRequest.Create(peticion);
+                request.Credentials = CredentialCache.DefaultCredentials;
+                request.Timeout = 3000;
+                request.Headers = new WebHeaderCollection();
+                request.Method = "POST";
+                request.ContentType = "application/json";
+                request.ContentLength = data.Length;
+                var bytes = Encoding.ASCII.GetBytes(data);
+
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(bytes, 0, data.Length);
+                }
+                WebResponse response = request.GetResponse();
+                Stream dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+                responseFromServer = reader.ReadToEnd();
+                reader.Close();
+                response.Close();
+                reader.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Log.EscribirError(ex.StackTrace, ex.Message);
+            }
+            return responseFromServer;
+        }
     }
 
     class ResponseScaleWS
@@ -496,5 +622,54 @@ namespace WindowsFormsApp1
             Result = resultado.ToString();
             Description = descripcion;
         }
+    }
+
+    public class NortMaticRequest
+    {
+        private string secretKey;
+        private string authSecret;
+        private string userCode;
+        private string userName;
+        private int? responseType;
+
+        [JsonRequired]
+        [JsonProperty("secretKey")]
+        public string SecretKey { get => secretKey; set => secretKey = value; }
+        [JsonProperty("responseType", NullValueHandling = NullValueHandling.Ignore)]
+        public int? ResponseType { get => responseType; set => responseType = value; }
+        [JsonProperty("authSecret", NullValueHandling = NullValueHandling.Ignore)]
+        public string AuthSecret { get => authSecret; set => authSecret = value; }
+        [JsonProperty("userCode", NullValueHandling = NullValueHandling.Ignore)]
+        public string UserCode { get => userCode; set => userCode = value; }
+        [JsonProperty("userName", NullValueHandling = NullValueHandling.Ignore)]
+        public string UserName { get => userName; set => userName = value; }
+    }
+
+    public class NormaticResponse
+    {
+        private NormaticCounterResponse responseSuccess;
+        private NormaticCounterResponse responseError;
+        private bool isError;
+        private string message;
+
+        [JsonProperty("responseSuccess", NullValueHandling = NullValueHandling.Ignore)]
+        public NormaticCounterResponse ResponseSuccess { get => responseSuccess; set => responseSuccess = value; }
+        [JsonProperty("responseError", NullValueHandling = NullValueHandling.Ignore)]
+        public NormaticCounterResponse ResponseError { get => responseError; set => responseError = value; }
+        [JsonProperty("isError")]
+        public bool IsError { get => isError; set => isError = value; }
+        [JsonProperty("message")]
+        public string Message { get => message; set => message = value; }
+    }
+
+    public class NormaticCounterResponse
+    {
+        private int currentcountervalue;
+        private int requestcountervalue;
+
+        [JsonProperty("currentcountervalue")]
+        public int Currentcountervalue { get => currentcountervalue; set => currentcountervalue = value; }
+        [JsonProperty("requestcountervalue")]
+        public int Requestcountervalue { get => requestcountervalue; set => requestcountervalue = value; }
     }
 }
