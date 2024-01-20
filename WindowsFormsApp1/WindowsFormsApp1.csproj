@@ -419,6 +419,7 @@
       <DependentUpon>Password.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance.cs" />
+    <Compile Include="Run.cs" />
     <Compile Include="TwoList.cs">
       <SubType>Form</SubType>
     </Compile>

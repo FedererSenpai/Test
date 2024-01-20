@@ -20,7 +20,8 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Application.Run(new Web());
+                Run.Execute();
+                Application.Run(new APITest());
             }
             else
             {
