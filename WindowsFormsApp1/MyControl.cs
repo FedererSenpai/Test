@@ -22,6 +22,8 @@ namespace WindowsFormsApp1
             Control = c;
             control.AutoResize();
             this.panel4.Controls.Add(Control);
+            if (control.Width > this.Width)
+                this.Width = control.Width + 50;
             control.Center();
         }
 
@@ -29,7 +31,6 @@ namespace WindowsFormsApp1
         {
             button1.Center();
             button2.Center();
-
         }
 
         public object GetComboBox()

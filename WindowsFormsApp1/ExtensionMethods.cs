@@ -215,6 +215,19 @@ namespace WindowsFormsApp1
             return result;
         }
 
+        public static string TrimEnd(this string target, string trimString)
+        {
+            if (string.IsNullOrEmpty(trimString)) return target;
+
+            string result = target;
+            while (result.EndsWith(trimString))
+            {
+                result = result.Substring(0, target.Length - trimString.Length);
+            }
+
+            return result;
+        }
+
         public static List<List<T>> Split<T>(this List<T> list, int size)
         {
             List<List<T>> bigList = new List<List<T>>();

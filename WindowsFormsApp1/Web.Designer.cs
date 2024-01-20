@@ -32,6 +32,7 @@
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewButtonColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.myProgressBar1 = new WindowsFormsApp1.MyProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -49,7 +50,7 @@
             this.Column2});
             this.dataGridView1.Location = new System.Drawing.Point(24, 13);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(745, 470);
+            this.dataGridView1.Size = new System.Drawing.Size(745, 690);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormating);
@@ -65,14 +66,32 @@
             // 
             this.Column2.HeaderText = "Preview";
             this.Column2.Name = "Column2";
-            this.Column2.Width = 51;
             this.Column2.Text = "Play";
+            this.Column2.Width = 51;
+            // 
+            // myProgressBar1
+            // 
+            this.myProgressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.myProgressBar1.BorderColor = System.Drawing.Color.Black;
+            this.myProgressBar1.BorderWidth = 1F;
+            this.myProgressBar1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.myProgressBar1.Location = new System.Drawing.Point(24, 720);
+            this.myProgressBar1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.myProgressBar1.Maximum = 100D;
+            this.myProgressBar1.Minimum = 0D;
+            this.myProgressBar1.Name = "myProgressBar1";
+            this.myProgressBar1.ProgressColor = System.Drawing.Color.Green;
+            this.myProgressBar1.ShowValue = true;
+            this.myProgressBar1.Size = new System.Drawing.Size(745, 23);
+            this.myProgressBar1.TabIndex = 1;
+            this.myProgressBar1.Value = 0D;
             // 
             // Web
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 550);
+            this.ClientSize = new System.Drawing.Size(800, 770);
+            this.Controls.Add(this.myProgressBar1);
             this.Controls.Add(this.dataGridView1);
             this.Name = "Web";
             this.Text = "Web";
@@ -87,5 +106,6 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewButtonColumn Column1;
         private System.Windows.Forms.DataGridViewButtonColumn Column2;
+        private MyProgressBar myProgressBar1;
     }
 }

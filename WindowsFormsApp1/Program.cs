@@ -45,6 +45,7 @@ namespace WindowsFormsApp1
                         Application.Run(new Insert());
                         break;
                     default:
+                        Zip.ZipFiles(args);
                         Application.Exit();
                         break;
                 }

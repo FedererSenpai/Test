@@ -111,7 +111,7 @@ namespace WindowsFormsApp1
                 }
                 UpdateProgress(progressBar1);
             }*/
-            ExtensionMethods.WriteToFile(Path.Combine(ResultPath,"MAL", $"{season}.json"), animes.ToJson());
+             ExtensionMethods.WriteToFile(Path.Combine(ResultPath,"MAL", $"{season}.json"), animes.ToJson());
             string asuidfha = animes.ToJson();
             button1.Enabled = true;
         }

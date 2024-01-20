@@ -194,6 +194,9 @@
     <Reference Include="RiotSharp, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RiotSharp.4.0.0\lib\netstandard1.3\RiotSharp.dll</HintPath>
     </Reference>
+    <Reference Include="SevenZipSharp, Version=0.64.3890.29348, Culture=neutral, PublicKeyToken=20de82c62b055c88, processorArchitecture=MSIL">
+      <HintPath>..\packages\SevenZipSharp.0.64\lib\SevenZipSharp.dll</HintPath>
+    </Reference>
     <Reference Include="SpotifyAPI.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SpotifyAPI.Web.7.0.2\lib\netstandard2.0\SpotifyAPI.Web.dll</HintPath>
     </Reference>
@@ -389,6 +392,7 @@
     <Compile Include="BBDD.Designer.cs">
       <DependentUpon>BBDD.cs</DependentUpon>
     </Compile>
+    <Compile Include="DefaultSize.cs" />
     <Compile Include="LoL.cs" />
     <Compile Include="MAL.cs">
       <SubType>Form</SubType>
@@ -401,6 +405,18 @@
     </Compile>
     <Compile Include="MyControl.Designer.cs">
       <DependentUpon>MyControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyProgressBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyProgressBar.Designer.cs">
+      <DependentUpon>MyProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Password.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Password.Designer.cs">
+      <DependentUpon>Password.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance.cs" />
     <Compile Include="TwoList.cs">
@@ -531,6 +547,7 @@
       <DependentUpon>Web.cs</DependentUpon>
     </Compile>
     <Compile Include="WinUtil.cs" />
+    <Compile Include="Zip.cs" />
     <EmbeddedResource Include="APITest.resx">
       <DependentUpon>APITest.cs</DependentUpon>
     </EmbeddedResource>
@@ -545,6 +562,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MyControl.resx">
       <DependentUpon>MyControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyProgressBar.resx">
+      <DependentUpon>MyProgressBar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Password.resx">
+      <DependentUpon>Password.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TwoList.resx">
       <DependentUpon>TwoList.cs</DependentUpon>
@@ -645,6 +668,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Librerias\7z.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Librerias\Microsoft.Office.Interop.Excel.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -680,6 +706,8 @@
     <Error Condition="!Exists('..\packages\cef.redist.x86.120.1.10\build\cef.redist.x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\cef.redist.x86.120.1.10\build\cef.redist.x86.props'))" />
     <Error Condition="!Exists('..\packages\CefSharp.Common.120.1.110\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.120.1.110\build\CefSharp.Common.props'))" />
     <Error Condition="!Exists('..\packages\CefSharp.Common.120.1.110\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.120.1.110\build\CefSharp.Common.targets'))" />
+    <Error Condition="!Exists('..\packages\SevenZipSharp.Interop.19.1.0\build\SevenZipSharp.Interop.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SevenZipSharp.Interop.19.1.0\build\SevenZipSharp.Interop.targets'))" />
   </Target>
   <Import Project="..\packages\CefSharp.Common.120.1.110\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.120.1.110\build\CefSharp.Common.targets')" />
+  <Import Project="..\packages\SevenZipSharp.Interop.19.1.0\build\SevenZipSharp.Interop.targets" Condition="Exists('..\packages\SevenZipSharp.Interop.19.1.0\build\SevenZipSharp.Interop.targets')" />
 </Project>

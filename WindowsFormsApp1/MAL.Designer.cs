@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -114,14 +115,14 @@
             this.progressBar1.ForeColor = System.Drawing.Color.DarkRed;
             this.progressBar1.Location = new System.Drawing.Point(106, 166);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(109, 13);
+            this.progressBar1.Size = new System.Drawing.Size(109, 40);
             this.progressBar1.TabIndex = 7;
             // 
             // MAL
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(215, 179);
+            this.ClientSize = new System.Drawing.Size(215, 206);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.panel2);
