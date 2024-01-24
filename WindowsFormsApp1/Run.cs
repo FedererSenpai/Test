@@ -24,12 +24,20 @@ namespace WindowsFormsApp1
                 case "Activity.exe":
                     RunActivity();
                     break;
+                case "MigracionDatos.exe":
+                    RunMigracionDatos();
+                    break;
                 default:
                     exit = false;
                     break;
             }
             if (exit)
                 Environment.Exit(0);
+        }
+
+        private static void RunMigracionDatos()
+        {
+            RunProgram(@"C:\MigraciónDatos\MigracionDatos.exe");
         }
 
         private static void RunTest()

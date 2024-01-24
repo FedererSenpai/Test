@@ -81,52 +81,88 @@ namespace WindowsFormsApp1
                 solutionPath = Path.Combine(repos, Convert.ToString(solutionRow.Path));
             }
 
+            checkBox1.Checked = Convert.ToBoolean(solutionRow.Reset);
             lista.Clear();
             foreach (Project p in datosExcel.Tables[projects].Select("Id = " + solutionRow.Id).ToList<Project>())
             {
+                Proyecto proyecto = new Proyecto();
+                proyecto.Encontrado = no;
                 string projectPath = Path.Combine(solutionPath, p.Path);
-                if(Directory.Exists(projectPath))
+                if (Directory.Exists(projectPath))
                 {
                     string carpeta = projectPath;
-                        foreach (string subdir in Directory.GetDirectories(carpeta))
+                    foreach (string subdir in Directory.GetDirectories(carpeta))
+                    {
+                        if (new FileInfo(subdir).Name.Equals("Properties"))
                         {
-                            if (new FileInfo(subdir).Name.Equals("Properties"))
+                            proyecto.Carpeta = new FileInfo(carpeta).Name;
+                            proyecto.Encontrado = si;
+                            foreach (string file in Directory.GetFiles(subdir))
                             {
-                                Proyecto proyecto = new Proyecto();
-                                proyecto.Carpeta = new FileInfo(carpeta).Name;
-                                lista.Add(proyecto);
-                                proyecto.Encontrado = si;
-                                foreach (string file in Directory.GetFiles(subdir))
+                                if (new FileInfo(file).Name.Equals("AssemblyInfo.cs"))
                                 {
-                                    if (new FileInfo(file).Name.Equals("AssemblyInfo.cs"))
+                                    proyecto.Fichero = file;
+                                    //string tmp = file + ".tmp";
+                                    //if (File.Exists(tmp))
+                                    //File.Delete(tmp);
+                                    //File.Move(file, tmp);
+                                    string[] lines = File.ReadAllLines(file);
+                                    //string[] newlines = new string[lines.Length];
+                                    int i = 0;
+                                    foreach (string line in lines)
                                     {
-                                        proyecto.Fichero = file;
-                                        //string tmp = file + ".tmp";
-                                        //if (File.Exists(tmp))
-                                            //File.Delete(tmp);
-                                        //File.Move(file, tmp);
-                                        string[] lines = File.ReadAllLines(file);
-                                        //string[] newlines = new string[lines.Length];
-                                        int i = 0;
-                                        foreach (string line in lines)
+                                        if (line.Contains("assembly: AssemblyVersion") || line.Contains("assembly: AssemblyFileVersion"))
                                         {
-                                            if (line.Contains("assembly: AssemblyVersion") || line.Contains("assembly: AssemblyFileVersion"))
-                                            {
-                                                proyecto.Version = line.Split('"')[1];
-                                                proyecto.Nuevaversion = SubirVersion(proyecto.Version);
-                                                //newlines[i] = line.Replace(proyecto.Version, proyecto.Nuevaversion);
-                                            }
-                                            //else
-                                                //newlines[i] = line;
-                                            i++;
+                                            proyecto.Version = line.Split('"')[1];
+                                            proyecto.Nuevaversion = SubirVersion(proyecto.Version);
+                                            //newlines[i] = line.Replace(proyecto.Version, proyecto.Nuevaversion);
                                         }
-                                        //File.WriteAllLines(file, newlines);
+                                        //else
+                                        //newlines[i] = line;
+                                        i++;
                                     }
+                                    //File.WriteAllLines(file, newlines);
+                                    break;
                                 }
-                                break;
+                            }
+                            break;
+                        }
+                    }
+                    if (proyecto.Encontrado == no)
+                    {
+                        foreach (string file in Directory.GetFiles(carpeta))
+                        {
+                            if (new FileInfo(file).Name.Equals("AssemblyInfo.cs"))
+                            {
+                                proyecto.Carpeta = new FileInfo(carpeta).Name;
+                                proyecto.Encontrado = si;
+                                proyecto.Fichero = file;
+                                //string tmp = file + ".tmp";
+                                //if (File.Exists(tmp))
+                                //File.Delete(tmp);
+                                //File.Move(file, tmp);
+                                string[] lines = File.ReadAllLines(file);
+                                //string[] newlines = new string[lines.Length];
+                                int i = 0;
+                                foreach (string line in lines)
+                                {
+                                    if (line.Contains("assembly: AssemblyVersion") || line.Contains("assembly: AssemblyFileVersion"))
+                                    {
+                                        proyecto.Version = line.Split('"')[1];
+                                        proyecto.Nuevaversion = SubirVersion(proyecto.Version);
+                                        //newlines[i] = line.Replace(proyecto.Version, proyecto.Nuevaversion);
+                                    }
+                                    //else
+                                    //newlines[i] = line;
+                                    i++;
+                                }
+                                //File.WriteAllLines(file, newlines);
                             }
                         }
+                        break;
+                    }
                 }
+                lista.Add(proyecto);
             }
             dataGridView1.AutoGenerateColumns = false;
             dataGridView1.DataSource = null;
@@ -150,7 +186,7 @@ namespace WindowsFormsApp1
                 if (radioButton2.Checked)
                 {
                     int revision = Convert.ToInt16(versiones.Last().Trim());
-                    if (revision >= 26)
+                    if (checkBox1.Checked && revision >= 26)
                     {
                         revision = 1;
                         int build = Convert.ToInt16(versiones[i - 2].Trim());
@@ -163,7 +199,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    int build = Convert.ToInt16(versiones[i - 1].Trim());
+                    int build = Convert.ToInt16(versiones[i - 2].Trim());
                     build++;
                     versiones[i - 2] = build.ToString();
                     versiones[i - 1] = 1.ToString();
@@ -206,7 +242,7 @@ namespace WindowsFormsApp1
                     newlines[i] = line;
                     i++;
                 }
-                File.WriteAllLines(p.Fichero, newlines);
+                File.WriteAllLines(p.Fichero, newlines, Encoding.UTF8);
                 c++;
                 progressBar1.Value = c;
                 progressBar1.Update();
@@ -262,10 +298,12 @@ namespace WindowsFormsApp1
         private int id;
         private string name;
         private string path;
+        private int reset;
 
         public int Id { get => id; set => id = value; }
         public string Name { get => name; set => name = value; }
         public string Path { get => path; set => path = value; }
+        public int Reset { get => reset; set => reset = value; }
     }
 
     public class Project
