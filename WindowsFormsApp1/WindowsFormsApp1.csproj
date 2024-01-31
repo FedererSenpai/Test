@@ -393,6 +393,12 @@
       <DependentUpon>BBDD.cs</DependentUpon>
     </Compile>
     <Compile Include="DefaultSize.cs" />
+    <Compile Include="DibalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DibalForm.Designer.cs">
+      <DependentUpon>DibalForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="LoL.cs" />
     <Compile Include="MAL.cs">
       <SubType>Form</SubType>
@@ -557,6 +563,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="BBDD.resx">
       <DependentUpon>BBDD.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DibalForm.resx">
+      <DependentUpon>DibalForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MAL.resx">
       <DependentUpon>MAL.cs</DependentUpon>

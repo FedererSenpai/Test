@@ -35,7 +35,7 @@ namespace WindowsFormsApp1
             //string texto = sr.ReadToEnd();
             //string respues = PostMethod("http://localhost:8888/tickets/insert", texto, 5000);
             string respues = GetMethod("http://10.2.11.103:8888/infos/status", 2500);
-            textBox1.Text = "http://nortmaticcloudlab.nortconsulting.com/nortmaticapi/api/";
+            textBox1.Text = "http://nortmaticcloudlab2.nortconsulting.com/nortmaticapi/api/";
         }
 
         public static string PostMethod(string url, string data, int timeout = 1500)
@@ -511,39 +511,28 @@ namespace WindowsFormsApp1
         private async void button10_Click(object sender, EventArgs e)
         {
             textBox2.Text = JsonConvert.SerializeObject(JsonConvert.DeserializeObject< NormaticResponse>(SendPeticion(textBox1.Text + "counter/getvalue", JsonConvert.SerializeObject(new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 }))), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-            HttpResponseMessage response = await client.PostAsJsonAsync("counter/getvalue", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
-            response.EnsureSuccessStatusCode();
-            //textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() {NullValueHandling = NullValueHandling.Ignore });
         }
 
         private async void button11_Click(object sender, EventArgs e)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("counter/next", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
-            response.EnsureSuccessStatusCode();
-            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            textBox2.Text = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<NormaticResponse>(SendPeticion(textBox1.Text + "counter/next", JsonConvert.SerializeObject(new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 }))), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
         }
 
         private async void button12_Click(object sender, EventArgs e)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("counter/recall", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 1 });
-            response.EnsureSuccessStatusCode();
-            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            textBox2.Text = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<NormaticResponse>(SendPeticion(textBox1.Text + "counter/recall", JsonConvert.SerializeObject(new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 }))), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 
         }
 
         private async void button13_Click(object sender, EventArgs e)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("counter/previous", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
-            response.EnsureSuccessStatusCode();
-            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            textBox2.Text = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<NormaticResponse>(SendPeticion(textBox1.Text + "counter/previous", JsonConvert.SerializeObject(new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 }))), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 
         }
 
         private async void button14_Click(object sender, EventArgs e)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("counter/reset", new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 });
-            response.EnsureSuccessStatusCode();
-            textBox2.Text = JsonConvert.SerializeObject(await response.Content.ReadAsAsync<NormaticResponse>(), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            textBox2.Text = JsonConvert.SerializeObject(JsonConvert.DeserializeObject<NormaticResponse>(SendPeticion(textBox1.Text + "counter/reset", JsonConvert.SerializeObject(new NortMaticRequest() { SecretKey = "c78ece5b-313d-4a14-94ca-386adcb243d2", ResponseType = 0 }))), Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 
         }
 
@@ -665,11 +654,11 @@ namespace WindowsFormsApp1
     public class NormaticCounterResponse
     {
         private int currentcountervalue;
-        private int requestcountervalue;
+        private int requestedcountervalue;
 
         [JsonProperty("currentcountervalue")]
         public int Currentcountervalue { get => currentcountervalue; set => currentcountervalue = value; }
-        [JsonProperty("requestcountervalue")]
-        public int Requestcountervalue { get => requestcountervalue; set => requestcountervalue = value; }
+        [JsonProperty("requestedcountervalue")]
+        public int Requestedcountervalue { get => requestedcountervalue; set => requestedcountervalue = value; }
     }
 }

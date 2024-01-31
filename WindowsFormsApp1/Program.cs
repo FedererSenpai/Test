@@ -20,7 +20,6 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Run.Execute();
                 Application.Run(new APITest());
             }
             else
@@ -38,6 +37,8 @@ namespace WindowsFormsApp1
                             Activity.WriteStart();
                         else if (args[1].Equals("/z"))
                             Activity.WriteShutDown();
+                        else
+                            new DibalForm(0).ShowDialog();
                         break;
                     case "MAL":
                         Application.Run(new MAL());
