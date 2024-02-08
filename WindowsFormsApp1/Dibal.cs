@@ -19,6 +19,8 @@ using System.Xml.Serialization;
 using System.Xml;
 using ExcelDataReader;
 using System.Data;
+using System.Security.Cryptography;
+using System.Threading;
 
 namespace WindowsFormsApp1
 {
@@ -289,13 +291,103 @@ namespace WindowsFormsApp1
             }
         }
 
-        public static void XML()       {
+        public static void XML()
+        {
+            string ruta = "C:\\SW1100\\BalanzaPC\\Config\\scale_config.xml";
+            if (File.Exists(ruta))
+            {
+                System.Xml.XmlNode n;
+                System.Xml.XmlDocument config = new System.Xml.XmlDocument();
+                config.Load(ruta);
+                n = config.SelectSingleNode("descendant::modoTrabajo");
+                string modoTrabajo = n.InnerText;
+            }
+
             XmlDocument writer = new XmlDocument();
             XmlDeclaration documentType = writer.CreateXmlDeclaration("1.0", "utf-8", null);
             writer.AppendChild(documentType);
 
             XmlElement root = writer.CreateElement("PatientFile");
             writer.AppendChild(root);
+        }
+
+        public static string Password(string contraseña)
+        {
+            MD5CryptoServiceProvider md5;
+            Byte[] TextoEnBytes;
+            Byte[] HashEnBytes;
+
+            // Create New Crypto Service Provider Object
+            md5 = new MD5CryptoServiceProvider();
+
+            //Convert the original string to array of Bytes
+            TextoEnBytes = System.Text.Encoding.UTF8.GetBytes(contraseña);
+
+            //Compute the Hash, returns an array of Bytes
+            HashEnBytes = md5.ComputeHash(TextoEnBytes);
+
+            md5.Clear();
+
+            // Return a base 64 encoded string of the Hash value
+            string passwordEncripatada = (Convert.ToBase64String(HashEnBytes));
+
+            return passwordEncripatada;
+        }
+
+        static void printAllKLength(char[] set, int k)
+        {
+            int n = set.Length;
+            printAllKLengthRec(set, "", n, k);
+        }
+
+        // The main recursive method
+        // to print all possible 
+        // strings of length k
+        static void printAllKLengthRec(char[] set,
+                                       String prefix,
+                                       int n, int k)
+        {
+
+            // Base case: k is 0,
+            // print prefix
+            if (k == 0)
+            {
+                Console.WriteLine(prefix);
+                if (Password(prefix) == "U+Nt5NAz6aPz/SD5ntgCXg==")
+                    MessageBox.Show(prefix + "=>" + Password(prefix));
+                return;
+            }
+
+            // One by one add all characters 
+            // from set and recursively 
+            // call for k equals to k-1
+            for (int i = 0; i < n; ++i)
+            {
+                // Next character of input added
+                String newPrefix = prefix + set[i];
+                if (string.IsNullOrEmpty(prefix))
+                {
+                    Thread t = new Thread(() => printAllKLengthRec(set, newPrefix,
+                                        n, k - 1));
+                    t.Start();
+                }
+                else
+                {
+                    // k is decreased, because 
+                    // we have added a new character
+                    printAllKLengthRec(set, newPrefix,
+                                            n, k - 1);
+                }
+            }
+        }
+
+        public static void CracK()
+        {
+            char[] set2 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToArray();
+            for (int i = 11; i>0; i--)
+            {
+                printAllKLength(set2, i);
+            }
         }
 
         public static void Codepages()
@@ -410,5 +502,17 @@ namespace WindowsFormsApp1
             }
         }
 
+        public static void DateTimeMySQL()
+        {
+            DataSet dsTarifa = MySQL.EjecutaQuery(MySQL.Connection,"Select * from dat_tarifa");
+            object o = dsTarifa.Tables[0].Rows[100]["FechaInicio"];
+            string s = dsTarifa.Tables[0].Rows[100]["FechaInicio"].ToString();
+            string sql = "Update dat_tarifa set FechaInicio = ?FechaInicio;";
+            IDbCommand cmd = MySQL.CreateCommand(MySQL.Connection, sql);
+            cmd.CommandText = sql;
+            DateTime.TryParse(dsTarifa.Tables[0].Rows[0]["FechaInicio"].ToString(), out DateTime dFechaInicio);
+            MySQL.AddParametro(cmd, "FechaInicio", dsTarifa.Tables[0].Rows[0]["FechaInicio"].ToString());
+            cmd.ExecuteNonQuery();
+        }
     }
 }

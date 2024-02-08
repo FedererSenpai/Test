@@ -568,7 +568,7 @@ namespace WindowsFormsApp1
             {
                 WebRequest request = WebRequest.Create(peticion);
                 request.Credentials = CredentialCache.DefaultCredentials;
-                request.Timeout = 3000;
+                request.Timeout = 10000;
                 request.Headers = new WebHeaderCollection();
                 request.Method = "POST";
                 request.ContentType = "application/json";
@@ -592,6 +592,11 @@ namespace WindowsFormsApp1
                 Log.EscribirError(ex.StackTrace, ex.Message);
             }
             return responseFromServer;
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            textBox3.Text = SendPeticion("http://192.168.150.100:3000/turnomatic/getData.php?ASJSON&id=127.0.0.1_1", string.Empty);
         }
     }
 

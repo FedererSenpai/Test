@@ -153,6 +153,16 @@ namespace WindowsFormsApp1
             return (objectCmd);
         }
 
+        public static IDbCommand CreateCommand(IDbConnection con, string sql)
+        {
+            // Creamos un comando
+            IDbCommand objectCmd = CreateCommand();
+            objectCmd.Connection = con;
+            objectCmd.CommandType = CommandType.Text;
+            objectCmd.CommandText = sql;
+            return (objectCmd);
+        }
+
         public static IDbConnection CreateConnection(IDbConnection con)
     {
         try
@@ -210,6 +220,15 @@ namespace WindowsFormsApp1
                 {
                 }
             }
+        }
+
+        public static void AddParametro(IDbCommand objectCmd, string nombre, object valor)
+        {
+                MySqlParameter parametro;
+                //Los DbType.Double son distintos a los MySqlDbType.Double y no funciona bien!!
+                parametro = new MySqlParameter(nombre, valor);
+                parametro.Value = valor;
+                objectCmd.Parameters.Add(parametro);
         }
 
         public static DataTable GetColumns(string database, string datatable)
