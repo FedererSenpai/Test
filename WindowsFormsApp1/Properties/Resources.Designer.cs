@@ -101,6 +101,16 @@ namespace WindowsFormsApp1.Properties {
         }
         
         /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap leftarrow {
+            get {
+                object obj = ResourceManager.GetObject("leftarrow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a &lt;Logos&gt;
         ///&lt;Logo&gt;
         ///&lt;name&gt;LogoSisp&lt;/name&gt;
@@ -119,6 +129,16 @@ namespace WindowsFormsApp1.Properties {
             get {
                 object obj = ResourceManager.GetObject("MAL", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap rightarrow {
+            get {
+                object obj = ResourceManager.GetObject("rightarrow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
