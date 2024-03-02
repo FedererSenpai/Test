@@ -16,14 +16,19 @@ namespace WindowsFormsApp1
     {
         private string folderPath = Application.StartupPath;
         private string resultPath = Path.Combine(Application.StartupPath, "Result");
+        private string filePath = string.Empty;
+
         public Base()
         {
             InitializeComponent();
+            FilePath = GetType().Name + ".txt";
         }
 
         public string FolderPath { get => folderPath; set => folderPath = value; }
         public string ResultPath { get => resultPath; set => resultPath = value; }
+        public string FilePath { get => filePath; set => filePath = value; }
 
+        public string FullPath => Path.Combine(resultPath, FilePath);
         private void Base_Load(object sender, EventArgs e)
         {
             this.Menu = new MainMenu();

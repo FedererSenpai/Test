@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             if (args.Length == 0)
             {
-                Application.Run(new Binnacle());
+                Application.Run(new AutoWeb());
             }
             else
             {
