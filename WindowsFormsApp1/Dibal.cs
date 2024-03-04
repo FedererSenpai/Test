@@ -21,6 +21,7 @@ using ExcelDataReader;
 using System.Data;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Management;
 
 namespace WindowsFormsApp1
 {
@@ -513,6 +514,119 @@ namespace WindowsFormsApp1
             DateTime.TryParse(dsTarifa.Tables[0].Rows[0]["FechaInicio"].ToString(), out DateTime dFechaInicio);
             MySQL.AddParametro(cmd, "FechaInicio", dsTarifa.Tables[0].Rows[0]["FechaInicio"].ToString());
             cmd.ExecuteNonQuery();
+        }
+
+        public static void Reorder()
+        {
+            DataSet ds = MySQL.EjecutaQuery(MySQL.Connection ,"SELECT idarticulo, logopantalla FROM dat_articulo d where idseccion = 1 order by idseccion, idarticulo");
+            foreach (DataRow dr in ds.Tables[0].Rows)
+            {
+                string logopantalla = NuevoLogoPantalla(dr["logopantalla"].ToString());
+                string sql = "Update dat_articulo set tecladirecta = " + dr["idarticulo"].ToString() + " where idarticulo = " + dr["idarticulo"].ToString();
+                MySQL.EjecutaNonQuery(sql);
+            }
+        }
+
+        private static string NuevoLogoPantalla(string logopantalla)
+        {
+            string logo = logopantalla;
+            logo = logo.Replace(@"\", @"\\");
+            /*logo = logo.Replace("1_Ave", "6_Ave");
+            logo = logo.Replace("2_Bebidas", "15_Bebidas");
+            logo = logo.Replace("3_Cerdo", "7_Cerdo");
+            logo = logo.Replace("4_Charcu", "4_Charcu");
+            logo = logo.Replace("5_Congelados", "14_Congelados");
+            logo = logo.Replace("6_Cordero", "8_Cordero");
+            logo = logo.Replace("7_Dulces", "13_Dulces");
+            logo = logo.Replace("8_Encurtidos", "12_Encurtidos");
+            logo = logo.Replace("9_Frutas", "1_Frutas");
+            logo = logo.Replace("10_Frutos_secos", "11_Frutos_secos");
+            logo = logo.Replace("11_Horno", "10_Horno");
+            logo = logo.Replace("12_Pescado", "15_Pescado");
+            logo = logo.Replace("13_Queso", "9_Queso");
+            logo = logo.Replace("14_Vacuno", "3_Vacuno");
+            logo = logo.Replace("15_Verduras", "2_Verduras");
+            logo = logo.Replace("15_Pescado", "5_Pescado");*/
+            return logo;
+        }
+
+        private static void Fiscal()
+        {
+            Properties.Settings.Default.Fiscal = 1;
+        }
+
+        private static void Encrypt()
+        {
+            Aes aes = System.Security.Cryptography.Aes.Create();
+            aes.CreateEncryptor();
+        }
+
+        public static void Remote()
+        {
+            var processToRun = new[] { "notepad.exe" };
+            var connection = new ConnectionOptions();
+            connection.Username = "CS1200";
+            connection.Password = "CS1200";
+            var wmiScope = new ManagementScope(String.Format("\\\\{0}\\root\\cimv2", "192.168.150.64"), connection);
+            var wmiProcess = new ManagementClass(wmiScope, new ManagementPath("Win32_Process"), new ObjectGetOptions());
+            wmiProcess.InvokeMethod("Create", processToRun);
+        }
+
+        public static void Blob()
+        {
+            byte[] img = (byte[])MySQL.EjecutaScalar(MySQL.NewConnection("localhost", "sys_datos_occ"), "Select Bitmap from dat_operacion_contra_cajon where idoperacion = 5846");
+            using (var ms = new MemoryStream(img))
+            {
+                System.Drawing.Image image = System.Drawing.Image.FromStream(ms);
+                image.Save(Path.Combine(Application.StartupPath, "Result", "image.bmp"));
+            }
+            new Process() { StartInfo = new ProcessStartInfo(Path.Combine(Application.StartupPath, "Result", "image.bmp")) }.Start();
+        }
+
+        public static void Schema()
+        {
+            /*using (WebClient client = new WebClient())
+            {
+                string s = client.DownloadString("https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/SuministroInformacion.xsd");
+                using (StreamWriter writer = new StreamWriter(Path.Combine(Application.StartupPath, "Result", "schema.xsd")))
+                {
+                    writer.Write(s);
+                }
+            }*/
+            DataSet ds = new DataSet();
+            ds.Locale = CultureInfo.InvariantCulture;
+            //ds.ReadXmlSchema(Path.Combine(Application.StartupPath, "Result", "schema.xsd"));
+            ds.ReadXmlSchema(@"C:\Users\dzhang\source\repos\dibalticketbai\DibalTB\DibalTB\TicketBai.xsd");
+        }
+
+        public static void DecryptLicense()
+        {
+            string a = ManagementLicenses.ModuleAccess.LeerRegistroNoEncriptado("CSW_ADV", "keycode");
+            string b = ManagementLicenses.ModuleAccess.LeerRegistroEncriptado("CSW_ADV", "keycode");
+            string valor = "EFC42600EB8E1800BDFF0100C19C3200CD6005001C391300466B2B0090F62100DCD11E00";
+            Int32[] bufferIn = new Int32[valor.Length];
+            byte[] bufferOut = new byte[valor.Length];
+            int longOut = 0;
+
+            string originalHex, alteredHex;
+            int iNumber;
+            int j = 0;
+            for (int i = 0; i < valor.Length; i += 8)
+            {
+                originalHex = valor.Substring(i, 8);
+                alteredHex = "";
+                alteredHex += originalHex.Substring(6, 2);
+                alteredHex += originalHex.Substring(4, 2);
+                alteredHex += originalHex.Substring(2, 2);
+                alteredHex += originalHex.Substring(0, 2);
+                iNumber = Int32.Parse(alteredHex, System.Globalization.NumberStyles.HexNumber);
+                bufferIn[j] = iNumber;
+                j++;
+            }
+
+            WinUtil.Decrypt(bufferIn, bufferIn.GetLength(0), ref bufferOut[0], ref longOut, WinUtil.cryp_E, WinUtil.decryp_D, WinUtil.cryp_N);
+
+            string result = Encoding.ASCII.GetString(bufferOut).Replace("\0", string.Empty);
         }
     }
 }

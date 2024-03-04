@@ -49,8 +49,12 @@
             this.button9 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.button17 = new System.Windows.Forms.Button();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.button16 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.button18 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -272,6 +276,10 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.button18);
+            this.tabPage3.Controls.Add(this.button17);
+            this.tabPage3.Controls.Add(this.textBox4);
+            this.tabPage3.Controls.Add(this.button16);
             this.tabPage3.Controls.Add(this.button15);
             this.tabPage3.Controls.Add(this.textBox3);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
@@ -282,13 +290,32 @@
             this.tabPage3.Text = "Turnomatic";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // textBox3
+            // button17
             // 
-            this.textBox3.Location = new System.Drawing.Point(128, 24);
-            this.textBox3.Multiline = true;
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(637, 390);
-            this.textBox3.TabIndex = 0;
+            this.button17.Location = new System.Drawing.Point(8, 104);
+            this.button17.Name = "button17";
+            this.button17.Size = new System.Drawing.Size(75, 23);
+            this.button17.TabIndex = 4;
+            this.button17.Text = "Open";
+            this.button17.UseVisualStyleBackColor = true;
+            this.button17.Click += new System.EventHandler(this.button17_Click);
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(128, 7);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(173, 20);
+            this.textBox4.TabIndex = 3;
+            // 
+            // button16
+            // 
+            this.button16.Location = new System.Drawing.Point(8, 63);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(75, 23);
+            this.button16.TabIndex = 2;
+            this.button16.Text = "Next";
+            this.button16.UseVisualStyleBackColor = true;
+            this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
             // button15
             // 
@@ -299,6 +326,24 @@
             this.button15.Text = "GetData";
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
+            // 
+            // textBox3
+            // 
+            this.textBox3.Location = new System.Drawing.Point(128, 41);
+            this.textBox3.Multiline = true;
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(637, 373);
+            this.textBox3.TabIndex = 0;
+            // 
+            // button18
+            // 
+            this.button18.Location = new System.Drawing.Point(8, 143);
+            this.button18.Name = "button18";
+            this.button18.Size = new System.Drawing.Size(75, 23);
+            this.button18.TabIndex = 5;
+            this.button18.Text = "Free";
+            this.button18.UseVisualStyleBackColor = true;
+            this.button18.Click += new System.EventHandler(this.button18_Click);
             // 
             // APITest
             // 
@@ -344,5 +389,9 @@
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Button button15;
         private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.Button button16;
+        private System.Windows.Forms.Button button17;
+        private System.Windows.Forms.Button button18;
     }
 }

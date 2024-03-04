@@ -36,7 +36,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -185,6 +185,9 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="RegistryComponent">
+      <HintPath>Librerias\RegistryComponent.dll</HintPath>
+    </Reference>
     <Reference Include="Renci.SshNet, Version=2023.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <HintPath>..\packages\SSH.NET.2023.0.0\lib\netstandard2.0\Renci.SshNet.dll</HintPath>
     </Reference>
@@ -392,6 +395,12 @@
     <Compile Include="BBDD.Designer.cs">
       <DependentUpon>BBDD.cs</DependentUpon>
     </Compile>
+    <Compile Include="Compare.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Compare.Designer.cs">
+      <DependentUpon>Compare.cs</DependentUpon>
+    </Compile>
     <Compile Include="DefaultSize.cs" />
     <Compile Include="DibalForm.cs">
       <SubType>Form</SubType>
@@ -564,6 +573,9 @@
     <EmbeddedResource Include="BBDD.resx">
       <DependentUpon>BBDD.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Compare.resx">
+      <DependentUpon>Compare.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DibalForm.resx">
       <DependentUpon>DibalForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -678,13 +690,22 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="dibalcrypt.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Librerias\7z.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Librerias\dibalcrypt.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Librerias\Microsoft.Office.Interop.Excel.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Librerias\OFFICE.DLL" />
+    <Content Include="Librerias\RegistryComponent.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="resources\Assembly.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

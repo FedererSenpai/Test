@@ -38,6 +38,9 @@ namespace WindowsFormsApp1
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr WindowHandle);
         public const int SW_RESTORE = 9;
+        [DllImport("dibalcrypt.dll")]
+        public static extern int Decrypt(Int32[] sBufferIn, int longInput, ref byte bufferOut, ref int ptrLongOutput, Int32 myE, Int32 myD, Int32 myN);
+
 
         public static void FocusProcess(string procName)
         {
@@ -97,6 +100,8 @@ namespace WindowsFormsApp1
         {
             SendMessage(hwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
         }
-
+        public const int cryp_E = 5969;
+        public const int cryp_N = 3472429;
+        public const int decryp_D = 1050977;
     }
 }
