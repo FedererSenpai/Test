@@ -284,5 +284,10 @@ namespace WindowsFormsApp1
                 cb.Width = max;
             }
         }
+
+        public static int ToInt(this DayOfWeek dow)
+        {
+            return (int)(dow + 6) % 7;
+        }
     }
 }

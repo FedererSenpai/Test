@@ -161,6 +161,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <HintPath>Librerias\Microsoft.Office.Interop.Excel.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic.Compatibility.Data" />
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
@@ -395,6 +396,12 @@
     <Compile Include="BBDD.Designer.cs">
       <DependentUpon>BBDD.cs</DependentUpon>
     </Compile>
+    <Compile Include="Binnacle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Binnacle.Designer.cs">
+      <DependentUpon>Binnacle.cs</DependentUpon>
+    </Compile>
     <Compile Include="Compare.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -415,11 +422,23 @@
     <Compile Include="MAL.Designer.cs">
       <DependentUpon>MAL.cs</DependentUpon>
     </Compile>
+    <Compile Include="MyCalendar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyCalendar.Designer.cs">
+      <DependentUpon>MyCalendar.cs</DependentUpon>
+    </Compile>
     <Compile Include="MyControl.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MyControl.Designer.cs">
       <DependentUpon>MyControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyDay.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyDay.Designer.cs">
+      <DependentUpon>MyDay.cs</DependentUpon>
     </Compile>
     <Compile Include="MyProgressBar.cs">
       <SubType>UserControl</SubType>
@@ -576,14 +595,23 @@
     <EmbeddedResource Include="Compare.resx">
       <DependentUpon>Compare.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Binnacle.resx">
+      <DependentUpon>Binnacle.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DibalForm.resx">
       <DependentUpon>DibalForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MAL.resx">
       <DependentUpon>MAL.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MyCalendar.resx">
+      <DependentUpon>MyCalendar.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MyControl.resx">
       <DependentUpon>MyControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyDay.resx">
+      <DependentUpon>MyDay.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MyProgressBar.resx">
       <DependentUpon>MyProgressBar.cs</DependentUpon>
@@ -709,6 +737,8 @@
     <Content Include="resources\Assembly.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="resources\rightarrow.png" />
+    <None Include="resources\leftarrow.png" />
     <EmbeddedResource Include="resources\Activity.xlsx" />
     <None Include="resources\Logos_183.TXT" />
   </ItemGroup>
