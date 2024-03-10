@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
@@ -16,7 +17,7 @@ namespace WindowsFormsApp1
             switch(System.AppDomain.CurrentDomain.FriendlyName)
             {
                 case "Test.exe":
-                    RunTest();
+                    RunTest();  
                         break;
                 case "Planning.exe":
                     RunPlanning();
@@ -26,6 +27,9 @@ namespace WindowsFormsApp1
                     break;
                 case "MigracionDatos.exe":
                     RunMigracionDatos();
+                    break;
+                case "ClearGit.exe":
+                    RunClearGit();
                     break;
                 default:
                     exit = false;
@@ -66,6 +70,24 @@ namespace WindowsFormsApp1
             ps.FileName = name;
             p.StartInfo = ps;
             p.Start();
+        }
+
+        private static void RunClearGit()
+        {
+            FolderBrowserDialog d = new FolderBrowserDialog();
+            d.ShowNewFolderButton = false;
+            d.SelectedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "source", "repos");
+            if (d.ShowDialog() == DialogResult.OK)
+            {
+                string folder = d.SelectedPath;
+                Process p = new Process();
+                ProcessStartInfo ps = new ProcessStartInfo("cmd.exe", $"/C \"cd {folder}\" & git stash");
+                ps.WorkingDirectory = folder;
+                ps.UseShellExecute = false;
+                p.StartInfo = ps;
+                p.Start();
+                p.WaitForExit(100000);
+            }
         }
     }
 }

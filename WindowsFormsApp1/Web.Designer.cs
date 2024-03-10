@@ -50,7 +50,7 @@
             this.Column2});
             this.dataGridView1.Location = new System.Drawing.Point(24, 13);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(745, 690);
+            this.dataGridView1.Size = new System.Drawing.Size(745, 730);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormating);
@@ -75,7 +75,7 @@
             this.myProgressBar1.BorderColor = System.Drawing.Color.Black;
             this.myProgressBar1.BorderWidth = 1F;
             this.myProgressBar1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.myProgressBar1.Location = new System.Drawing.Point(24, 720);
+            this.myProgressBar1.Location = new System.Drawing.Point(24, 760);
             this.myProgressBar1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.myProgressBar1.Maximum = 100D;
             this.myProgressBar1.Minimum = 0D;
@@ -90,7 +90,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 770);
+            this.ClientSize = new System.Drawing.Size(800, 810);
             this.Controls.Add(this.myProgressBar1);
             this.Controls.Add(this.dataGridView1);
             this.Name = "Web";

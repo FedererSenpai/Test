@@ -15,6 +15,7 @@ using System.Threading;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Net.Http.Formatting;
+using System.Collections;
 
 namespace WindowsFormsApp1
 {
@@ -597,6 +598,66 @@ namespace WindowsFormsApp1
         private void button15_Click(object sender, EventArgs e)
         {
             textBox3.Text = SendPeticion("http://192.168.150.100:3000/turnomatic/getData.php?ASJSON&id=127.0.0.1_1", string.Empty);
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(textBox4.Text))
+            {
+                System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
+                t.Interval = 60000;
+                t.Tick += new EventHandler(Timer_tick);
+                t.Start();
+            }
+            else
+            {
+                string serverViewIP = textBox4.Text.Split(':')[0];
+                string sectionID = textBox4.Text.Split(':')[1];
+                SendPeticion("http://" + serverViewIP + ":3000/turnomatic/turnomatic.php?id=127.0.0.1_" + sectionID + "&action=turnIncrement", string.Empty);
+                textBox3.Text += "http://" + serverViewIP + ":3000/turnomatic/turnomatic.php?id=127.0.0.1_" + sectionID + "&action=turnIncrement" + " =>" + DateTime.Now.ToString() + Environment.NewLine;
+            }
+        }
+
+        private void Timer_tick(object sender, EventArgs e)
+        {
+            Hashtable table = new Hashtable();
+            table.Add("0","192.168.151.69:1");
+            table.Add("1","192.168.151.65:2");
+            table.Add("2","10.2.11.99:3");
+            table.Add("3", "192.168.150.61:1");
+            table.Add("4", "192.168.151.69:2");
+            table.Add("5", "10.2.11.103:3");
+            table.Add("6", "10.2.11.99:1");
+            table.Add("7", "10.2.11.103:2");
+            table.Add("8", "192.168.150.62:3");
+            string randomkey = new Random().Next(table.Count).ToString();
+            string serverViewIP = table[randomkey].ToString().Split(':')[0];
+            string sectionID = table[randomkey].ToString().Split(':')[1];
+            //string serverViewIP = textBox4.Text;
+            //string sectionID = "1"; // new Random().Next(2).ToString();
+            SendPeticion("http://" + serverViewIP + ":3000/turnomatic/turnomatic.php?id=127.0.0.1_" + sectionID + "&action=turnIncrement", string.Empty);
+            textBox3.Text += "http://" + serverViewIP + ":3000/turnomatic/turnomatic.php?id=127.0.0.1_" + sectionID + "&action=turnIncrement" + " =>" + DateTime.Now.ToString() + Environment.NewLine;
+            if(textBox3.Lines.Count() >= 20)
+            textBox3.Lines = textBox3.Lines.Skip(15).ToArray();
+        }
+
+        private void button17_Click(object sender, EventArgs e)
+        {
+            string serverIP = "192.168.150.221";
+            string serverID = "1";
+            string checkout_number = "1";
+            SendPeticion("http://" + serverIP + ":3000/SingleQueue/request.php?action=openCheckout&id=" + serverID + "&checkoutNumber=" + checkout_number + "&value=1", string.Empty);
+            textBox3.Text += "http://" + serverIP + ":3000/SingleQueue/request.php?action=openCheckout&id=" + serverID + "&checkoutNumber=" + checkout_number + "&value=1" + " =>" + DateTime.Now.ToString() + Environment.NewLine;
+        }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            string serverIP = "192.168.150.221";
+            string serverID = "1";
+            string checkout_number = "1";
+            string arrow = "1";
+            SendPeticion("http://" + serverIP + ":3000/SingleQueue/request.php?action=freeCheckout&id=" + serverID + "&checkoutNumber=" + checkout_number + "&arrow=" + arrow + "&value=1", string.Empty);
+            textBox3.Text += "http://" + serverIP + ":3000/SingleQueue/request.php?action=freeCheckout&id=" + serverID + "&checkoutNumber=" + checkout_number + "&arrow=" + arrow + "&value=1" + " =>" + DateTime.Now.ToString() + Environment.NewLine;
         }
     }
 
