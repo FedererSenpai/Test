@@ -31,6 +31,7 @@ namespace WindowsFormsApp1
         public MAL()
         {
             InitializeComponent();
+            this.Load += Start;
         }
 
         static List<string> names = new List<string>();
@@ -39,6 +40,22 @@ namespace WindowsFormsApp1
         static List<string> nodes = new List<string>();
         static string[] header = new string[] { "Name", "URL", "Type", "Song", "Artist" };
         static string season;
+
+        private void Start(object sender, EventArgs e)
+        {
+            AddMenu("Senpai", new EventHandler(Senpai));
+            this.BringToFront();
+
+        }
+
+        private void Senpai(object sender, EventArgs e)
+        {
+            season = "Senpai";
+            string json = File.ReadAllText(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"));
+            foreach (Anime a in json.JsonToList<Anime>())
+                ProcessAnime(a.Clone());
+            ExtensionMethods.WriteToFile(Path.Combine(ResultPath, "MAL", $"FedererSenpaiList.json"), animes.ToJson());
+        }
 
         private void LoadDefault()
         {
@@ -112,7 +129,6 @@ namespace WindowsFormsApp1
                 UpdateProgress(progressBar1);
             }*/
              ExtensionMethods.WriteToFile(Path.Combine(ResultPath,"MAL", $"{season}.json"), animes.ToJson());
-            string asuidfha = animes.ToJson();
             button1.Enabled = true;
         }
          
@@ -138,7 +154,7 @@ namespace WindowsFormsApp1
 
         private void ProcessAnime(Anime animeBase)
         {
-            string path = Path.Combine(Application.StartupPath, season, $"{animeBase.Name}.txt".CheckFileName());
+            string path = Path.Combine(ResultPath, season, $"{animeBase.Name}.txt".CheckFileName());
             HtmlDocument doc = new HtmlDocument();
             using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
             {

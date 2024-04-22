@@ -40,7 +40,6 @@
             this.chromiumWebBrowser1.Name = "chromiumWebBrowser1";
             this.chromiumWebBrowser1.Size = new System.Drawing.Size(800, 490);
             this.chromiumWebBrowser1.TabIndex = 0;
-            this.chromiumWebBrowser1.FrameLoadStart += new System.EventHandler<CefSharp.FrameLoadStartEventArgs>(this.chromiumWebBrowser1_FrameLoadStart);
             this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1_LoadingStateChanged);
             // 
             // AutoWeb
@@ -53,6 +52,7 @@
             this.Text = "AutoWeb";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.ResumeLayout(false);
+            this.Opacity = 0;
 
         }
 

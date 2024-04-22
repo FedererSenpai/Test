@@ -31,6 +31,9 @@ namespace WindowsFormsApp1
                 case "ClearGit.exe":
                     RunClearGit();
                     break;
+                case "Vacaciones.exe":
+                    RunVacaciones();
+                    break;
                 default:
                     exit = false;
                     break;
@@ -89,5 +92,12 @@ namespace WindowsFormsApp1
                 p.WaitForExit(100000);
             }
         }
+
+        private static void RunVacaciones()
+        {
+            File.Copy(@"T:\32.-Planning\0-Vacaciones 2024.xlsx", @"C:\Users\dzhang\Desktop\Vacaciones.xlsx", true);
+            RunProgram(@"C:\Users\dzhang\Desktop\Vacaciones.xlsx");
+        }
+
     }
 }

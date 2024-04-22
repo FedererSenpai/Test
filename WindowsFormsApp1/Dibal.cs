@@ -22,6 +22,7 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Management;
+using System.Xml.Schema;
 
 namespace WindowsFormsApp1
 {
@@ -585,20 +586,32 @@ namespace WindowsFormsApp1
 
         public static void Schema()
         {
-            /*using (WebClient client = new WebClient())
+            using (WebClient client = new WebClient())
             {
                 string s = client.DownloadString("https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/SuministroInformacion.xsd");
+                s = client.DownloadString("https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SuministroInformacion.xsd");
                 using (StreamWriter writer = new StreamWriter(Path.Combine(Application.StartupPath, "Result", "schema.xsd")))
                 {
                     writer.Write(s);
                 }
-            }*/
+            }
+            XmlTextReader reader = new XmlTextReader("https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SuministroInformacion.xsd");
+            XmlSchema schema = XmlSchema.Read(reader, ValidationCallback);
             DataSet ds = new DataSet();
-            ds.Locale = CultureInfo.InvariantCulture;
-            //ds.ReadXmlSchema(Path.Combine(Application.StartupPath, "Result", "schema.xsd"));
+            ds.ReadXml(Path.Combine(Application.StartupPath, "Result", "schema.xsd"), XmlReadMode.ReadSchema);
+            ds.ReadXmlSchema(Path.Combine(Application.StartupPath, "Result", "schema.xsd"));
             ds.ReadXmlSchema(@"C:\Users\dzhang\source\repos\dibalticketbai\DibalTB\DibalTB\TicketBai.xsd");
         }
 
+        static void ValidationCallback(object sender, ValidationEventArgs args)
+        {
+            if (args.Severity == XmlSeverityType.Warning)
+                Console.Write("WARNING: ");
+            else if (args.Severity == XmlSeverityType.Error)
+                Console.Write("ERROR: ");
+
+            Console.WriteLine(args.Message);
+        }
         public static void DecryptLicense()
         {
             string a = ManagementLicenses.ModuleAccess.LeerRegistroNoEncriptado("CSW_ADV", "keycode");
@@ -627,6 +640,41 @@ namespace WindowsFormsApp1
             WinUtil.Decrypt(bufferIn, bufferIn.GetLength(0), ref bufferOut[0], ref longOut, WinUtil.cryp_E, WinUtil.decryp_D, WinUtil.cryp_N);
 
             string result = Encoding.ASCII.GetString(bufferOut).Replace("\0", string.Empty);
+        }
+
+        public static void MyConvert()
+        {
+            object value = null;
+            value = "NULL";
+            int.TryParse(Convert.ToString(value), out int f);
+            value = int.MinValue;
+            int.TryParse(Convert.ToString(value), out int o);
+            if (o == int.MinValue) { }
+            object v = Convert.ToInt32(value);
+        }
+
+        public static void Multisql()
+        {
+            object asdg = MySQL.EjecutaQuery(MySQL.Connection, "Select idarticulo from sys_datos_dfs.dat_articulo union select idarticulo from sys_datos.dat_articulo;");
+        }
+
+        public enum MODELO_FACTURACION
+        {
+            NO_ESTABLECIDO = -1,
+            NO_FISCAL = 0,
+            TBAI = 1,
+            FISCAL = 2,
+            VERIFACTU = 3
+        }
+
+        public static void CheckModelo()
+        {
+            MODELO_FACTURACION modelo = MODELO_FACTURACION.FISCAL;
+            MODELO_FACTURACION modeloaf = MODELO_FACTURACION.FISCAL;
+            if(modelo == modeloaf)
+            {
+
+            }
         }
     }
 }

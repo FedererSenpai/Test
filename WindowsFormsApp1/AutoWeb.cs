@@ -10,7 +10,6 @@ using System.Windows.Forms;
 using HtmlAgilityPack;
 using CefSharp;
 using CefSharp.WinForms;
-using JikanDotNet;
 using System.Net.Http;
 using System.Net;
 using System.IO;
@@ -28,49 +27,13 @@ namespace WindowsFormsApp1
         {
             InitializeComponent();
             chromiumWebBrowser1.LoadUrl("https://myanimelist.net/animelist/FedererMagic?status=2");
-            WebBrowser wb = new WebBrowser();
-            wb.Dock = DockStyle.Fill;
-            this.Controls.Add(wb);
-            wb.Navigate($"https://myanimelist.net/animelist/FedererMagic?status=2");
-            wb.ScriptErrorsSuppressed = true;
-            wb.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(dasgsd);
-            HtmlDocument doc = new HtmlDocument();
-            using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
-            {
-                string downloadString = client.DownloadString($"https://myanimelist.net/animelist/FedererMagic?status=2");
-                doc.LoadHtml(downloadString);
-            }
-            HtmlNodeCollection col = doc.DocumentNode.SelectNodes("//table[@class='list-table']");
-            string v = col.First().GetAttributeValue("data-items", string.Empty);
-            File.WriteAllText(Path.Combine(ResultPath, "mylist.json"), v.Replace("&quot;", "\""));
-            File.WriteAllText(FullPath, doc.Text);
-            List<MyAnime> l = JsonSerializer.Deserialize<List<MyAnime>>(v.Replace("&quot;", "\""));
-        }
-
-        private void dasgsd(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            (sender as WebBrowser).Document.Body.ScrollIntoView(false);
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml((sender as WebBrowser).DocumentText);
-            HtmlNodeCollection col = doc.DocumentNode.SelectNodes("//table[@class='list-table']");
-            string v = col.First().GetAttributeValue("data-items", string.Empty);
-            File.WriteAllText(Path.Combine(ResultPath, "mylist.json"), v.Replace("&quot;", "\""));
-            File.WriteAllText(FullPath, doc.Text);
-            List<MyAnime> l = JsonSerializer.Deserialize<List<MyAnime>>(v.Replace("&quot;", "\""));
-
         }
 
         private async void chromiumWebBrowser1_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if(!e.IsLoading)
             {
-                using (WebClient webClient = new WebClient())
-                {
-                    webClient.DownloadStringAsync(new Uri("https://myanimelist.net/animelist/FedererMagic?status=2"));
-                    webClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(DownloadStringCompleted);
-                }
-                string script = "document.getElementsByName(\"q\")";
-                script = "document.getElementsByClassName(\" css-47sehv\")[0].click();";
+                string script = "document.getElementsByClassName(\" css-47sehv\")[0].click();";
                 JavascriptResponse res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
 
                 if (res.Success && res.Result != null)
@@ -96,24 +59,28 @@ namespace WindowsFormsApp1
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(s);
                 HtmlNodeCollection col = doc.DocumentNode.SelectNodes("//tbody[@class='list-item']");
-                Hashtable t = new Hashtable();
+                List<AnimeURL> t = new List<AnimeURL>();
                 foreach (HtmlNode n in col)
                 {
                     HtmlNode y = n.SelectSingleNode(".//td[@class='data title clearfix']").SelectSingleNode(".//a[@class='link sort']");
-                    t.Add(y.InnerText, y.GetAttributeValue("href", string.Empty));
+                    t.Add(new AnimeURL() { Name = y.InnerText, Url = y.GetAttributeValue("href", string.Empty) });
                 }
+                if(t.Count > 300)
+                ExtensionMethods.WriteToFile(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"), t.ToJson());
+
             }
 
         }
 
-        private async void chromiumWebBrowser1_FrameLoadStart(object sender, FrameLoadStartEventArgs e)
-        {
-        }
+    }
 
-        private void DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-            File.AppendAllText(FullPath ,e.Result);
-        }
+    public class AnimeURL
+    {
+        private string name;
+        private string url;
+
+        public string Name { get => name; set => name = value; }
+        public string Url { get => url; set => url = "https://myanimelist.net" + value; }
     }
 
     public class MyAnime

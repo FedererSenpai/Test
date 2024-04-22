@@ -140,6 +140,11 @@ namespace WindowsFormsApp1
             return row;
         }
 
+        public static List<T> JsonToList<T>(this string s)
+        {
+            return JsonConvert.DeserializeObject<List<T>>(s);
+        }
+
         public static string ToJson<T>(this List<T> l)
         {
             return JsonConvert.SerializeObject(l);

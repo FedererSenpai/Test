@@ -37,6 +37,28 @@ namespace WindowsFormsApp1
             //string respues = PostMethod("http://localhost:8888/tickets/insert", texto, 5000);
             string respues = GetMethod("http://10.2.11.103:8888/infos/status", 2500);
             textBox1.Text = "http://nortmaticcloudlab2.nortconsulting.com/nortmaticapi/api/";
+            NortMaticRequest r = new NortMaticRequest();
+            r.AuthSecret = "AAAAA";
+            r.SecretKey = "BBBBB";
+            r.UserName = "CCCCC";
+            r.UserCode = "DDDDD";
+            r.AuthSecret = "EEEEE";
+            NormaticResponse s = new NormaticResponse();
+            s.IsError = true;
+            s.Message = "ZZZZZ";
+            s.ResponseError = new NormaticCounterResponse() { Currentcountervalue = 10, Requestedcountervalue = 20 };
+            s.ResponseSuccess = new NormaticCounterResponse() { Currentcountervalue = 30, Requestedcountervalue = 40 };
+            List<NortMaticRequest> asfd = new List<NortMaticRequest>();
+            asfd.Add(r);
+            asfd.ToFile(@"C:\pruebajson.json");
+            List<NormaticResponse> aghdf = new List<NormaticResponse>();
+            aghdf.Add(s);
+            aghdf.ToFile(@"C:\pruebajson2.json");
+            List<BajaRequest> dasdf = new List<BajaRequest>();
+            dasdf.Add(new BajaRequest());
+            dasdf.Add(new BajaRequest());
+            dasdf.Add(new BajaRequest());
+            dasdf.ToFile(@"C:\pruebabaja.json");
         }
 
         public static string PostMethod(string url, string data, int timeout = 1500)
@@ -726,5 +748,26 @@ namespace WindowsFormsApp1
         public int Currentcountervalue { get => currentcountervalue; set => currentcountervalue = value; }
         [JsonProperty("requestedcountervalue")]
         public int Requestedcountervalue { get => requestedcountervalue; set => requestedcountervalue = value; }
+    }
+
+    public class BajaRequest
+    {
+        private int idTransaccion = 1;
+        private int codigoArticulo = 345978;
+        private string nombreArticulo = "qwertyuiop";
+        private string tipoArticulo = "pesado";
+        private decimal cantidad = 1.234M;
+        private DateTime fechaHora = DateTime.Now;
+        private string tipoBaja = "asdfghjkl";
+        private string modificado = "A";
+
+        public int IdTransaccion { get => idTransaccion; set => idTransaccion = value; }
+        public int CodigoArticulo { get => codigoArticulo; set => codigoArticulo = value; }
+        public string NombreArticulo { get => nombreArticulo; set => nombreArticulo = value; }
+        public string TipoArticulo { get => tipoArticulo; set => tipoArticulo = value; }
+        public decimal Cantidad { get => cantidad; set => cantidad = value; }
+        public DateTime FechaHora { get => fechaHora; set => fechaHora = value; }
+        public string TipoBaja { get => tipoBaja; set => tipoBaja = value; }
+        public string Modificado { get => modificado; set => modificado = value; }
     }
 }

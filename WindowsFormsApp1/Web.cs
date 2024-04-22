@@ -55,6 +55,7 @@ namespace WindowsFormsApp1
             AddMenu("Test", new EventHandler(Test));
             AddMenu("Create", new EventHandler(CreatePlaylist));
             AddMenu("Result", new EventHandler(ShowResult));
+            AddMenu("Senpai", new EventHandler(Senpai));
             Task t = new Task(async () => await Auth());
             t.Start();
             this.BringToFront();
@@ -73,6 +74,32 @@ namespace WindowsFormsApp1
                 mc.Close();
             }
             return season;
+        }
+
+        private async void Senpai(object sender, EventArgs e)
+        {
+            string name = "FedererSenpaiList";
+            string path = Path.Combine(web.ResultPath, "MAL", $"{name}.json");
+            List<Anime> l = JsonConvert.DeserializeObject<List<Anime>>(File.ReadAllText(path)).Where(x => x.Song != "No opening theme" && x.Song != "No ending theme").ToList();
+            web.myProgressBar1.Maximum = l.Count;
+            foreach (Anime anime in l)
+            {
+                Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song), anime.Artist);
+                spoti.Anime = anime.Clone();
+                if (anime.Header.Equals("Continuing"))
+                    spoti.Add = false;
+                list.Add(spoti);
+                myProgressBar1.Value++;
+            }
+            list.ToFile(Path.Combine(web.ResultPath, "Spotify", $"anime {name} mix.json"));
+            dataGridView1.DataSource = list;
+            dataGridView1.Tag = name;
+            //foreach(List<string> l in list.Select(x => "spotify:track:" + x.Id).ToList().Split(100))
+            //{
+            //await spotify.Playlists.AddItems(pl.Id, new PlaylistAddItemsRequest(l));
+            //}
+            web.WindowState = FormWindowState.Maximized;
+
         }
 
         private async void Search(object sender, EventArgs e)
@@ -175,8 +202,15 @@ namespace WindowsFormsApp1
 
         private async Task<SearchResponse> SearchTrack(string title)
         {
-            SearchRequest request = new SearchRequest(SearchRequest.Types.Track, title);
-            return await spotify.Search.Item(request);
+            try
+            {
+                SearchRequest request = new SearchRequest(SearchRequest.Types.Track, title);
+                return await spotify.Search.Item(request);
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
         }
 
         private Spotify ProcessSpotify(SearchResponse response, string artist)
