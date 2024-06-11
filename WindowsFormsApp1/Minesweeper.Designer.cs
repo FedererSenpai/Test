@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp1
 {
-    partial class AutoWeb
+    partial class Minesweeper
     {
         /// <summary>
         /// Required designer variable.
@@ -28,35 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.chromiumWebBrowser1 = new CefSharp.WinForms.ChromiumWebBrowser();
             this.SuspendLayout();
             // 
-            // chromiumWebBrowser1
-            // 
-            this.chromiumWebBrowser1.ActivateBrowserOnCreation = false;
-            this.chromiumWebBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chromiumWebBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.chromiumWebBrowser1.Name = "chromiumWebBrowser1";
-            this.chromiumWebBrowser1.Size = new System.Drawing.Size(800, 490);
-            this.chromiumWebBrowser1.TabIndex = 0;
-            // 
-            // AutoWeb
+            // Minesweeper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 490);
-            this.Controls.Add(this.chromiumWebBrowser1);
-            this.Name = "AutoWeb";
-            this.Text = "AutoWeb";
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.BackColor = System.Drawing.Color.Gray;
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Name = "Minesweeper";
+            this.Text = "Minesweeper";
             this.ResumeLayout(false);
-            this.Opacity = 1;
 
         }
 
         #endregion
-
-        private CefSharp.WinForms.ChromiumWebBrowser chromiumWebBrowser1;
     }
 }

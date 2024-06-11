@@ -206,10 +206,10 @@
       <HintPath>..\packages\SevenZipSharp.0.64\lib\SevenZipSharp.dll</HintPath>
     </Reference>
     <Reference Include="SpotifyAPI.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SpotifyAPI.Web.7.0.2\lib\netstandard2.0\SpotifyAPI.Web.dll</HintPath>
+      <HintPath>..\packages\SpotifyAPI.Web.7.1.1\lib\netstandard2.0\SpotifyAPI.Web.dll</HintPath>
     </Reference>
     <Reference Include="SpotifyAPI.Web.Auth, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SpotifyAPI.Web.Auth.7.0.2\lib\netstandard2.0\SpotifyAPI.Web.Auth.dll</HintPath>
+      <HintPath>..\packages\SpotifyAPI.Web.Auth.7.1.1\lib\netstandard2.0\SpotifyAPI.Web.Auth.dll</HintPath>
     </Reference>
     <Reference Include="SshNet.Security.Cryptography, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SshNet.Security.Cryptography.1.3.0\lib\net45\SshNet.Security.Cryptography.dll</HintPath>
@@ -432,6 +432,18 @@
     <Compile Include="MAL.Designer.cs">
       <DependentUpon>MAL.cs</DependentUpon>
     </Compile>
+    <Compile Include="Mine.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Mine.Designer.cs">
+      <DependentUpon>Mine.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Minesweeper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Minesweeper.Designer.cs">
+      <DependentUpon>Minesweeper.cs</DependentUpon>
+    </Compile>
     <Compile Include="MyCalendar.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -617,6 +629,12 @@
     <EmbeddedResource Include="MAL.resx">
       <DependentUpon>MAL.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Mine.resx">
+      <DependentUpon>Mine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Minesweeper.resx">
+      <DependentUpon>Minesweeper.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MyCalendar.resx">
       <DependentUpon>MyCalendar.cs</DependentUpon>
     </EmbeddedResource>
@@ -750,6 +768,11 @@
     <Content Include="resources\Assembly.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="resources\flag1.bmp" />
+    <None Include="resources\Mine1.bmp" />
+    <None Include="resources\Mine.bmp" />
+    <None Include="resources\Flag2.ico" />
+    <None Include="resources\flag.bmp" />
     <None Include="resources\rightarrow.png" />
     <None Include="resources\leftarrow.png" />
     <EmbeddedResource Include="resources\Activity.xlsx" />

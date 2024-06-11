@@ -17,16 +17,84 @@ using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using System.Text.Json;
 using System.Threading;
 using System.Collections;
+using CefSharp.DevTools.DOM;
 
 
 namespace WindowsFormsApp1
 {
     public partial class AutoWeb : Base
     {
+        public bool ready = false;
         public AutoWeb()
         {
             InitializeComponent();
-            chromiumWebBrowser1.LoadUrl("https://myanimelist.net/animelist/FedererMagic?status=2");
+            this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1_LoadingStateChanged);
+            this.Load += Start;
+            chromiumWebBrowser1.LoadUrl("https://myanimelist.net/anime/32729/Orange");
+        }
+
+        public AutoWeb (string url)
+        {
+            InitializeComponent();
+            //this.Opacity = 0;
+            this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1Senpai_LoadingStateChanged);
+            chromiumWebBrowser1.LoadUrl(url);
+        }
+
+        public HtmlDocument GetDoc()
+        {
+            Task<string> task = chromiumWebBrowser1.GetSourceAsync();
+            task.Start();
+            task.Wait();
+            string s = task.Result;
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(s);
+            return doc;
+        }
+        private void Start(object sender, EventArgs e)
+        {
+            AddMenu("Senpai", new EventHandler(Senpai));
+            this.BringToFront();
+        }
+
+        private async void Senpai(object sender, EventArgs e)
+        {
+            string json = File.ReadAllText(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"));
+            List<Anime> animelist = json.JsonToList<Anime>();
+            foreach (Anime a in animelist)
+            {
+                chromiumWebBrowser1.LoadUrl(a.URL);
+                Thread.Sleep(1000);
+                Application.DoEvents();
+            }
+        }
+
+        private async void chromiumWebBrowser1Senpai_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+        {
+            if (!e.IsLoading)
+            {
+                string script = "document.getElementsByClassName(\" css-47sehv\")[0].click();";
+                JavascriptResponse res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
+                string s = await chromiumWebBrowser1.GetSourceAsync();
+                MAL.doc = new HtmlDocument();
+                MAL.doc.LoadHtml(s);
+                Thread.Sleep(500);
+                Cerrar();
+            }
+        }
+
+        delegate void OnCerrar();
+        private void Cerrar()
+        {
+            if(this.InvokeRequired)
+            {
+                OnCerrar del = new OnCerrar(Cerrar);
+                this.Invoke(del);
+            }
+            else
+            {
+                this.Close();
+            }
         }
 
         private async void chromiumWebBrowser1_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)

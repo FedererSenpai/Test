@@ -19,6 +19,8 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Windows.Documents;
+using JikanDotNet;
+using System.Text.Json.Serialization;
 
 namespace WindowsFormsApp1
 {
@@ -32,6 +34,7 @@ namespace WindowsFormsApp1
         {
             InitializeComponent();
             this.Load += Start;
+            malFolder = Path.Combine(ResultPath, "MAL");
         }
 
         static List<string> names = new List<string>();
@@ -40,21 +43,28 @@ namespace WindowsFormsApp1
         static List<string> nodes = new List<string>();
         static string[] header = new string[] { "Name", "URL", "Type", "Song", "Artist" };
         static string season;
+        List<Anime> error = new List<Anime>();
+        public static HtmlDocument doc;
+        private static string malFolder = string.Empty;
 
         private void Start(object sender, EventArgs e)
         {
             AddMenu("Senpai", new EventHandler(Senpai));
             this.BringToFront();
-
         }
 
         private void Senpai(object sender, EventArgs e)
         {
             season = "Senpai";
-            string json = File.ReadAllText(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"));
-            foreach (Anime a in json.JsonToList<Anime>())
+            string json = File.ReadAllText(Path.Combine(malFolder, $"FedererSenpai.json"));
+            List<Anime> animelist = json.JsonToList<Anime>();
+            progressBar1.Maximum = animelist.Count();
+            foreach (Anime a in animelist)
+            {
                 ProcessAnime(a.Clone());
-            ExtensionMethods.WriteToFile(Path.Combine(ResultPath, "MAL", $"FedererSenpaiList.json"), animes.ToJson());
+                UpdateProgress(progressBar1);
+            }
+            ExtensionMethods.WriteToFile(Path.Combine(malFolder, $"FedererSenpaiList.json"), animes.ToJson());
         }
 
         private void LoadDefault()
@@ -63,7 +73,6 @@ namespace WindowsFormsApp1
             comboBox1.SelectedItem = GetSeason();
             numericUpDown1.Value = DateTime.Now.Year;
         }
-
         public void Read()
         {
 
@@ -71,7 +80,7 @@ namespace WindowsFormsApp1
             using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
             {
                 string downloadString = client.DownloadString($"https://myanimelist.net/anime/season/{numericUpDown1.Value}/{comboBox1.SelectedItem}");
-                ExtensionMethods.WriteToFile(Path.Combine(FolderPath, "api.txt"), downloadString);
+                ExtensionMethods.WriteToFile(Path.Combine(malFolder, "api.txt"), downloadString);
                 doc.LoadHtml(downloadString);
             }
 
@@ -105,6 +114,7 @@ namespace WindowsFormsApp1
                         ProcessAnime(anime.Clone());
                     UpdateProgress(progressBar1);
                 }
+                ResetProgress(progressBar1);
             }
             /*string[] lines = File.ReadAllLines(Path.Combine(Application.StartupPath, "api.txt"));
             progressBar1.Maximum = lines.Length;
@@ -128,7 +138,7 @@ namespace WindowsFormsApp1
                 }
                 UpdateProgress(progressBar1);
             }*/
-             ExtensionMethods.WriteToFile(Path.Combine(ResultPath,"MAL", $"{season}.json"), animes.ToJson());
+             ExtensionMethods.WriteToFile(Path.Combine(malFolder, $"{season}.json"), animes.ToJson());
             button1.Enabled = true;
         }
          
@@ -158,10 +168,28 @@ namespace WindowsFormsApp1
             HtmlDocument doc = new HtmlDocument();
             using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
             {
-                string downloadString = client.DownloadString(animeBase.URL);
+                try { string downloadString = client.DownloadString(animeBase.URL); 
                 ExtensionMethods.WriteToFile(path, downloadString);
                 doc.LoadHtml(downloadString);
+                }
+                catch
+                {
+                    try
+                    {
+                        AutoWeb autoweb = new AutoWeb(animeBase.URL);
+                        autoweb.ShowDialog();
+                        doc = MAL.doc;
+                        ExtensionMethods.WriteToFile(path, doc.ToString());
+                        Application.DoEvents();
+                        Thread.Sleep(500);
+                    }
+                    catch
+                    { error.Add(animeBase);
+                        return;
+                    } 
+                }
             }
+
             Anime anime;
             HtmlNode openingNode = doc.DocumentNode.SelectSingleNode("//div[@class='theme-songs js-theme-songs opnening']");
             HtmlNode endingNode = doc.DocumentNode.SelectSingleNode("//div[@class='theme-songs js-theme-songs ending']");
@@ -271,6 +299,7 @@ namespace WindowsFormsApp1
                     anime = animeBase;
                 }
             }*/
+            animes = animes.GroupBy(x => new { x.Song, x.Artist }).Select(y=>y.First()).ToList();
         }
 
         private void ResetProgress(ProgressBar pb)
@@ -281,7 +310,7 @@ namespace WindowsFormsApp1
 
         private void UpdateProgress(ProgressBar pb)
         {
-            pb.Value = pb.Maximum;
+            pb.Value = pb.Value + 1;
             pb.Update();
             Application.DoEvents();
             Thread.Sleep(1);
@@ -492,6 +521,8 @@ namespace WindowsFormsApp1
         public string Artist { get => artist; set => artist = value; }
         public static List<string> Ignore => ignore;
 
+        [JsonIgnore()]
+        public static HtmlDocument Doc;
         public string Header { get => header; set => header = value; }
 
         public override string ToString()

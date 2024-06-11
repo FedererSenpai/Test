@@ -35,8 +35,13 @@ namespace WindowsFormsApp1
 
         [DllImport("user32.dll")]
         public static extern bool ShowWindowAsync(HandleRef hWnd, int nCmdShow);
+
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr WindowHandle);
+
+        [DllImport("user32.dll")]
+        public static extern long LockWindowUpdate(IntPtr Handle);
+
         public const int SW_RESTORE = 9;
         [DllImport("dibalcrypt.dll")]
         public static extern int Decrypt(Int32[] sBufferIn, int longInput, ref byte bufferOut, ref int ptrLongOutput, Int32 myE, Int32 myD, Int32 myN);

@@ -38,6 +38,7 @@ namespace WindowsFormsApp1
         private static EmbedIOAuthServer _server;
         private static SpotifyClient spotify;
         private static List<Spotify> list = new List<Spotify>();
+        private static List<Anime> error = new List<Anime>();            
         public Web()
         {
             InitializeComponent();
@@ -56,6 +57,7 @@ namespace WindowsFormsApp1
             AddMenu("Create", new EventHandler(CreatePlaylist));
             AddMenu("Result", new EventHandler(ShowResult));
             AddMenu("Senpai", new EventHandler(Senpai));
+            AddMenu("Kpoop", new EventHandler(Kpoop));
             Task t = new Task(async () => await Auth());
             t.Start();
             this.BringToFront();
@@ -82,9 +84,16 @@ namespace WindowsFormsApp1
             string path = Path.Combine(web.ResultPath, "MAL", $"{name}.json");
             List<Anime> l = JsonConvert.DeserializeObject<List<Anime>>(File.ReadAllText(path)).Where(x => x.Song != "No opening theme" && x.Song != "No ending theme").ToList();
             web.myProgressBar1.Maximum = l.Count;
+
             foreach (Anime anime in l)
             {
                 Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song), anime.Artist);
+                if(spoti == null)
+                {
+                    error.Add(anime.Clone());
+                    myProgressBar1.Value++;
+                    continue;
+                }
                 spoti.Anime = anime.Clone();
                 if (anime.Header.Equals("Continuing"))
                     spoti.Add = false;
@@ -199,7 +208,25 @@ namespace WindowsFormsApp1
             //var sdafgklh= asfd.Tracks.Items.Min(x => x.Artists.Min(y => ExtensionMethods.Distance(y.Name, "AvrilLavigne")));
             await spotify.Playlists.Create("316b4swabpspq4guu4yzvz5jnz4q", new PlaylistCreateRequest("Prueba"));
         }
-
+        private async void Kpoop(object sender, EventArgs e)
+        {
+            Paging<PlaylistTrack<IPlayableItem>> kpopmix = await spotify.Playlists.GetItems("37i9dQZF1EQpesGsmIyqcW");
+            Paging <PlaylistTrack<IPlayableItem>> kpoop = await spotify.Playlists.GetItems("2w4i6mlSsBMOE3BwVEKxux");
+            List<string> kpopmixlist = kpopmix.Items.Select(x => ((FullTrack)x.Track).Uri).ToList();
+            List<string> kpooplist = kpoop.Items.Select(x => ((FullTrack)x.Track).Uri).ToList();
+            while (kpopmix.Next != null)
+            {
+                kpopmix = await spotify.NextPage(kpopmix);
+                kpopmixlist.AddRange(kpopmix.Items.Select(x => ((FullTrack)x.Track).Uri).ToList());
+            }
+            while (kpoop.Next != null)
+            {
+                kpoop = await spotify.NextPage(kpoop);
+                kpooplist.AddRange(kpoop.Items.Select(x => ((FullTrack)x.Track).Uri).ToList());
+            }
+            PlaylistAddItemsRequest request = new PlaylistAddItemsRequest(kpopmixlist.Except(kpooplist).ToList());
+            SnapshotResponse response = await spotify.Playlists.AddItems("2w4i6mlSsBMOE3BwVEKxux", request);
+        }
         private async Task<SearchResponse> SearchTrack(string title)
         {
             try
@@ -215,19 +242,28 @@ namespace WindowsFormsApp1
 
         private Spotify ProcessSpotify(SearchResponse response, string artist)
         {
-            FullTrack track = response.Tracks.Items.FirstOrDefault(x=>x.Artists.Select(y=>y.Name).Contains(artist));
-            bool add = true;
-            if(track == null)
+            try
             {
-                track = response.Tracks.Items.First();
-                add = false;
+                FullTrack track = response.Tracks.Items.FirstOrDefault(x => x.Artists.Select(y => y.Name).Contains(artist));
+                bool add = true;
+                if (track == null)
+                {
+                    track = response.Tracks.Items.First();
+                    add = false;
+                }
+                return new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = add };
             }
-            return new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = add };
+            catch
+            {
+                return null;
+            }
         }
 
         private void dataGridView1_CellFormating(object sender, DataGridViewCellFormattingEventArgs e)
         {
             Spotify s = dataGridView1.Rows[e.RowIndex].DataBoundItem as Spotify;
+            if (!s.Add)
+                e.CellStyle.BackColor = Color.LightSalmon;
             if (s.Anime.Header.Equals("Continuing"))
                 e.CellStyle.BackColor = Color.LightBlue;
         }
@@ -261,6 +297,9 @@ namespace WindowsFormsApp1
                         WebBrowser wb = new WebBrowser();
                         wb.Navigate(preview);
                         wb.Navigate(preview);
+                    }
+                    if (!string.IsNullOrEmpty(track.Uri))
+                    {
                         s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = true, Anime = s.Anime });
                         dataGridView1.Refresh();
                     }
