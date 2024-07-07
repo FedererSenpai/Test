@@ -14,6 +14,9 @@ namespace WindowsFormsApp1
     {
         private State state = State.Closed;
         private int value = int.MinValue;
+        public static bool revealing = false;
+        public static int opens = 0;
+        public static int flags = 99;
         private Brush[] fores = new Brush[9]
         {
             Brushes.Transparent,
@@ -28,6 +31,26 @@ namespace WindowsFormsApp1
         };
 
         public int Value { get => value; set => this.value = value; }
+        public State MyState
+        {
+            get => state;
+            set
+            {
+                if (value != state)
+                {
+                    if(value == State.Opened)
+                        opens++;
+                    if (value == State.Flagged)
+                        flags--;
+                    if (state == State.Flagged)
+                        flags++;
+                }
+                state = value;
+                if (value == State.Opened && !revealing)
+                    OnOpened();
+                Refresh();
+            }
+        }
 
         public enum State
         {
@@ -39,7 +62,11 @@ namespace WindowsFormsApp1
         }
 
         public delegate void OpenedEventHandler(object sender, OpenedEventArgs e);
-        public event OpenedEventHandler OnOpened;
+        public event OpenedEventHandler Opened;
+        protected virtual void OnOpened()
+        {
+            Opened?.Invoke(this, new OpenedEventArgs(Value, MyState));
+        }
         public Mine()
         {
             InitializeComponent();
@@ -54,51 +81,54 @@ namespace WindowsFormsApp1
         {
             if(e.Button == MouseButtons.Right)
             {
-                if (state == State.Flagged)
-                    state = State.Closed;
+                if (MyState == State.Opened)
+                    return;
+                if (MyState == State.Flagged)
+                    MyState = State.Closed;
                 else
-                    state = State.Flagged;
+                    MyState = State.Flagged;
             }
             else if(e.Button == MouseButtons.Left)
             {
+                if (state == State.Flagged)
+                    return;
                 //Enabled = false;
                 if (value == -1)
-                    state = State.Exploded;
+                    MyState = State.Exploded;
                 else
-                    state = State.Opened;
-                OnOpened(this, new OpenedEventArgs(Value, state));
+                    MyState = State.Opened;
+                OnOpened();
             }
-            Refresh();
         }
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            if (state == State.Exploded)
+            if (MyState == State.Exploded)
                 g.DrawImage(Properties.Resources.MineExploded, new RectangleF(0, 0, Width, Height));
-            else if (state == State.WrongFlagged)
+            else if (MyState == State.WrongFlagged)
             {
                 g.DrawImage(Properties.Resources.flagwrong, new RectangleF(0, 0, Width, Height));
             }
-            else if (state == State.Opened)
+            else if (MyState == State.Opened)
             {
                 StringFormat format = new StringFormat();
                 format.LineAlignment = StringAlignment.Center;
                 format.Alignment = StringAlignment.Center;
-                    g.FillRectangle(Brushes.LightGray, new RectangleF(0, 0, Width, Height));
+                    g.FillRectangle(Brushes.DarkGray, new RectangleF(0, 0, Width, Height));
                     if (value < 0)
                     {
                         g.DrawImage(Properties.Resources.Mine, new RectangleF(0, 0, Width, Height));
                     }
                     else
                     {
-                        g.DrawString(value.ToString(), new Font("Calibri", 10, FontStyle.Bold), fores[value], e.ClipRectangle, format);
+                        g.DrawString(value.ToString(), new Font("Calibri", 13, FontStyle.Bold), fores[value], e.ClipRectangle, format);
                     }
             }
             else
             {
                 g.FillPolygon(Brushes.WhiteSmoke, new Point[] { new Point(0, 0), new Point(Width, 0), new Point(0, Height) });
                 g.FillPolygon(Brushes.Gray, new Point[] { new Point(Width, Height), new Point(Width, 0), new Point(0, Height) });
-                if (state == State.Flagged)
+                if (MyState == State.Flagged)
                 {
                     g.DrawImage(Properties.Resources.flag, new RectangleF(2, 2, Width - 4, Height - 4));
                 }
@@ -112,29 +142,35 @@ namespace WindowsFormsApp1
 
         public State GetState()
         {
-            return state;
+            return MyState;
         }
 
         public void OpenVoid()
         {
-            state = State.Opened;
+            MyState = State.Opened;
             if(value == 0)
-            OnOpened(this, new OpenedEventArgs(Value, state));
+            OnOpened();
         }
 
         public void OpenMine()
         {
-            state = value == -1 ? State.Exploded : State.Opened;
+            MyState = value == -1 ? State.Exploded : State.Opened;
             if (value < 1)
-                OnOpened(this, new OpenedEventArgs(Value, state));
+                OnOpened();
         }
         public void Open()
         {
-            if(value == -1 && state != State.Flagged && state != State.Exploded)
-                state = State.Opened;
-            if (value >= 0 && state == State.Flagged)
-                state = State.WrongFlagged;
+            if(value == -1 && MyState != State.Flagged && MyState != State.Exploded)
+                MyState = State.Opened;
+            if (value >= 0 && MyState == State.Flagged)
+                MyState = State.WrongFlagged;
             Enabled = false;
+        }
+
+        public void Flag()
+        {
+            if (value == -1)
+                MyState = State.Flagged;
         }
     }
 
