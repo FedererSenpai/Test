@@ -190,7 +190,8 @@ namespace WindowsFormsApp1
             SendKeys.SendWait("^{w}"); // close tab.
             Thread.Sleep(100); 
             WinUtil.FocusProcess("WindowsFormsApp1");
-            web.WindowState = FormWindowState.Maximized;
+            Thread.Sleep(100);
+
         }
 
         private static async Task OnErrorReceived(object sender, string error, string state)
@@ -225,7 +226,9 @@ namespace WindowsFormsApp1
                 kpooplist.AddRange(kpoop.Items.Select(x => ((FullTrack)x.Track).Uri).ToList());
             }
             PlaylistAddItemsRequest request = new PlaylistAddItemsRequest(kpopmixlist.Except(kpooplist).ToList());
-            SnapshotResponse response = await spotify.Playlists.AddItems("2w4i6mlSsBMOE3BwVEKxux", request);
+            if(request.Uris.Count > 0)
+                await spotify.Playlists.AddItems("2w4i6mlSsBMOE3BwVEKxux", request);
+            MessageBox.Show(kpopmixlist.Except(kpooplist).Count().ToString() + " items added.");
         }
         private async Task<SearchResponse> SearchTrack(string title)
         {

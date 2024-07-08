@@ -18,9 +18,12 @@ namespace WindowsFormsApp1
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+#if KPOOP
+            Application.Run(new Web());
+#else
             if (args.Length == 0)
             {
-                Application.Run(new AutoWeb());
+                Application.Run(new Minesweeper());
             }
             else
             {
@@ -38,7 +41,7 @@ namespace WindowsFormsApp1
                         else if (args[1].Equals("/z"))
                             Activity.WriteShutDown();
                         else
-                            new DibalForm(0).ShowDialog();
+                            Application.Run(new DibalForm(0));
                         break;
                     case "MAL":
                         Application.Run(new MAL());
@@ -52,7 +55,8 @@ namespace WindowsFormsApp1
                         break;
                 }
             }
+#endif
         }
 
-    }
+   }
 }
