@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -33,6 +34,12 @@ namespace WindowsFormsApp1
                     break;
                 case "Vacaciones.exe":
                     RunVacaciones();
+                    break;
+                case "MysqlService.exe":
+                    RunMysqlService();
+                    break;
+                case "Testing.exe":
+                    RunTesting();
                     break;
                 default:
                     exit = false;
@@ -95,9 +102,37 @@ namespace WindowsFormsApp1
 
         private static void RunVacaciones()
         {
-            File.Copy(@"T:\32.-Planning\0-Vacaciones 2024.xlsx", @"C:\Users\dzhang\Desktop\Vacaciones.xlsx", true);
+            File.Copy(@"U:\000_INFORMACIÓN PERMANENTE\00 CONSERVAR-RESPONSABLE Inmaculada Lopez-REORGANIZACIÓN INFO\99 99 VACACIONES\0-Vacaciones 2024.xlsx", @"C:\Users\dzhang\Desktop\Vacaciones.xlsx", true);
             RunProgram(@"C:\Users\dzhang\Desktop\Vacaciones.xlsx");
         }
 
+        private static void RunMysqlService()
+        {
+            bool start = true;
+            bool running = false;
+            while (!running)
+            {
+                List<ServiceController> lsc = ServiceController.GetServices().Where(s => s.ServiceName.Contains("MySQL")).ToList();
+                foreach (ServiceController sc in lsc)
+                {
+                    if (sc.Status == ServiceControllerStatus.Running)
+                    {
+                        start = false;
+                        running = true;
+                        break;
+                    }
+                }
+                if (start)
+                {
+                    lsc.First().Start();
+                }
+                System.Threading.Thread.Sleep(5000);
+            }
+        }
+
+        private static void RunTesting()
+        {
+            Process.Start(@"C:\Daniel\VS\Test\Testing\bin\Release\Testing.exe");
+        }
     }
 }

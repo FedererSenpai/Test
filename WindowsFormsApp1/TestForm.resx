@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="textBox1.Text" xml:space="preserve">
+    <value>I'm a mess, mess, mess, mess, mess, mess, mess
+I'm a mess, mess, mess, mess, mess, mess, mess
+I'm a mess in distress
+But we're still the best dressed
+Fearless, say yes, we don't dress to impress
+괜찮단다 뭘 해도
+거짓말인 걸 난 알아
+괜찮겠지 뭘 해도
+착한 얼굴에 니 말 잘 들을 땐
+괜찮지 않아 그런 건
+내 룰은 나만 정할래 yeah
+볼 거야 금지된 걸
+Never hold back 더 자유롭게
+Boom, boom, boom 내 심장이 뛰네
+Get it like boom, boom, boom
+Get it like boom, boom, boom (boom, boom now)
+Boom, boom, boom 내 심장이 뛰네
+Get it like boom, boom, boom
+Get it like boom, boom, boom (push it)
+I wish for what's forbidden
+Get it like boom, boom, boom
+Get it like boom, boom, boom (push it)
+(Oh-oh) I wish for what's forbidden
+Get it like boom, boom, boom
+Get it like boom, boom, boom (oh-oh)
+I'm a mess, mess, mess, mess, mess, mess, mess
+I'm a mess, mess, mess, mess, mess, mess, mess
+I'm a mess in distress
+But we're still the best dressed
+Fearless, say yes, we don't dress to impress
+웃어, 웃어, 더 인형이 되렴 (ah-ah-ah)
+덮어, 덮어, 다 감정 따윈 다
+싫어, 싫어, 난 인형이 아냐 (ah-ah-ah)
+찡그린대도 그것도 나야
+보지 말람 보고 파
+날 둘러싼 이 금기들 yeah
+그날의 이브처럼
+Take it on the chain, I know I like that
+Boom, boom, boom 내 심장이 뛰네
+Get it like boom, boom, boom
+Get it like boom, boom, boom (boom, boom now)
+Boom, boom, boom 내 심장이 뛰네
+Get it like boom, boom, boom
+Get it like boom, boom, boom (push it)
+I wish for what's forbidden
+Get it like boom, boom, boom
+Get it like boom, boom, boom (push it)
+(Oh-oh) I wish for what's forbidden
+Get it like boom, boom, boom
+Get it like boom, boom, boom (oh-oh)
+What you waiting for?
+이게 타락이면 we fall, fall, fall (oh-oh)
+What you looking for?
+원한다면 now we fall, we fall, we fall
+Boom, boom, boom 내 심장이 뛰네
+Get it like boom, boom, boom
+Get it like boom, boom, boom (boom, boom now)
+Boom, boom, boom 내 심장이 뛰네
+Get it like boom, boom, boom
+Get it like boom, boom, boom (push it)
+Girl wanna have fun (girl)
+Girl wanna have fun (girl)
+Get it like boom, boom, boom
+Get it like boom, boom, boom
+Girl wanna have fun (girl)
+Girl wanna have fun (girl)
+Get it like boom, boom, boom
+Get it like boom, boom, boom
+</value>
+  </data>
+</root>

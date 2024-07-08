@@ -13,7 +13,7 @@ namespace WindowsFormsApp1
     
     public static class MySQL
     {
-        private static MySqlConnectionStringBuilder cadenaConexion = new MySqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["cnnString"].ConnectionString);
+        private static MySqlConnectionStringBuilder cadenaConexion = new MySqlConnectionStringBuilder("Server=localhost; Database=sys_datos_dfs; User Id=user; Password=dibal;Connection TimeOut = 10000; Port=3306");// new MySqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["cnnString"].ConnectionString);
 
         public static MySqlConnectionStringBuilder CadenaConexion { get => cadenaConexion; }
         private static IDbConnection connection = null;
@@ -55,7 +55,9 @@ namespace WindowsFormsApp1
 
         public static IDbConnection NewConnection(string server ,string database)
         {
-            MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder(string.Empty) { Database = database, Server = server };
+            MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder(MySQL.CadenaConexion.ToString());
+            builder.Database = database;
+            builder.Server = server;
             return new MySqlConnection(builder.ToString());
         }
 

@@ -45,7 +45,12 @@ namespace WindowsFormsApp1
         public const int SW_RESTORE = 9;
         [DllImport("dibalcrypt.dll")]
         public static extern int Decrypt(Int32[] sBufferIn, int longInput, ref byte bufferOut, ref int ptrLongOutput, Int32 myE, Int32 myD, Int32 myN);
-
+        [DllImport("dibalcrypt.dll")]
+        public static extern int Encrypt(string sBufferIn, ref byte sBufferOut, ref int ptrLongOutput, Int32 destE, Int32 destN);
+        [DllImport("dibalcrypt.dll")]
+        public static extern int Decrypt(byte[] sBufferIn, int longInput, ref byte bufferOut, ref int ptrLongOutput, Int32 myE, Int32 myD, Int32 myN);
+        [DllImport("dibalcrypt.dll")]
+        public static extern void GenerateKeys(ref Int32 myE, ref Int32 myN, ref Int32 myD);
 
         public static void FocusProcess(string procName)
         {

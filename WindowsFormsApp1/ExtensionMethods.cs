@@ -20,6 +20,11 @@ namespace WindowsFormsApp1
 {
     static class ExtensionMethods
     {
+        public static string Escritorio
+        {
+            get => Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        }
+
         private enum weekday
         {
             D = 0,
@@ -119,10 +124,24 @@ namespace WindowsFormsApp1
             switch(format)
             {
                 case 0:
-                    datetime = ((weekday)(int)dt.DayOfWeek).ToString() + dt.ToString("dd HH:mm:ss");
+                    datetime = ((weekday)(int)dt.DayOfWeek).ToString() + dt.ToString("HH:mm:ss");
+                    break;
+                case 1:
+                    datetime = ((weekday)(int)dt.DayOfWeek).ToString() + dt.ToString("dd");
+                    break;
+                case 2:
+                    datetime = dt.ToString("HH:mm:ss");
                     break;
             }
             return datetime;
+        }
+
+        public static string ToString(this DateTime? dt, int format)
+        {
+            if (dt == null)
+                return "NULL";
+
+            return dt.Value.ToString(format);
         }
 
         public static int NextRow(this _Worksheet w, int column) 
@@ -293,6 +312,62 @@ namespace WindowsFormsApp1
         public static int ToInt(this DayOfWeek dow)
         {
             return (int)(dow + 6) % 7;
+        }
+
+        public static string ToReadableString(this TimeSpan? span)
+        {
+            if (span == null)
+                return "NULL";
+
+            return ToReadableString(span.Value);
+        }
+
+        public static string ToReadableString(this TimeSpan span)
+        {
+            string formatted = string.Format("{0}{1}{2}",
+                span.Duration().Hours > 0 ? string.Format("{0:0} hour{1}, ", span.Hours, span.Hours == 1 ? string.Empty : "s") : string.Empty,
+                span.Duration().Minutes > 0 ? string.Format("{0:0} minute{1}, ", span.Minutes, span.Minutes == 1 ? string.Empty : "s") : string.Empty,
+                span.Duration().Seconds > 0 ? string.Format("{0:0} second{1}", span.Seconds, span.Seconds == 1 ? string.Empty : "s") : string.Empty);
+
+            if (formatted.EndsWith(", ")) formatted = formatted.Substring(0, formatted.Length - 2);
+
+            if (string.IsNullOrEmpty(formatted)) formatted = "0 seconds";
+
+            return formatted;
+        }
+
+        public static TimeSpan AddDifference(this TimeSpan span, DateTime? dif1, DateTime? dif2)
+        {
+            if (dif1 == null || dif2 == null)
+                return span;
+
+            return span.Add(dif2.Value - dif1.Value);
+        }
+
+        public static string DesktopFile(string file)
+        {
+            return Path.Combine(Escritorio, file);
+        }
+
+        public static string RandomString(this int length)
+        {
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var stringChars = new char[length];
+            var random = new Random();
+            for (int i = 0; i < length; i++)
+            {
+                stringChars[i] = chars[random.Next(chars.Length)];
+            }
+            return new string(stringChars);
+        }
+
+        public static void MoveFile(string src, string dst)
+        {
+            if (File.Exists(dst))
+            {
+                File.Delete(dst);
+            }
+            File.Move(src, dst);
         }
     }
 }

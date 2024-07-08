@@ -23,6 +23,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Management;
 using System.Xml.Schema;
+using System.Xml.Linq;
 
 namespace WindowsFormsApp1
 {
@@ -32,7 +33,13 @@ namespace WindowsFormsApp1
         private static UInt32 _mask;
         public static List<string> ag;
         public static List<string> df;
- 
+        private static Int32 claveCliente_E = 0;
+        private static Int32 claveCliente_N = 0;
+        private static Int32 claveCliente_D = 0;
+        private static Int32 claveServidor_E = 0;
+        private static Int32 claveServidor_N = 0;
+
+
         public static void IPSegment(string ip, string mask)
         {
             _ip = ip.ParseIp();
@@ -586,6 +593,8 @@ namespace WindowsFormsApp1
 
         public static void Schema()
         {
+            DataSet ds = new DataSet();
+            ds.ReadXmlSchema(@"C:\Daniel\VS\Test\WindowsFormsApp1\bin\Debug\Result\SuministroInformacion.xsd");
             using (WebClient client = new WebClient())
             {
                 string s = client.DownloadString("https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tike/cont/ws/SuministroInformacion.xsd");
@@ -597,7 +606,6 @@ namespace WindowsFormsApp1
             }
             XmlTextReader reader = new XmlTextReader("https://prewww2.aeat.es/static_files/common/internet/dep/aplicaciones/es/aeat/tikeV1.0/cont/ws/SuministroInformacion.xsd");
             XmlSchema schema = XmlSchema.Read(reader, ValidationCallback);
-            DataSet ds = new DataSet();
             ds.ReadXml(Path.Combine(Application.StartupPath, "Result", "schema.xsd"), XmlReadMode.ReadSchema);
             ds.ReadXmlSchema(Path.Combine(Application.StartupPath, "Result", "schema.xsd"));
             ds.ReadXmlSchema(@"C:\Users\dzhang\source\repos\dibalticketbai\DibalTB\DibalTB\TicketBai.xsd");
@@ -675,6 +683,370 @@ namespace WindowsFormsApp1
             {
 
             }
+        }
+
+        public static string Desencriptar(byte[] mensajeServidor)
+        {
+            string sMensajeServidor = string.Empty;
+            try
+            {
+                WinUtil.GenerateKeys(ref claveCliente_E, ref claveCliente_N, ref claveCliente_D);
+                byte[] bufferOut = new byte[800];
+            int longOut = 0;
+            WinUtil.Decrypt(mensajeServidor, mensajeServidor.GetLength(0), ref bufferOut[0], ref longOut, claveCliente_E, claveCliente_D, claveCliente_N);
+            foreach (byte bt in bufferOut)
+                sMensajeServidor += Convert.ToChar(bt);
+            return sMensajeServidor;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public static byte[] Encriptar(string mensajeEncriptar)
+        {
+            try
+            {
+                WinUtil.GenerateKeys(ref claveCliente_E, ref claveCliente_N, ref claveCliente_D);
+                byte[] bufferOut = new byte[800];
+            int longOut = 0;
+            WinUtil.Encrypt(mensajeEncriptar, ref bufferOut[0], ref longOut, claveServidor_E, claveServidor_N);
+            bufferOut = (byte[])ResizeArray(bufferOut, longOut);
+
+            return bufferOut;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private static System.Array ResizeArray(System.Array oldArray, int newSize)
+        {
+            try
+            {
+                int oldSize = oldArray.Length;
+                System.Type elementType = oldArray.GetType().GetElementType();
+                System.Array newArray = System.Array.CreateInstance(elementType, newSize);
+                int preserveLength = System.Math.Min(oldSize, newSize);
+                if (preserveLength > 0)
+                    System.Array.Copy(oldArray, newArray, preserveLength);
+                return newArray;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public static void ErrorLogs()
+        {
+            List<string> errors = new List<string>();
+        string path = @"C:\Daniel\VS\Test\WindowsFormsApp1\bin\Debug\Result\Logs";
+            foreach(DirectoryInfo d in new DirectoryInfo(path).GetDirectories())
+            {
+                foreach(FileInfo f in d.GetFiles())
+                {
+                    using (StreamReader sr = new StreamReader(f.FullName))
+                    {
+                        if(sr.ReadToEnd().ToLower().Contains("error"))
+                            errors.Add(f.FullName);
+                    }
+                }
+            }
+        }
+
+        public static void Diretory(string path, List<FileInfo> files, bool first = true)
+        {
+            if(first)
+            files = new List<FileInfo>();
+            foreach(string s in Directory.GetDirectories(path))
+            {
+                Diretory(s, files, false);
+            }
+            foreach(string s in Directory.GetFiles(path))
+            {
+                files.Add(new FileInfo(s));
+            }
+            if(first)
+            {
+                MessageBox.Show(files.Count.ToString());
+                Process p = new Process();
+                p.StartInfo = new ProcessStartInfo(@"C:\xampp\htdocs\Dibal\DibalTransfer\Actions\DibalUpdateSW\data\device\current\CS1100_GA_164M\CS1100_GA_164M\5-Programa\sw1100_setup.exe", "/f");
+                p.Start();
+                p.WaitForExit();
+                Diretory2(path, files);
+            }
+        }
+
+        private static void Diretory2(string path, List<FileInfo> files, bool first = true)
+        {
+            foreach (string s in Directory.GetDirectories(path))
+            {
+                Diretory2(s, files, false);
+            }
+            foreach (string s in Directory.GetFiles(path))
+            {
+                FileInfo fi = new FileInfo(s);
+                if (files.Any(f => f.FullName.Equals(fi.FullName) && f.CreationTime.Equals(fi.CreationTime)))
+                    files.Remove(new FileInfo(s));
+            }
+            if (first)
+            {
+                files.ToFile("C:\\Files.txt");
+                MessageBox.Show(files.Count.ToString());
+            }
+        }
+
+        public static void Remove()
+        {
+            string s = "VALUES (asdf, adsfa, asdfsd), ";
+            MessageBox.Show(s.Remove(s.Length - 2));
+        }
+
+        public static void Checksum()
+        {
+            string resul = "79815872347";
+            resul = resul.Substring(resul.Length - 12);
+            int Suma = 92;
+            int sumared = Convert.ToInt32((Suma + 10) / 10) * 10;
+        }
+
+        public static void Baltty()
+        {
+            string[] lines = File.ReadAllLines(ExtensionMethods.DesktopFile("tx.txt"));
+            List<string> newlines = new List<string>();
+            foreach(string line in lines)
+            {
+                if(line.StartsWith("02L"))
+                {
+                    newlines.Add(line);
+                }
+            }
+            File.WriteAllLines(ExtensionMethods.DesktopFile("tx.txt"), newlines);
+        }
+
+        public static void Images()
+        {
+            Random r = new Random(234234);
+            while (true)
+            {
+                if (File.Exists(@"C:\Users\dzhang\Downloads\Images.jpg"))
+                {
+                    int name = r.Next(1000000);
+                    while (File.Exists(Path.Combine(@"C:\Daniel\Basurilla\Images", name + ".jpg")))
+                    {
+                        name = r.Next(1000000);
+                    }
+                    File.Move(@"C:\Users\dzhang\Downloads\Images.jpg", Path.Combine(@"C:\Daniel\Basurilla\Images", name + ".jpg"));
+                }
+            }
+        }
+
+        public static void Uninstall()
+        {
+                while (true)
+                {
+                try
+                {
+                    if (File.Exists(@"\\192.168.150.65\ftp\Update"))
+                    {
+                        foreach (Process d in Process.GetProcessesByName("AccesoBalanzaPC")) { d.Kill(); }
+                        foreach (Process d in Process.GetProcessesByName("RGI")) { d.Kill(); }
+                        foreach (Process d in Process.GetProcessesByName("ComunicacionesBalPCInterface")) { d.Kill(); }
+
+                        string name = Convert.ToString(Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\SW1100").GetValue("Version"));
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            Process p2 = new Process();
+                            ProcessStartInfo psi2 = new ProcessStartInfo("cmd.exe", $"/C wmic product where name='{name}' call uninstall");
+                            p2.StartInfo = psi2;
+                            psi2.UseShellExecute = false;
+                            psi2.CreateNoWindow = false;
+                            psi2.RedirectStandardInput = true;
+                            psi2.RedirectStandardOutput = true;
+                            psi2.RedirectStandardError = true;
+                            p2.OutputDataReceived += new DataReceivedEventHandler(p_OutputDataReceived);
+                            p2.ErrorDataReceived += new DataReceivedEventHandler(p_ErrorDataReceived);
+                            p2.Start();
+                            p2.WaitForExit();
+                        }
+                        Process p = new Process();
+                        ProcessStartInfo psi = new ProcessStartInfo(@"C:\Users\CS1200\Desktop\SDK_Gadisa_2.19\SDK_Gadisa_2.19\CS1100_GA_164L\CS1100_GA_164L\5-Programa\sw1100_setup.exe", "/qb");
+                            p.StartInfo = psi;
+                            psi.UseShellExecute = false;
+                            psi.CreateNoWindow = false;
+                            psi.RedirectStandardError = false;
+                            psi.RedirectStandardInput = false;
+                            psi.RedirectStandardOutput = false;
+                            p.Start();
+                            p.WaitForExit();
+
+                        File.Copy(@"C:\Users\CS1200\Desktop\CONFIGURATION_DB.exe", @"C:\SW1100\DBSQLCS\CONFIGURATION_DB.exe", true);
+
+                        p = new Process();
+                            psi = new ProcessStartInfo(@"C:\SW1100\DBSQLCS\CONFIGURATION_DB.exe", "1 0");
+                            p.StartInfo = psi;
+                            psi.UseShellExecute = false;
+                            psi.CreateNoWindow = false;
+                            psi.RedirectStandardError = false;
+                            psi.RedirectStandardInput = false;
+                            psi.RedirectStandardOutput = false;
+                            p.Start();
+                            p.WaitForExit();
+
+                        File.Copy(@"C:\Users\CS1200\Desktop\AccesoBalanzaPC.exe.config", @"C:\SW1100\BalanzaPC\AccesoBalanzaPC.exe.config", true);
+                        Process.Start(@"C:\SW1100\BalanzaPC\AccesoBalanzaPC.exe");
+                        Thread.Sleep(1000);
+                        Process.Start(@"C:\SW1100\Comunicaciones\ComunicacionesBalPCInterface.exe");
+                        Thread.Sleep(1000);
+                        File.Copy(@"C:\Users\CS1200\Desktop\LineData.xml", @"C:\SW1100\RGI\LineData.xml", true);
+                        Process.Start(@"C:\SW1100\RGI\RGI.exe");
+                        Thread.Sleep(1000);
+
+                        if (File.Exists(@"\\192.168.150.65\ftp\Update"))
+                            ExtensionMethods.MoveFile(@"\\192.168.150.65\ftp\Update", @"\\192.168.150.65\ftp\Updated");
+                    }
+                    Thread.Sleep(1000);
+                }
+            catch (NullReferenceException e)
+                {
+                    if (File.Exists(@"\\192.168.150.65\ftp\Update"))
+                        ExtensionMethods.MoveFile(@"\\192.168.150.65\ftp\Update", @"\\192.168.150.65\ftp\NullReferenceError");
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                    if (File.Exists(@"\\192.168.150.65\ftp\Update"))
+                        ExtensionMethods.MoveFile(@"\\192.168.150.65\ftp\Update", @"\\192.168.150.65\ftp\Error");
+                }
+            }
+
+        }
+
+        static void p_OutputDataReceived(object sender, System.Diagnostics.DataReceivedEventArgs e)
+        {
+            string s = e.Data;
+            File.AppendAllText(Path.Combine(Application.StartupPath, "Output.txt"), DateTime.Now.ToString() + "  => " + s + Environment.NewLine);
+        }
+
+        static void p_ErrorDataReceived(object sender, System.Diagnostics.DataReceivedEventArgs e)
+        {
+            string s = e.Data;
+            File.AppendAllText(Path.Combine(Application.StartupPath, "Error.txt"), DateTime.Now.ToString() + "  => " + s + Environment.NewLine);
+        }
+
+        public static void Chrome()
+        {
+            string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
+            string programFilesX86 = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
+            string sdag = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            string sdagsdfg = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+            string sdwag = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles);
+            string sddagsdfg = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86);
+            string sdsdfhag = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\Google\Chrome\Application\chrome.exe";
+            string sdhfdhagsdfg = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + @"\Google\Chrome\Application\chrome.exe";
+            //Chrome
+            if (!File.Exists(Environment.ExpandEnvironmentVariables("%ProgramW6432%") + @"\Google\Chrome\Application\chrome.exe"))
+            {
+                if (!File.Exists(Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%") + @"\Google\Chrome\Application\chrome.exe"))
+                {
+
+                }
+            }
+        }
+
+        public static void splitcommand()
+        {
+            string comand = "#ID=3040#IR##ID=4207#LS#0#5#80#0#0#0#0#";
+            foreach (string mes in comand.Split(new string[] { "#ID=" }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                MessageBox.Show("#ID=" + mes);
+            }
+        }
+
+        public static void FechaArabe()
+        {
+            try
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+                System.Threading.Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+                MessageBox.Show(System.Threading.Thread.CurrentThread.CurrentCulture.ToString());
+                MessageBox.Show(System.Threading.Thread.CurrentThread.CurrentUICulture.ToString());
+
+                int rows = MySQL.EjecutaQuery(MySQL.Connection, "select * from sys_campos_etiqueta where IdModeloBalanza = 20 order by OrdenAgrupacion DESC, OrdenCampos ASC").Tables[0].Rows.Count;
+                MessageBox.Show(rows.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.GetType().ToString() + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+        }
+
+        public static void GetFiles()
+        {
+            string path = "C:\\tmp3";
+            string[] files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly);
+            int asfg = files.Length;
+        }
+
+        public static void CompareMD5()
+        {
+            string fileUN = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "ts_client_UN.dll");
+            byte[] bUN;
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(fileUN))
+                {
+                    bUN = md5.ComputeHash(stream);
+                }
+            }
+            string fileDI = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "ts_client_DI.dll");
+            byte[] bDI;
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(fileDI))
+                {
+                    bDI = md5.ComputeHash(stream);
+                }
+            }
+            bool eq = Enumerable.SequenceEqual(bUN, bDI);
+        }
+
+        public static void Testing()
+        {
+            int number = 144;
+            string root = "T:\\17-RegistroPruebas";
+            string end = "." + number.ToString("000");
+            string folder = Directory.GetDirectories(root).Single(x => x.EndsWith(end));
+            string testingf = "01.-Testing Scope";
+            string defectsf = "04.-Defects to Correct";
+            string tmp = Path.Combine(Path.GetTempPath(), "TestingPlan.xlsx");
+            string directory = Path.Combine(folder, testingf);
+            string file = Directory.GetFiles(directory).Single(x => Path.GetFileName(x).StartsWith("Testing Plan") && x.EndsWith(".xlsx"));
+            File.Copy(file, tmp, true);
+            Process.Start(tmp);
+
+            directory = Path.Combine(folder, defectsf);
+            file = Directory.GetFiles(directory).Single(x => Path.GetFileName(x).StartsWith("Defects") && x.EndsWith(".xlsx"));
+            Process.Start(file);
+
+            IExcelDataReader excelReader = null;
+            DataSet datosExcel;
+            using (FileStream stream = File.Open(file, FileMode.Open, FileAccess.Read))
+            {
+                    excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+
+               datosExcel = excelReader.AsDataSet(new ExcelDataSetConfiguration()
+                {
+                    ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                    {
+                        UseHeaderRow = true
+                    }
+                });
+            }
+
         }
     }
 }
