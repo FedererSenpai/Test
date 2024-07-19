@@ -24,6 +24,7 @@ using System.Threading;
 using System.Management;
 using System.Xml.Schema;
 using System.Xml.Linq;
+using System.Collections;
 
 namespace WindowsFormsApp1
 {
@@ -939,8 +940,30 @@ namespace WindowsFormsApp1
 
         public static void Chrome()
         {
+            List<string> ev = new List<string>();
+            foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>())
+            {
+                ev.Add(entry.Key + ": " + entry.Value);
+            }
+            ev.ToFile("C:\\EV.txt");
+            string p= Environment.ExpandEnvironmentVariables("%ProgramW6432%") + @"\Google\Chrome\Application\chrome.exe";
+            if (!File.Exists(p))
+            {
+                MessageBox.Show(p + " => false");
+                p = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%") + @"\Google\Chrome\Application\chrome.exe";
+                if (!File.Exists(p))
+                {
+                    MessageBox.Show(p + " => false");
+                    p = Environment.ExpandEnvironmentVariables("%ProgramFiles%") + @"\Google\Chrome\Application\chrome.exe";
+                    if (!File.Exists(p))
+                        MessageBox.Show(p + " => false");
+                }
+            }
+            MessageBox.Show(p + " => true");
+
             string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
             string programFilesX86 = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
+            string progagsadgaramFilesX86 = Environment.ExpandEnvironmentVariables("%ProgramFiles%");
             string sdag = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             string sdagsdfg = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
             string sdwag = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles);
@@ -1047,6 +1070,23 @@ namespace WindowsFormsApp1
                 });
             }
 
+        }
+
+        public static void CloseProgram()
+        {
+            Process[] pp = Process.GetProcessesByName("Testing");
+            foreach(Process p in pp)
+            {
+                p.CloseMainWindow();
+            }
+        }
+
+        public static void Streamwriter()
+        {
+            using (StreamWriter sw = new StreamWriter(@"C:\agslasd asf\E.txt", true, Encoding.UTF8))
+            {
+                sw.WriteLine("asdghsdkgf");
+            }
         }
     }
 }

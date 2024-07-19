@@ -369,5 +369,15 @@ namespace WindowsFormsApp1
             }
             File.Move(src, dst);
         }
+
+        public static T Random<T>() where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum) { throw new Exception("random enum variable is not an enum"); }
+
+            var random = new Random();
+            var values = Enum.GetValues(typeof(T));
+            return (T)values.GetValue(random.Next(values.Length));
+        }
+
     }
 }

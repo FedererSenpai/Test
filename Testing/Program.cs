@@ -1,5 +1,6 @@
 ﻿using ExcelDataReader;
 using Microsoft.Toolkit.Uwp.Notifications;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -71,6 +72,9 @@ namespace Testing
                     directory = Path.Combine(folder, defectsf);
                     defectsfile = Directory.GetFiles(directory).Single(x => Path.GetFileName(x).StartsWith("Defects") && x.EndsWith(".xlsx"));
                 }
+
+                SystemEvents.SessionEnded += new SessionEndedEventHandler(End);
+
                 Timer t = new Timer();
                 t.Tick += Check;
                 t.Interval = 60000;
@@ -168,6 +172,12 @@ namespace Testing
                     }
                 });
             }
+        }
+
+        void End (object sender, SessionEndedEventArgs e)
+        {
+            //MessageBox.Show(Convert.ToString(number + "-" + lastdefect));
+            Exit(this, e);
         }
     }
 }
