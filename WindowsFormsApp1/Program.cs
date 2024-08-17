@@ -23,7 +23,7 @@ namespace WindowsFormsApp1
 #else
             if (args.Length == 0)
             {
-                Application.Run(new Minesweeper());
+                Application.Run(new MainWindow());
             }
             else
             {

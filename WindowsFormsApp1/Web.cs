@@ -25,6 +25,7 @@ using System.Threading;
 using System.Net.Mail;
 using static WindowsFormsApp1.Web;
 using Microsoft.Office.Interop.Excel;
+using System.Net;
 
 namespace WindowsFormsApp1
 {
@@ -58,6 +59,7 @@ namespace WindowsFormsApp1
             AddMenu("Result", new EventHandler(ShowResult));
             AddMenu("Senpai", new EventHandler(Senpai));
             AddMenu("Kpoop", new EventHandler(Kpoop));
+            AddMenu("Add", new EventHandler(Add));
             Task t = new Task(async () => await Auth());
             t.Start();
             this.BringToFront();
@@ -78,7 +80,7 @@ namespace WindowsFormsApp1
             return season;
         }
 
-        private async void Senpai(object sender, EventArgs e)
+        private async Task Senpai(bool add)
         {
             string name = "FedererSenpaiList";
             string path = Path.Combine(web.ResultPath, "MAL", $"{name}.json");
@@ -87,12 +89,12 @@ namespace WindowsFormsApp1
 
             foreach (Anime anime in l)
             {
-                Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song), anime.Artist);
-                if(spoti == null)
+                Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song, anime.Artist), anime.Artist, anime.Song);
+                if (spoti == null)
                 {
                     error.Add(anime.Clone());
                     myProgressBar1.Value++;
-                    continue;
+                    continue; 
                 }
                 spoti.Anime = anime.Clone();
                 if (anime.Header.Equals("Continuing"))
@@ -100,7 +102,14 @@ namespace WindowsFormsApp1
                 list.Add(spoti);
                 myProgressBar1.Value++;
             }
-            list.ToFile(Path.Combine(web.ResultPath, "Spotify", $"anime {name} mix.json"));
+            if(add)
+            {
+                JsonConvert.DeserializeObject<List<Spotify>>(Path.Combine(web.ResultPath, "Spotify", $"anime {name} mix.json")).Union(list).ToList().ToFile(Path.Combine(web.ResultPath, "Spotify", $"anime {name} mix.json"));
+            }
+            else
+            {
+                list.ToFile(Path.Combine(web.ResultPath, "Spotify", $"anime {name} mix.json"));
+            }
             dataGridView1.DataSource = list;
             dataGridView1.Tag = name;
             //foreach(List<string> l in list.Select(x => "spotify:track:" + x.Id).ToList().Split(100))
@@ -108,7 +117,10 @@ namespace WindowsFormsApp1
             //await spotify.Playlists.AddItems(pl.Id, new PlaylistAddItemsRequest(l));
             //}
             web.WindowState = FormWindowState.Maximized;
-
+        }
+        private async void Senpai(object sender, EventArgs e)
+        {
+            await Senpai(false);
         }
 
         private async void Search(object sender, EventArgs e)
@@ -128,7 +140,7 @@ namespace WindowsFormsApp1
             web.myProgressBar1.Maximum = l.Count;
             foreach (Anime anime in l)
             {
-                Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song), anime.Artist);
+                Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song, anime.Artist), anime.Artist, anime.Song);
                 spoti.Anime = anime.Clone();
                 if (anime.Header.Equals("Continuing"))
                     spoti.Add = false;
@@ -146,7 +158,7 @@ namespace WindowsFormsApp1
         }
 
         private static async void CreatePlaylist(object sender, EventArgs e)
-        {
+        { 
             FullPlaylist pl = await spotify.Playlists.Create(userid, new PlaylistCreateRequest($"Anime {web.dataGridView1.Tag.ToString().FirstLetterToUpperCase()} Mix"));
             playlist = pl.Id;
 
@@ -209,6 +221,86 @@ namespace WindowsFormsApp1
             //var sdafgklh= asfd.Tracks.Items.Min(x => x.Artists.Min(y => ExtensionMethods.Distance(y.Name, "AvrilLavigne")));
             await spotify.Playlists.Create("316b4swabpspq4guu4yzvz5jnz4q", new PlaylistCreateRequest("Prueba"));
         }
+
+        private async void Add(object sender, EventArgs e)
+        {
+            WebRequest request = WebRequest.Create($"https://accounts.spotify.com/api/token");
+            request.ContentType = "application/x-www-form-urlencoded";
+            //request.Headers.Add($"Basic {clientid}: {clientsecret}");
+            request.Method = "POST";
+            string stringData = $"grant_type=client_credentials&client_id={clientid}&client_secret={clientsecret}"; // place body here
+            var data = Encoding.Default.GetBytes(stringData); // note: choose appropriate encoding
+            using (Stream writer = request.GetRequestStream())
+            {
+                writer.Write(data, 0, data.Length);
+            }
+
+            WebResponse response = request.GetResponse();
+            AccessToken accessToken;
+            using(StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responsestring = reader.ReadToEnd();
+                accessToken = JsonConvert.DeserializeObject<AccessToken>(responsestring);
+            }
+
+            request = WebRequest.Create($"https://api.spotify.com/v1/users/{userid}/playlists");
+            request.Method = "GET";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.Headers.Add("Authorization", $"Bearer {accessToken.access_token}");
+            response = request.GetResponse();
+            PlaylistList playlist;
+            using(StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responsestring = reader.ReadToEnd();
+                playlist = JsonConvert.DeserializeObject<PlaylistList>(responsestring);
+            }
+
+            ComboBox cb = new ComboBox();
+            cb.DisplayMember = "name";
+            cb.DataSource = playlist.items;
+            MyControl mc = new MyControl(cb);
+            if (mc.isOK())
+            {            
+                List<Spotify> list = (web.dataGridView1.DataSource as List<Spotify>).Where(x => x.Add).ToList();
+                foreach (List<string> l2 in list.Select(x => "spotify:track:" + x.Id).ToList().Split(100))
+                {
+                    await spotify.Playlists.AddItems((cb.SelectedItem as Item).id, new PlaylistAddItemsRequest(l2));
+                }
+
+                return;
+
+                AutoWeb aw = new AutoWeb("https://myanimelist.net", false);
+                aw.ShowDialog();
+                List<Anime> l = MAL.GetAnimes("Address.txt").Where(x => x.Song != "No opening theme" && x.Song != "No ending theme").ToList();
+                web.myProgressBar1.Maximum = l.Count;
+                foreach (Anime anime in l)
+                {
+                    WebRequest request2 = WebRequest.Create($"https://api.spotify.com/v1/search?q=remaster%2520track%3A{anime.Song}%2520artist%3A{anime.Artist}&type=track&market=JP");
+                    request2.ContentType = "application/UTF-8";
+                    request2.Method = "GET";
+                    request.Headers.Add("Authorization", $"Bearer {accessToken.access_token}");
+                    WebResponse response2 = request2.GetResponse();
+                    using (StreamReader reader = new StreamReader(response2.GetResponseStream()))
+                    {
+                        string responsestring = reader.ReadToEnd();
+                    }
+                    Spotify spoti = ProcessSpotify(await SearchTrack(anime.Song, anime.Artist), anime.Artist, anime.Song);
+                    if (spoti == null)
+                    {
+                        error.Add(anime.Clone());
+                        myProgressBar1.Value++;
+                        continue;
+                    }
+                    spoti.Anime = anime.Clone();
+                    list.Add(spoti);
+                    myProgressBar1.Value++;
+                }
+                dataGridView1.DataSource = list;
+                    dataGridView1.Tag = "Address";
+                    web.WindowState = FormWindowState.Maximized;
+            }
+
+        }
         private async void Kpoop(object sender, EventArgs e)
         {
             Paging<PlaylistTrack<IPlayableItem>> kpopmix = await spotify.Playlists.GetItems("37i9dQZF1EQpesGsmIyqcW");
@@ -230,11 +322,11 @@ namespace WindowsFormsApp1
                 await spotify.Playlists.AddItems("2w4i6mlSsBMOE3BwVEKxux", request);
             MessageBox.Show(kpopmixlist.Except(kpooplist).Count().ToString() + " items added.");
         }
-        private async Task<SearchResponse> SearchTrack(string title)
+        private async Task<SearchResponse> SearchTrack(string title, string artist)
         {
             try
             {
-                SearchRequest request = new SearchRequest(SearchRequest.Types.Track, title);
+                SearchRequest request = new SearchRequest(SearchRequest.Types.Track, title) { Market = "JP"};
                 return await spotify.Search.Item(request);
             }
             catch(Exception ex)
@@ -243,12 +335,17 @@ namespace WindowsFormsApp1
             }
         }
 
-        private Spotify ProcessSpotify(SearchResponse response, string artist)
+        private Spotify ProcessSpotify(SearchResponse response, string artist, string song)
         {
             try
             {
-                FullTrack track = response.Tracks.Items.FirstOrDefault(x => x.Artists.Select(y => y.Name).Contains(artist));
+                FullTrack track = response.Tracks.Items.FirstOrDefault(x => x.Artists.Select(y => y.Name.ToLower()).Contains(artist.ToLower()) || x.Artists.Any(y=>artist.ToLower().Contains(y.Name.ToLower())));
                 bool add = true;
+                if (track == null)
+                {
+                    track = response.Tracks.Items.FirstOrDefault(x=>x.Name.ToLower().Contains(song.ToLower()) || song.ToLower().Contains(x.Name.ToLower()));
+                    add = false;
+                }
                 if (track == null)
                 {
                     track = response.Tracks.Items.First();
@@ -271,43 +368,74 @@ namespace WindowsFormsApp1
                 e.CellStyle.BackColor = Color.LightBlue;
         }
 
-        private async void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridView1.Columns[e.ColumnIndex].GetType() == typeof(DataGridViewButtonColumn))
+            try
             {
                 string header = dataGridView1.Columns[e.ColumnIndex].HeaderText;
-                if (header.Equals("Change"))
+                if (header.Equals("Anime"))
                 {
                     Spotify s = dataGridView1.Rows[e.RowIndex].DataBoundItem as Spotify;
-                    SearchResponse response = await SearchTrack(s.Anime.Song);
-                    ComboBox cb = new ComboBox();
-                    cb.DataSource = response.Tracks.Items.Select(x => $"{x.Name} ({string.Join(",", x.Artists.Select(y => y.Name))}) [{x.Id}]").ToList();
-                    MyControl mc = new MyControl(cb);
-                    if (mc.isOK())
-                    {
-                        FullTrack track = response.Tracks.Items.Single(x => x.Id == mc.GetComboBox().ToString().Split(new char[] { '[', ']' })[1]);
-                        s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = true, Anime = s.Anime });
-                        dataGridView1.Refresh();
-                    }
+                    Process.Start(new ProcessStartInfo("cmd", "/c start chrome.exe \"" + s.Anime.URL + "\""));
                 }
-                else if (header.Equals("Preview"))
+            }
+            catch
+            {
+                return;
+            }
+            dataGridView1.Refresh();
+            ((List<Spotify>)dataGridView1.DataSource).ToFile(Path.Combine(web.ResultPath, "Spotify", $"anime {dataGridView1.Tag} mix.json"));
+        }
+        private async void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                if (dataGridView1.Columns[e.ColumnIndex].GetType() == typeof(DataGridViewButtonColumn))
                 {
-                    Spotify s = dataGridView1.Rows[e.RowIndex].DataBoundItem as Spotify;
-                    FullTrack track = await spotify.Tracks.Get(s.Id);
-                    string preview = track.PreviewUrl;
-                    if (!string.IsNullOrEmpty(preview))
+                    string header = dataGridView1.Columns[e.ColumnIndex].HeaderText;
+                    if (header.Equals("Change"))
                     {
-                        WebBrowser wb = new WebBrowser();
-                        wb.Navigate(preview);
-                        wb.Navigate(preview);
+                        Process.Start("cmd.exe", "/C taskkill /IM chrome.exe /F");
+                        Spotify s = dataGridView1.Rows[e.RowIndex].DataBoundItem as Spotify;
+                        string uri = $"https://open.spotify.com/search/{s.Anime.Song.Replace(" ", "%20")}%20{s.Anime.Artist.Replace(" ", "%20")}/tracks";
+                        Process.Start(new ProcessStartInfo("cmd", "/c start chrome.exe \"" + uri + "\""));
+                        
+                        //BrowserUtil.Open(new Uri(uri));
+                        /*SearchResponse response = await SearchTrack(s.Anime.Song, s.Anime.Artist);
+                        ComboBox cb = new ComboBox();
+                        cb.DataSource = response.Tracks.Items.Select(x => $"{x.Name} ({string.Join(",", x.Artists.Select(y => y.Name))}) [{x.Id}]").ToList();
+                        MyControl mc = new MyControl(cb);
+                        if (mc.isOK())
+                        {
+                            FullTrack track = response.Tracks.Items.Single(x => x.Id == mc.GetComboBox().ToString().Split(new char[] { '[', ']' })[1]);
+                            s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = true, Anime = s.Anime });
+                            dataGridView1.Refresh();
+                        }*/
                     }
-                    if (!string.IsNullOrEmpty(track.Uri))
+                    else if (header.Equals("Preview"))
                     {
-                        s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = true, Anime = s.Anime });
-                        dataGridView1.Refresh();
+                        Spotify s = dataGridView1.Rows[e.RowIndex].DataBoundItem as Spotify;
+                        FullTrack track = await spotify.Tracks.Get(s.Id);
+                        string preview = track.PreviewUrl;
+                        /*if (!string.IsNullOrEmpty(preview))
+                        {
+                            WebBrowser wb = new WebBrowser();
+                            wb.Navigate(preview);
+                            wb.Navigate(preview);
+                        }*/
+                        if (!string.IsNullOrEmpty(track.Uri))
+                        {
+                            s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = true, Anime = s.Anime });
+                            dataGridView1.Refresh();
+                        }
                     }
                 }
             }
+            catch
+            {
+                return;
+            }
+            dataGridView1.Refresh();
             ((List<Spotify>)dataGridView1.DataSource).ToFile(Path.Combine(web.ResultPath, "Spotify", $"anime {dataGridView1.Tag} mix.json"));
         }
 
@@ -359,5 +487,70 @@ namespace WindowsFormsApp1
             Add = true;
             Anime = s.Anime.Clone();
         }
+    }
+
+    public class AccessToken
+    {
+
+        public string access_token;
+        public string token_type;
+        public int expires_in;
+    }
+
+    public class ExternalUrls
+    {
+        public string spotify { get; set; }
+    }
+
+    public class SpotifyImage
+    {
+        public int? height { get; set; }
+        public string url { get; set; }
+        public int? width { get; set; }
+    }
+
+    public class Item
+    {
+        public bool collaborative { get; set; }
+        public string description { get; set; }
+        public ExternalUrls external_urls { get; set; }
+        public string href { get; set; }
+        public string id { get; set; }
+        public List<SpotifyImage> images { get; set; }
+        public string name { get; set; }
+        public Owner owner { get; set; }
+        public object primary_color { get; set; }
+        public bool @public { get; set; }
+        public string snapshot_id { get; set; }
+        public Tracks tracks { get; set; }
+        public string type { get; set; }
+        public string uri { get; set; }
+    }
+
+    public class Owner
+    {
+        public string display_name { get; set; }
+        public ExternalUrls external_urls { get; set; }
+        public string href { get; set; }
+        public string id { get; set; }
+        public string type { get; set; }
+        public string uri { get; set; }
+    }
+
+    public class PlaylistList
+    {
+        public string href { get; set; }
+        public int limit { get; set; }
+        public object next { get; set; }
+        public int offset { get; set; }
+        public object previous { get; set; }
+        public int total { get; set; }
+        public List<Item> items { get; set; }
+    }
+
+    public class Tracks
+    {
+        public string href { get; set; }
+        public int total { get; set; }
     }
 }

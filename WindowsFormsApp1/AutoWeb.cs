@@ -18,29 +18,31 @@ using System.Text.Json;
 using System.Threading;
 using System.Collections;
 using CefSharp.DevTools.DOM;
+using System.Runtime.Remoting.Messaging;
 
 
 namespace WindowsFormsApp1
 {
     public partial class AutoWeb : Base
     {
-        public bool ready = false;
+        public bool ready = true;
+        public bool cerrar = false;
         public AutoWeb()
         {
-            InitializeComponent();
-            this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1_LoadingStateChanged);
-            this.Load += Start;
-            chromiumWebBrowser1.LoadUrl("https://myanimelist.net/anime/32729/Orange");
+                InitializeComponent();
+                this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1_LoadingStateChanged);
+                this.Load += Start;
+                chromiumWebBrowser1.LoadUrl("https://myanimelist.net/animelist/FedererMagic?order=5&status=2");
         }
 
-        public AutoWeb (string url)
+        public AutoWeb (string url, bool cerrar)
         {
             InitializeComponent();
+            this.cerrar = cerrar;
             //this.Opacity = 0;
             this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1Senpai_LoadingStateChanged);
             chromiumWebBrowser1.LoadUrl(url);
         }
-
         public HtmlDocument GetDoc()
         {
             Task<string> task = chromiumWebBrowser1.GetSourceAsync();
@@ -54,32 +56,54 @@ namespace WindowsFormsApp1
         private void Start(object sender, EventArgs e)
         {
             AddMenu("Senpai", new EventHandler(Senpai));
+            AddMenu("Json", new EventHandler(Json));
             this.BringToFront();
         }
 
+        private async void Json(object sender, EventArgs e)
+        {
+            string s = await chromiumWebBrowser1.GetSourceAsync();
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(s);
+            HtmlNodeCollection col = doc.DocumentNode.SelectNodes("//tbody[@class='list-item']");
+            List<AnimeURL> t = new List<AnimeURL>();
+            foreach (HtmlNode n in col)
+            {
+                HtmlNode y = n.SelectSingleNode(".//td[@class='data title clearfix']").SelectSingleNode(".//a[@class='link sort']");
+                t.Add(new AnimeURL() { Name = y.InnerText, Url = y.GetAttributeValue("href", string.Empty) });
+            }
+            t.ToFile(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"));
+        }
         private async void Senpai(object sender, EventArgs e)
         {
             string json = File.ReadAllText(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"));
             List<Anime> animelist = json.JsonToList<Anime>();
+
+            ready = false;
             foreach (Anime a in animelist)
             {
                 chromiumWebBrowser1.LoadUrl(a.URL);
                 Thread.Sleep(1000);
                 Application.DoEvents();
             }
+            ready = true;
         }
 
         private async void chromiumWebBrowser1Senpai_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if (!e.IsLoading)
             {
+                while (!chromiumWebBrowser1.CanExecuteJavascriptInMainFrame)
+                    Thread.Sleep(10);
+
                 string script = "document.getElementsByClassName(\" css-47sehv\")[0].click();";
                 JavascriptResponse res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
                 string s = await chromiumWebBrowser1.GetSourceAsync();
                 MAL.doc = new HtmlDocument();
                 MAL.doc.LoadHtml(s);
                 Thread.Sleep(500);
-                Cerrar();
+                if (MAL.doc.Text.Contains("myanimelist"))
+                    Cerrar();
             }
         }
 
@@ -93,7 +117,10 @@ namespace WindowsFormsApp1
             }
             else
             {
-                this.Close();
+                WriteTempFile("Address.txt", chromiumWebBrowser1.GetSourceAsync().Result);
+                Thread.Sleep(500);
+                if (cerrar)
+                    this.Close();
             }
         }
 
@@ -101,6 +128,9 @@ namespace WindowsFormsApp1
         {
             if(!e.IsLoading)
             {
+                while(!chromiumWebBrowser1.CanExecuteJavascriptInMainFrame)
+                    Thread.Sleep(100);
+
                 string script = "document.getElementsByClassName(\" css-47sehv\")[0].click();";
                 JavascriptResponse res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
 
@@ -116,13 +146,18 @@ namespace WindowsFormsApp1
                         var startDate = res.Result;
                     }
 
+                Thread.Sleep(1000);
+
                 script = "window.scrollTo(0, document.body.scrollHeight);";
                 res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
 
                 if (res.Success && res.Result != null)
-                {
+                { 
                     var startDate = res.Result;
                 }
+
+                Thread.Sleep(1000);
+
                 string s = await chromiumWebBrowser1.GetSourceAsync();
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(s);
@@ -133,9 +168,19 @@ namespace WindowsFormsApp1
                     HtmlNode y = n.SelectSingleNode(".//td[@class='data title clearfix']").SelectSingleNode(".//a[@class='link sort']");
                     t.Add(new AnimeURL() { Name = y.InnerText, Url = y.GetAttributeValue("href", string.Empty) });
                 }
-                if(t.Count > 300)
-                ExtensionMethods.WriteToFile(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"), t.ToJson());
 
+                if (t.Count > 600)
+                ExtensionMethods.WriteToFile(Path.Combine(ResultPath, "MAL", $"FedererSenpai.json"), t.ToJson());
+                else
+                {
+                    script = "window.scrollTo(0, document.body.scrollHeight);";
+                    res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
+
+                    if (res.Success && res.Result != null)
+                    {
+                        var startDate = res.Result;
+                    }
+                }
             }
 
         }
@@ -151,64 +196,4 @@ namespace WindowsFormsApp1
         public string Url { get => url; set => url = "https://myanimelist.net" + value; }
     }
 
-    public class MyAnime
-    {
-        public int status;
-        public int score;
-        public string tags;
-        public int is_rewatching;
-        public int num_watched_episodes;
-        public int created_at;
-        public int updated_at;
-        public string anime_title;
-        public string anime_title_eng;
-        public int anime_num_episodes;
-        public int anime_airing_status;
-        public int anime_id;
-        public string anime_studios;
-        public string anime_licensors;
-        public string anime_season;
-        public int anime_total_members;
-        public int anime_total_scores;
-        public int anime_socre_val;
-        public int anime_score_diff;
-        public int anime_popularity;
-        public bool has_episode_video;
-        public bool has_promotion_video;
-        public bool has_video;
-        public string video_url;
-        public List<Genre> genres;
-        public List<Demographic> demographics;
-        public List<Theme> themes;
-        public string title_localized;
-        public string anime_url;
-        public string anime_image_path;
-        public bool is_added_to_list;
-        public string anime_media_type_string;
-        public string anime_mpaa_rating_string;
-        public string start_date_string;
-        public string finish_date_string;
-        public string anime_start_date_string;
-        public string anime_end_date_string;
-        public string days_string;
-        public string storage_string;
-        public string priority_string;
-        public string notes;
-        public string editable_notes;
-    }
-    public class Genre
-    {
-        public int id;
-        public string name;
-    }
-    public class Demographic
-    {
-        public int id;
-        public string name;
-    }
-    public class Theme
-    {
-        public int id;
-        public string name;
-    }
 }

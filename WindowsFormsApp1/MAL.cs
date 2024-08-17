@@ -1,5 +1,4 @@
 ﻿using ExcelDataReader;
-using Org.BouncyCastle.Cms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -56,6 +55,10 @@ namespace WindowsFormsApp1
         private void Senpai(object sender, EventArgs e)
         {
             season = "Senpai";
+            foreach(string file in Directory.GetFiles(Path.Combine(ResultPath, season)))
+            {
+                File.Move(file, Path.Combine(ResultPath, season, "Old", Path.GetFileName(file)));
+            }
             string json = File.ReadAllText(Path.Combine(malFolder, $"FedererSenpai.json"));
             List<Anime> animelist = json.JsonToList<Anime>();
             progressBar1.Maximum = animelist.Count();
@@ -165,18 +168,22 @@ namespace WindowsFormsApp1
         private void ProcessAnime(Anime animeBase)
         {
             string path = Path.Combine(ResultPath, season, $"{animeBase.Name}.txt".CheckFileName());
+            if (File.Exists(Path.Combine(ResultPath, season, "Old", Path.GetFileName(path))))
+                return;
             HtmlDocument doc = new HtmlDocument();
             using (WebClient client = new WebClient() { Encoding = System.Text.Encoding.UTF8 })
             {
-                try { string downloadString = client.DownloadString(animeBase.URL); 
-                ExtensionMethods.WriteToFile(path, downloadString);
-                doc.LoadHtml(downloadString);
+                try
+                {
+                        string downloadString = client.DownloadString(animeBase.URL);
+                        ExtensionMethods.WriteToFile(path, downloadString);
+                        doc.LoadHtml(downloadString);
                 }
                 catch
                 {
                     try
                     {
-                        AutoWeb autoweb = new AutoWeb(animeBase.URL);
+                        AutoWeb autoweb = new AutoWeb(animeBase.URL, true);
                         autoweb.ShowDialog();
                         doc = MAL.doc;
                         ExtensionMethods.WriteToFile(path, doc.ToString());
@@ -184,124 +191,101 @@ namespace WindowsFormsApp1
                         Thread.Sleep(500);
                     }
                     catch
-                    { error.Add(animeBase);
+                    { 
+                        error.Add(animeBase);
                         return;
                     } 
                 }
             }
 
+            ProcessAnimeDoc(doc, animeBase);
+            animes = animes.GroupBy(x => new { x.Song, x.Artist }).Select(y=>y.First()).ToList();
+        }
+
+        private static void ProcessAnimeDoc(HtmlDocument doc, Anime animeBase)
+        {
             Anime anime;
             HtmlNode openingNode = doc.DocumentNode.SelectSingleNode("//div[@class='theme-songs js-theme-songs opnening']");
             HtmlNode endingNode = doc.DocumentNode.SelectSingleNode("//div[@class='theme-songs js-theme-songs ending']");
 
-            if (openingNode.SelectNodes(".//td").Any(x => x.InnerText.Contains("No opening themes")))
+            try
             {
-                anime = animeBase.Clone();
-                anime.Type = "Opening";
-                anime.Song = "No opening theme";
-                animes.Add(anime.Clone());
-            }
-            else if (openingNode.SelectSingleNode(".//td[@width='84%']") != null)
-            {
-                foreach (HtmlNode subnode in openingNode.SelectNodes(".//td[@width='84%']"))
+                if (openingNode.SelectNodes(".//td").Any(x => x.InnerText.Contains("No opening themes")))
                 {
                     anime = animeBase.Clone();
                     anime.Type = "Opening";
-
-                    anime.Song = subnode.InnerText;
-                    if (subnode.SelectSingleNode(".//span[@class='theme-song-index']") != null)
-                    {
-                        anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-index']").InnerText, string.Empty);
-                    }
-                    if (subnode.SelectSingleNode(".//span[@class='theme-song-episode']") != null)
-                    {
-                        anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-episode']").InnerText, string.Empty);
-                    }
-
-                    if (subnode.SelectSingleNode(".//span[@class='theme-song-artist']") == null)
-                    {
-                        anime.Artist = subnode.InnerText;
-                    }
-                    else
-                    {
-                        anime.Artist = subnode.SelectSingleNode(".//span[@class='theme-song-artist']").InnerText;
-                    }
+                    anime.Song = "No opening theme";
                     animes.Add(anime.Clone());
                 }
-            }
+                else if (openingNode.SelectSingleNode(".//td[@width='84%']") != null)
+                {
+                    foreach (HtmlNode subnode in openingNode.SelectNodes(".//td[@width='84%']"))
+                    {
+                        anime = animeBase.Clone();
+                        anime.Type = "Opening";
 
-            if (endingNode.SelectNodes(".//td").Any(x => x.InnerText.Contains("No ending themes")))
-            {
-                anime = animeBase.Clone();
-                anime.Type = "Ending";
-                anime.Song = "No ending theme";
-                animes.Add(anime.Clone());
+                        anime.Song = subnode.InnerText;
+                        if (subnode.SelectSingleNode(".//span[@class='theme-song-index']") != null)
+                        {
+                            anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-index']").InnerText, string.Empty);
+                        }
+                        if (subnode.SelectSingleNode(".//span[@class='theme-song-episode']") != null)
+                        {
+                            anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-episode']").InnerText, string.Empty);
+                        }
+
+                        if (subnode.SelectSingleNode(".//span[@class='theme-song-artist']") == null)
+                        {
+                            anime.Artist = subnode.InnerText;
+                        }
+                        else
+                        {
+                            anime.Artist = subnode.SelectSingleNode(".//span[@class='theme-song-artist']").InnerText;
+                        }
+                        animes.Add(anime.Clone());
+                    }
+                }
             }
-            else if (endingNode.SelectSingleNode(".//td[@width='84%']") != null)
+            catch { }
+            try
             {
-                foreach (HtmlNode subnode in endingNode.SelectNodes(".//td[@width='84%']"))
+                if (endingNode.SelectNodes(".//td").Any(x => x.InnerText.Contains("No ending themes")))
                 {
                     anime = animeBase.Clone();
                     anime.Type = "Ending";
-                    anime.Song = subnode.InnerText;
-                    if (subnode.SelectSingleNode(".//span[@class='theme-song-index']") != null)
-                    {
-                        anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-index']").InnerText, string.Empty);
-                    }
-                    if (subnode.SelectSingleNode(".//span[@class='theme-song-episode']") != null)
-                    {
-                        anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-episode']").InnerText, string.Empty);
-                    }
-
-                    if (subnode.SelectSingleNode(".//span[@class='theme-song-artist']") == null)
-                    {
-                        anime.Artist = subnode.InnerText;
-                    }
-                    else
-                    {
-                        anime.Artist = subnode.SelectSingleNode(".//span[@class='theme-song-artist']").InnerText;
-                    }
+                    anime.Song = "No ending theme";
                     animes.Add(anime.Clone());
                 }
+                else if (endingNode.SelectSingleNode(".//td[@width='84%']") != null)
+                {
+                    foreach (HtmlNode subnode in endingNode.SelectNodes(".//td[@width='84%']"))
+                    {
+                        anime = animeBase.Clone();
+                        anime.Type = "Ending";
+                        anime.Song = subnode.InnerText;
+                        if (subnode.SelectSingleNode(".//span[@class='theme-song-index']") != null)
+                        {
+                            anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-index']").InnerText, string.Empty);
+                        }
+                        if (subnode.SelectSingleNode(".//span[@class='theme-song-episode']") != null)
+                        {
+                            anime.Song = anime.Song.Replace(subnode.SelectSingleNode(".//span[@class='theme-song-episode']").InnerText, string.Empty);
+                        }
+
+                        if (subnode.SelectSingleNode(".//span[@class='theme-song-artist']") == null)
+                        {
+                            anime.Artist = subnode.InnerText;
+                        }
+                        else
+                        {
+                            anime.Artist = subnode.SelectSingleNode(".//span[@class='theme-song-artist']").InnerText;
+                        }
+                        animes.Add(anime.Clone());
+                    }
+                }
             }
-
-            /*GetChild(doc.DocumentNode.SelectSingleNode("//h2[.='Opening Theme']").ChildNodes);
-            GetChild(doc.DocumentNode.ChildNodes);
-
-            string[] lines = File.ReadAllLines(path);
-            progressBar2.Maximum = lines.Length;
-            string tipo = string.Empty;
-
-            bool anadir = false;
-
-            foreach (string line in lines)
-            {
-                try
-                {
-                    if (NodeAnime(line, ref anime))
-                        anadir = true;
-                }
-                catch (Exception ex)
-                {
-                    try
-                    {
-                        NodeAnime(line.Replace("&nbsp;", string.Empty), ref anime);
-                    }
-                    catch (Exception exex)
-                    {
-
-                    }
-                }                
-                UpdateProgress(progressBar2);
-                if(anadir)
-                {
-                    animes.Add(anime);
-                    anime = animeBase;
-                }
-            }*/
-            animes = animes.GroupBy(x => new { x.Song, x.Artist }).Select(y=>y.First()).ToList();
+            catch { }
         }
-
         private void ResetProgress(ProgressBar pb)
         {
             pb.Value = 0;
@@ -500,6 +484,17 @@ namespace WindowsFormsApp1
                 c++;
             }
             return matrix;
+        }
+
+        public static List<Anime> GetAnimes(string file)
+        {
+            MAL mal = new MAL();
+            animes.Clear();
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(mal.ReadTempFile(file));
+            ProcessAnimeDoc(doc, new Anime());
+            animes.ToFile(Path.Combine(mal.TempPath, "AddressAnime.txt"));
+            return animes;
         }
     }
 

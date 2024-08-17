@@ -11,10 +11,10 @@ using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
 using System.IO;
 using HtmlAgilityPack;
-using Org.BouncyCastle.Asn1.Crmf;
 using System.Windows.Forms;
 using System.Runtime.CompilerServices;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace WindowsFormsApp1
 {
@@ -166,7 +166,7 @@ namespace WindowsFormsApp1
 
         public static string ToJson<T>(this List<T> l)
         {
-            return JsonConvert.SerializeObject(l);
+            return JsonConvert.SerializeObject(l, Formatting.Indented);
         }
 
         public static void ToFile(this string content, string filePath)
@@ -299,7 +299,7 @@ namespace WindowsFormsApp1
                 ComboBox cb = c as ComboBox;
                 Graphics g = cb.CreateGraphics();
                 int max = cb.Width;
-                foreach (object o in (List<string>)cb.DataSource)
+                foreach (object o in cb.Items)
                 {
                     float width = g.MeasureString(cb.GetItemText(o), cb.Font).Width;
                     if (width > max)
@@ -379,5 +379,26 @@ namespace WindowsFormsApp1
             return (T)values.GetValue(random.Next(values.Length));
         }
 
+        public static void ScreenShot(System.Drawing.Rectangle bounds, string path)
+        {
+            using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+            {
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.CopyFromScreen(new System.Drawing.Point(bounds.Left, bounds.Top), System.Drawing.Point.Empty, bounds.Size);
+                }
+                bitmap.Save(path, ImageFormat.Png, true);
+            }
+        }
+
+        public static void Save(this Bitmap bitmap, string filename, ImageFormat format, bool overwrite)
+        {
+            if(overwrite)
+            {
+                if (File.Exists(filename))
+                    File.Delete(filename);
+            }
+            bitmap.Save(filename, format);
+        }
     }
 }
