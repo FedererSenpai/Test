@@ -46,7 +46,7 @@ namespace WindowsFormsApp1
 
         private void MyShown(object sender, EventArgs e)
         {
-            Page5();
+            Page6();
             //WorkingSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //WorkingSocket.Connect("192.168.150.64", 9090);
             /*t.Interval = 60000;
@@ -449,6 +449,13 @@ namespace WindowsFormsApp1
             {
                 File.Copy(temp, Path.Combine("C:\\TicketBai\\24646462", Path.GetRandomFileName() + ".xml"), true);
             }
+        }
+
+        private void Page6()
+        {
+            ListBox lb = new ListBox();
+            lb.Dock = DockStyle.Fill;
+            tabPage6.Controls.Add(lb);
             DriveInfo c = new DriveInfo("C:\\");
             FileInfo fi = new FileInfo("C:\\SW1100.zip");
             Int64 size = fi.Length;
@@ -463,5 +470,5 @@ namespace WindowsFormsApp1
                 cont++;
             }
         }
-   }
+    }
 }
