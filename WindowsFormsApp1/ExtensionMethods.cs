@@ -15,6 +15,9 @@ using System.Windows.Forms;
 using System.Runtime.CompilerServices;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using CefSharp.Web;
+using Newtonsoft.Json.Linq;
 
 namespace WindowsFormsApp1
 {
@@ -157,6 +160,14 @@ namespace WindowsFormsApp1
                     
             }
             return row;
+        }
+
+        public static List<T> FileToList<T>(string file)
+        {
+            if(!File.Exists(file))
+                return new List<T>();
+            string json = File.ReadAllText(file);
+            return json.JsonToList<T>();
         }
 
         public static List<T> JsonToList<T>(this string s)
@@ -399,6 +410,30 @@ namespace WindowsFormsApp1
                     File.Delete(filename);
             }
             bitmap.Save(filename, format);
+        }
+
+        public static string ToListString<T>(this List<T> l, string property = "")
+        {
+            var methodInfo = typeof(T).GetMethods().Single(x => x.Name == "ToString" && x.GetParameters().Length == 0);
+            if (methodInfo.DeclaringType != typeof(T) && !string.IsNullOrEmpty(property))
+            {
+                return string.Join(", ", l.Select(x => typeof(T).GetProperty(property).GetValue(x).ToString()));
+            }
+            else
+            {
+                return string.Join(", ", l.Select(x => x.ToString()));
+            }
+        }
+
+        public static void Log(this Exception ex, IWin32Window owner)
+        {
+            MessageBox.Show(owner, ex.Message + Environment.NewLine + ex.StackTrace);
+        }
+
+        public static string AsJSON(this string s)
+        {
+            JToken parsedJson = JToken.Parse(s);
+            return parsedJson.ToString(Formatting.Indented);
         }
     }
 }

@@ -96,5 +96,20 @@ namespace WindowsFormsApp1
         {
             return File.ReadAllText(Path.Combine(TempPath, file));
         }
+
+        public string ResultFile(string file, bool subfolder = true)
+        {
+            if(subfolder)
+                return Path.Combine(ResultPath, GetType().Name, file);
+            else
+                return Path.Combine(ResultPath, file);
+        }
+
+        public void SaveResultFile(string file, string content, bool subfolder = true)
+        {
+            if (File.Exists(file))
+                File.Delete(file);
+            File.WriteAllText(ResultFile(file, subfolder), content, Encoding.UTF8);
+        }
     }
 }

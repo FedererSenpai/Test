@@ -351,7 +351,7 @@ namespace WindowsFormsApp1
                     track = response.Tracks.Items.First();
                     add = false;
                 }
-                return new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = add };
+                return new Spotify() { Track = track.Name, Author = track.Artists.ToListString("Name"), Id = track.Id, Add = add };
             }
             catch
             {
@@ -425,7 +425,7 @@ namespace WindowsFormsApp1
                         }*/
                         if (!string.IsNullOrEmpty(track.Uri))
                         {
-                            s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.First().Name, Id = track.Id, Add = true, Anime = s.Anime });
+                            s.Modify(new Spotify() { Track = track.Name, Author = track.Artists.ToListString("Name"), Id = track.Id, Add = true, Anime = s.Anime });
                             dataGridView1.Refresh();
                         }
                     }
@@ -474,9 +474,9 @@ namespace WindowsFormsApp1
         private bool add;
 
         public Anime Anime { get => anime; set => anime = value; }
+        public string Id { get => id; set => id = value; }
         public string Track { get => track; set => track = value; }
         public string Author { get => author; set => author = value; }
-        public string Id { get => id; set => id = value; }
         public bool Add { get => add; set => add = value; }
 
         public void Modify(Spotify s)

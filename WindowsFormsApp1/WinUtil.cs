@@ -42,6 +42,8 @@ namespace WindowsFormsApp1
         [DllImport("user32.dll")]
         public static extern long LockWindowUpdate(IntPtr Handle);
 
+        private const int SW_MAXIMIZE = 3;
+        private const int SW_MINIMIZE = 6;
         public const int SW_RESTORE = 9;
         [DllImport("dibalcrypt.dll")]
         public static extern int Decrypt(Int32[] sBufferIn, int longInput, ref byte bufferOut, ref int ptrLongOutput, Int32 myE, Int32 myD, Int32 myN);
@@ -59,7 +61,7 @@ namespace WindowsFormsApp1
             {
                 IntPtr hWnd = IntPtr.Zero;
                 hWnd = objProcesses[0].MainWindowHandle;
-                ShowWindowAsync(new HandleRef(null, hWnd), SW_RESTORE);
+                ShowWindowAsync(new HandleRef(null, hWnd), SW_MAXIMIZE);
                 SetForegroundWindow(objProcesses[0].MainWindowHandle);
             }
         }

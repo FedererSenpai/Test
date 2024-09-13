@@ -46,11 +46,15 @@ namespace WindowsFormsApp1
 
         private void ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            string name = (sender as ToolStripItem).Text;
-            object form = Activator.CreateInstance(Type.GetType(currentnamespace + name, false, true));
-            (form as Base).ShowDialog();
-            this.Show();
+            try
+            {
+                this.Hide();
+                string name = (sender as ToolStripItem).Text;
+                object form = Activator.CreateInstance(Type.GetType(currentnamespace + name, false, true));
+                (form as Base).ShowDialog();
+                this.Show();
+            }
+            catch(Exception ex) { MessageBox.Show(this, ex.Message); }
         }
 
         private void New_Click(object sender, EventArgs e)

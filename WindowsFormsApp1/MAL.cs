@@ -166,7 +166,7 @@ namespace WindowsFormsApp1
         }
 
         private void ProcessAnime(Anime animeBase)
-        {
+        {       
             string path = Path.Combine(ResultPath, season, $"{animeBase.Name}.txt".CheckFileName());
             if (File.Exists(Path.Combine(ResultPath, season, "Old", Path.GetFileName(path))))
                 return;
