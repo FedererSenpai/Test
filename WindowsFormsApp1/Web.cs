@@ -26,6 +26,7 @@ using System.Net.Mail;
 using static WindowsFormsApp1.Web;
 using Microsoft.Office.Interop.Excel;
 using System.Net;
+using Swan.Logging;
 
 namespace WindowsFormsApp1
 {
@@ -39,8 +40,9 @@ namespace WindowsFormsApp1
         private static EmbedIOAuthServer _server;
         private static SpotifyClient spotify;
         private static List<Spotify> list = new List<Spotify>();
-        private static List<Anime> error = new List<Anime>();            
-        public Web()
+        private static List<Anime> error = new List<Anime>();
+        private static string youtubeid = "481114111248-u5ipv6go48scmilhra8r6dmrafp3fvhq.apps.googleusercontent.com";
+        public Web() 
         {
             InitializeComponent();
             //webBrowser1.ScriptErrorsSuppressed = true;
@@ -63,7 +65,7 @@ namespace WindowsFormsApp1
             Task t = new Task(async () => await Auth());
             t.Start();
             this.BringToFront();
-
+            web.Opacity = 1;
         }
 
         private static string ChooseSeason()
@@ -269,7 +271,7 @@ namespace WindowsFormsApp1
 
                 return;
 
-                AutoWeb aw = new AutoWeb("https://myanimelist.net", false);
+                AutoWeb aw = new AutoWeb("https://myanimelist.net", false, "");
                 aw.ShowDialog();
                 List<Anime> l = MAL.GetAnimes("Address.txt").Where(x => x.Song != "No opening theme" && x.Song != "No ending theme").ToList();
                 web.myProgressBar1.Maximum = l.Count;
@@ -307,6 +309,7 @@ namespace WindowsFormsApp1
             Paging <PlaylistTrack<IPlayableItem>> kpoop = await spotify.Playlists.GetItems("2w4i6mlSsBMOE3BwVEKxux");
             List<string> kpopmixlist = kpopmix.Items.Select(x => ((FullTrack)x.Track).Uri).ToList();
             List<string> kpooplist = kpoop.Items.Select(x => ((FullTrack)x.Track).Uri).ToList();
+            List<string> addlist;
             while (kpopmix.Next != null)
             {
                 kpopmix = await spotify.NextPage(kpopmix);
@@ -317,10 +320,11 @@ namespace WindowsFormsApp1
                 kpoop = await spotify.NextPage(kpoop);
                 kpooplist.AddRange(kpoop.Items.Select(x => ((FullTrack)x.Track).Uri).ToList());
             }
-            PlaylistAddItemsRequest request = new PlaylistAddItemsRequest(kpopmixlist.Except(kpooplist).ToList());
+            addlist = kpopmixlist.Except(kpooplist).ToList();
+            PlaylistAddItemsRequest request = new PlaylistAddItemsRequest(addlist);
             if(request.Uris.Count > 0)
                 await spotify.Playlists.AddItems("2w4i6mlSsBMOE3BwVEKxux", request);
-            MessageBox.Show(kpopmixlist.Except(kpooplist).Count().ToString() + " items added.");
+            MessageBox.Show(addlist.Count().ToString() + " items added.");
         }
         private async Task<SearchResponse> SearchTrack(string title, string artist)
         {

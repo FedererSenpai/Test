@@ -97,6 +97,8 @@
             this.Controls.Add(this.dataGridView1);
             this.Name = "Web";
             this.Text = "Web";
+            this.Opacity = 0;
+            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 

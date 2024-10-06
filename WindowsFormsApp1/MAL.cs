@@ -34,6 +34,8 @@ namespace WindowsFormsApp1
             InitializeComponent();
             this.Load += Start;
             malFolder = Path.Combine(ResultPath, "MAL");
+            Script = "document.getElementsByClassName(\" css-47sehv\")[0].click();";
+
         }
 
         static List<string> names = new List<string>();
@@ -165,7 +167,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void ProcessAnime(Anime animeBase)
+        private async void ProcessAnime(Anime animeBase)
         {       
             string path = Path.Combine(ResultPath, season, $"{animeBase.Name}.txt".CheckFileName());
             if (File.Exists(Path.Combine(ResultPath, season, "Old", Path.GetFileName(path))))
@@ -183,12 +185,13 @@ namespace WindowsFormsApp1
                 {
                     try
                     {
-                        AutoWeb autoweb = new AutoWeb(animeBase.URL, true);
+                        AutoWeb autoweb = new AutoWeb(animeBase.URL, true, "document.getElementsByClassName(\\\" css-47sehv\\\")[0].click();");
                         autoweb.ShowDialog();
                         doc = MAL.doc;
                         ExtensionMethods.WriteToFile(path, doc.ToString());
                         Application.DoEvents();
                         Thread.Sleep(500);
+                        autoweb.Dispose();
                     }
                     catch
                     { 

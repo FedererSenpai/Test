@@ -18,6 +18,9 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using CefSharp.Web;
 using Newtonsoft.Json.Linq;
+using RiotSharp.Endpoints.StaticDataEndpoint.ProfileIcons;
+using System.Diagnostics;
+using System.Web;
 
 namespace WindowsFormsApp1
 {
@@ -234,7 +237,7 @@ namespace WindowsFormsApp1
 
         public static void ToFile<T>(this List<T> l, string path)
         {
-            l.ToJson().ToFile(path);
+            HttpUtility.HtmlDecode(l.ToJson()).ToFile(path);
         }
 
         public static string TrimStart(this string target, string trimString)
@@ -434,6 +437,33 @@ namespace WindowsFormsApp1
         {
             JToken parsedJson = JToken.Parse(s);
             return parsedJson.ToString(Formatting.Indented);
+        }
+
+        public static Type GetTypeByName(string name)
+        {
+            string currentnamespace = Assembly.GetExecutingAssembly().GetName().Name + ".";
+            Type form = Type.GetType(currentnamespace + name, false, true);
+            return form;
+        }
+
+        public static void DefaultBrowser(object url)
+        {
+            if (url is string)
+                Process.Start(url.ToString());
+            else if (url is Uri)
+                Process.Start((url as Uri).AbsoluteUri);
+            else
+                throw new NotSupportedException();
+        }
+
+        public static HtmlNodeCollection SelectNodesByClass(this HtmlNode node, string _class, bool root = false)
+        {
+            return node.SelectNodes((root ? string.Empty : ".") + $"//*[@class='{_class}']");
+        }
+
+        public static HtmlNode SelectSingleNodeByClass(this HtmlNode node, string _class, bool root = false)
+        {
+            return node.SelectSingleNode((root? string.Empty : ".") + $"//*[@class='{_class}']");
         }
     }
 }

@@ -52,7 +52,8 @@ namespace WindowsFormsApp1
                 string name = (sender as ToolStripItem).Text;
                 object form = Activator.CreateInstance(Type.GetType(currentnamespace + name, false, true));
                 (form as Base).ShowDialog();
-                this.Show();
+                if(!this.IsDisposed)
+                    this.Show();
             }
             catch(Exception ex) { MessageBox.Show(this, ex.Message); }
         }
