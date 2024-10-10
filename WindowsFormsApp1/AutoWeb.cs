@@ -31,6 +31,8 @@ namespace WindowsFormsApp1
         public bool cerrar = false;
         private string script;
         private string file;
+        private string check;
+        public string prefix;
         public AutoWeb()
         {
                 InitializeComponent();
@@ -39,11 +41,12 @@ namespace WindowsFormsApp1
                 chromiumWebBrowser1.LoadUrl("https://myanimelist.net/animelist/FedererMagic?order=5&status=2");
         }
 
-        public AutoWeb(string url, string script, string file, bool cerrar)
+        public AutoWeb(string url, string script, string file, bool cerrar, string check = "")
         {
             this.script = script;
             this.file = file;
             this.cerrar = cerrar;
+            this.check = check;
             InitializeComponent();
             this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowserFile_LoadingStateChanged);
             chromiumWebBrowser1.LoadUrl(url);
@@ -56,29 +59,38 @@ namespace WindowsFormsApp1
                 while (!chromiumWebBrowser1.CanExecuteJavascriptInMainFrame)
                     Thread.Sleep(10);
 
-                await chromiumWebBrowser1.EvaluateScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
-
-                JavascriptResponse res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
-                string s = await chromiumWebBrowser1.GetBrowser().MainFrame.GetSourceAsync();
-                
-                if (s.Contains("Ups! Parece que algo no va bien..."))
+                JavascriptResponse res;
+                try
                 {
-                    ChangeOpacity(1, false);
+                    await chromiumWebBrowser1.EvaluateScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
+
+                    res = await chromiumWebBrowser1.EvaluateScriptAsync(script);
+                    string s = await chromiumWebBrowser1.GetBrowser().MainFrame.GetSourceAsync();
+
+                    if (s.Contains("Ups! Parece que algo no va bien..."))
+                    {
+                        ChangeOpacity(1, false);
+                        return;
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
                     return;
                 }
+                
 
                 await Task.Delay(1000); 
 
                 try
                 {
-                    if (!string.IsNullOrEmpty(file))
+                    if (!string.IsNullOrEmpty(file) && res.Result != null && (string.IsNullOrEmpty(check) || Convert.ToString(res.Result).Contains(check))) //Añadir comprobacion class
                     {
-                        SaveResultFile(file, Convert.ToString(res.Result), false);
+                        SaveResultFile(file, Convert.ToString(res.Result), false, false);
                     }
                 }
                 catch(IOException ex)
                 {
-                    MessageBox.Show(file);
+                    //MessageBox.Show(file);
                 }
 
                 await Task.Delay(500);
@@ -186,15 +198,6 @@ namespace WindowsFormsApp1
                 }
                 else if(Owner is Cars)
                 {
-                    if (!s.Contains("sui-AtomCard sui-AtomCard--responsive") || !s.Contains("sui-AtomButton sui-AtomButton--primary sui-AtomButton--outline sui-AtomButton--center sui-AtomButton--link sui-AtomButton--circular"))
-                    {
-                        //JavascriptResponse res = await chromiumWebBrowser1.EvaluateScriptAsync("document.body;");
-                        //Cars.doc = new HtmlDocument();
-                        //Cars.doc.LoadHtml(Convert.ToString(res.Result));
-                        //Thread.Sleep(500);
-                        Cerrar();
-                        return;
-                    }
                     Cars.doc = new HtmlDocument();
                     Cars.doc.LoadHtml(s);
                     Thread.Sleep(500);
@@ -249,7 +252,7 @@ namespace WindowsFormsApp1
             }
             catch(Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
             }
         }
 

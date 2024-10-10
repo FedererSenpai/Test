@@ -23,6 +23,7 @@ namespace WindowsFormsApp1
         private string filePath = string.Empty;
         private string tempPath = string.Empty;
         private string script;
+        private bool saved = false;
 
         public Base() : this(".txt")
         {
@@ -135,12 +136,12 @@ namespace WindowsFormsApp1
                 return Path.Combine(ResultPath, file);
         }
 
-        public void SaveResultFile(string file, string content, bool subfolder = true) //Guardar fichero en carpeta resultados
+        public void SaveResultFile(string file, string content, bool subfolder = true, bool overwrite = true) //Guardar fichero en carpeta resultados
         {
             string f = ResultFile(file, subfolder);
             try
             {
-                if (File.Exists(f))
+                if (overwrite && File.Exists(f))
                     File.Delete(f);
             }
             catch(IOException ex)
@@ -165,7 +166,7 @@ namespace WindowsFormsApp1
                 }
                 if (closed)
                 {
-                    if (File.Exists(f))
+                    if (overwrite && File.Exists(f))
                         File.Delete(f);
                 }
                 else
@@ -173,7 +174,12 @@ namespace WindowsFormsApp1
                     f = GetFileNumbered(f, 1);
                 }
             }
-            File.WriteAllText(f, content, Encoding.UTF8);
+            catch(Exception ex)
+            {
+
+            }
+            if(!overwrite || !File.Exists(f))
+                File.WriteAllText(f, content, Encoding.UTF8);
         }
 
         private string GetFileNumbered(string file, int number)

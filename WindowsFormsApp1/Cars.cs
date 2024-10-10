@@ -39,6 +39,7 @@ namespace WindowsFormsApp1
         const string addPage = "&pg={0}";
         public static HtmlDocument doc = new HtmlDocument();
         private int MaxPrice = 50000;
+        private string prefix;
         enum imageType
         {
             Image,
@@ -92,9 +93,15 @@ namespace WindowsFormsApp1
             DESC = -1
         }
 
+        enum EquipmentType
+        {
+            Standard,
+            Extras
+        }
         public Cars() : base(".json")
         {
             InitializeComponent();
+            prefix = DateTime.Now.ToString("yyyyMMddHHmmss");
         }
 
         public override void Initialize()
@@ -146,8 +153,42 @@ namespace WindowsFormsApp1
             myProgressBar1.Maximum = lastPage;
             carsList = new List<Car>();
             GetCochesNetCar(doc.DocumentNode, lastPage);
+            carsList.ToFile(OwnFullPath);
+
+            myProgressBar1.Value = 0;
+            myProgressBar1.Maximum = carsList.Count;
             foreach (Car car in carsList)
+            {
                 GetCochesNetInfoCar(car);
+                myProgressBar1.Value++;
+            }
+            while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
+                Thread.Sleep(10);
+            carsList.ToFile(OwnFullPath);
+            
+            myProgressBar1.Value = 0;
+            myProgressBar1.Maximum = carsList.Count;
+            foreach (Car car in carsList)
+            {
+                car.TechLink = File.ReadAllText(car.File);
+                File.Delete(car.File);
+                GetCochesNetTechCar(car);
+                myProgressBar1.Value++;
+            }
+            while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
+                Thread.Sleep(10);
+            carsList.ToFile(OwnFullPath);
+
+            myProgressBar1.Value = 0;
+            myProgressBar1.Maximum = carsList.Count;
+            foreach (Car car in carsList)
+            {
+                ReadCochesNetTechCar(car);
+                myProgressBar1.Value++;
+                //File.Delete(car.TechFile);
+            }
+            carsList.ToFile(OwnFullPath);
+
             dataGridView1.DataSource = carsList;
             carsList.ToFile(OwnFullPath);
         }
@@ -169,33 +210,37 @@ namespace WindowsFormsApp1
         private void Fill(object sender, EventArgs e)
         {
             carsList = ExtensionMethods.FileToList<Car>(OwnFullPath);
+            //myProgressBar1.Value = 0;
+            //myProgressBar1.Maximum = carsList.Count;
+            //foreach (Car car in carsList)
+            //{
+            //    GetCochesNetInfoCar(car);
+            //    myProgressBar1.Value++;
+            //}
+            //while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
+            //    Thread.Sleep(10);
+            //carsList.ToFile(OwnFullPath);
+            //myProgressBar1.Value = 0;
+            //myProgressBar1.Maximum = carsList.Count;
+            //foreach (Car car in carsList)
+            //{
+            //    car.TechLink = File.ReadAllText(car.File);
+            //    //File.Delete(car.File);
+            //    if(!string.IsNullOrEmpty(car.TechLink))
+            //    GetCochesNetTechCar(car);
+            //    myProgressBar1.Value++;
+            //}
+            //while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
+            //    Thread.Sleep(10);
+            //carsList.ToFile(OwnFullPath);
             myProgressBar1.Value = 0;
             myProgressBar1.Maximum = carsList.Count;
             foreach (Car car in carsList)
             {
-                GetCochesNetInfoCar(car);
-                myProgressBar1.Value++;
-            }
-            carsList.ToFile(OwnFullPath);
-            while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
-                Thread.Sleep(10);
-            myProgressBar1.Value = 0;
-            myProgressBar1.Maximum = carsList.Count;
-            foreach (Car car in carsList)
-            {
-                car.TechLink = File.ReadAllText(car.File);
-                File.Delete(car.File);
-                GetCochesNetTechCar(car);
-                myProgressBar1.Value++;
-            }
-            carsList.ToFile(OwnFullPath);
-            while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
-                Thread.Sleep(10);
-            foreach(Car car in carsList)
-            {
+                if(!string.IsNullOrEmpty(car.TechFile))
                 ReadCochesNetTechCar(car);
                 myProgressBar1.Value++;
-                File.Delete(car.TechFile);
+                //File.Delete(car.TechFile);
             }
             carsList.ToFile(OwnFullPath);
             dataGridView1.DataSource = carsList;
@@ -289,7 +334,7 @@ namespace WindowsFormsApp1
             string file = string.Empty;
             while(string.IsNullOrEmpty(file) || File.Exists(file))
             {
-                string randomFile = Path.GetRandomFileName();
+                string randomFile = prefix + Path.GetRandomFileName();
                 file = ResultFile(randomFile);
             }
             AutoWeb aw = new AutoWeb(url, "Array.from(document.getElementsByClassName('sui-AtomButton sui-AtomButton--primary sui-AtomButton--outline sui-AtomButton--center sui-AtomButton--link sui-AtomButton--circular')).find(item=>item.getAttribute('type') == 'link').toString()", file, true);
@@ -309,7 +354,7 @@ namespace WindowsFormsApp1
             string file = string.Empty;
             while (string.IsNullOrEmpty(file) || File.Exists(file))
             {
-                string randomFile = Path.GetRandomFileName();
+                string randomFile = prefix + Path.GetRandomFileName();
                 file = ResultFile(randomFile);
             }
             AutoWeb aw = new AutoWeb(url, "Array.prototype.forEach.call(document.getElementsByClassName('sui-MoleculeAccordionItemHeaderButton sui-MoleculeAccordionItemHeaderButton--icon-position-right'), function(el) {el.click();}); document.body.getHTML();", file, true);
@@ -350,6 +395,148 @@ namespace WindowsFormsApp1
                 HtmlNodeCollection dataNode = node.SelectNodesByClass("react-AtomTable-row react-AtomTable-row--zebraStriped");
                 GetCochesNetGeneralData(car, dataNode, type);
             }
+            GetCochesNetEquipmentCount(doc.DocumentNode.SelectSingleNodeByClass("mt-ListModelDetails mt-ListModelDetails--paddingless"), out int c1, out int c2);
+            HtmlNodeCollection equipmentNode = doc.DocumentNode.SelectNodesByClass("mt-PanelEquipment-accordion");
+            int c = 0;
+            foreach(HtmlNode node in equipmentNode)
+            {
+                HtmlNode headerNode = node.SelectSingleNodeByClass("sui-MoleculeAccordionItemHeaderButtonContent sui-MoleculeAccordionItemHeaderButtonContent--noWrap");
+                string type = headerNode.InnerText;
+                HtmlNodeCollection dataNode = node.SelectNodesByClass("mt-PanelEquipment-tableItem");
+                if (c < c1)
+                    GetCochesNetStandardEquipment(car, dataNode, type, EquipmentType.Standard);
+                else
+                    GetCochesNetStandardEquipment(car, dataNode, type, EquipmentType.Extras);
+                c++;
+            }
+        }
+
+        private void GetCochesNetEquipmentCount(HtmlNode node, out int standardEquipmentCount, out int ExtrasCount)
+        {
+            standardEquipmentCount = 0;
+            ExtrasCount = 0;
+            bool standardEquipment = false;
+            bool extras = false;
+            HtmlNode currentNode = node.NextSibling;
+            while(currentNode != null)
+            {
+                if (currentNode.GetAttributeValue("class", string.Empty).Equals("mt-PanelEquipment-title"))
+                {
+                    standardEquipment = currentNode.InnerText.Equals("Equipamiento de serie");
+                    extras = currentNode.InnerText.Equals("Extras");
+                    if (!standardEquipment && !extras)
+                        MessageBox.Show("Tittle." + currentNode.InnerText);
+                }
+                if(currentNode.GetAttributeValue("class", string.Empty).Equals("mt-PanelEquipment-accordion"))
+                {
+                    if (standardEquipment)
+                        standardEquipmentCount++;
+                    if (extras)
+                        ExtrasCount++;
+                }
+                currentNode = currentNode.NextSibling;
+            }
+        }
+
+        private void GetCochesNetStandardEquipment(Car car, HtmlNodeCollection datanode, string type, EquipmentType eType)
+        {
+            switch(eType)
+            {
+                case EquipmentType.Standard:
+                    switch (type)
+                    {
+                        case "Ficha Técnica":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.TechnicalSheet.Add(node.InnerText);
+                            break;
+                        case "Multimedia y Audio":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.MultimediaAudio.Add(node.InnerText);
+                            break;
+                        case "Acabado Exterior":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.ExteriorFinish.Add(node.InnerText);
+                            break;
+                        case "Seguridad":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.Security.Add(node.InnerText);
+                            break;
+                        case "Información Básica":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.BasicInformation.Add(node.InnerText);
+                            break;
+                        case "Confort":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.Comfort.Add(node.InnerText);
+                            break;
+                        case "Dimensiones":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.Dimensions.Add(node.InnerText);
+                            break;
+                        case "Acabado Interior":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.InteriorFinish.Add(node.InnerText);
+                            break;
+                        case "Prestaciones":
+                            foreach (HtmlNode node in datanode)
+                                car.CarStandardEquipment.Capability.Add(node.InnerText);
+                            break;
+                        default:
+                            MessageBox.Show("Standard." + type);
+                            break;
+                    }
+                    break;
+                case EquipmentType.Extras:
+                    switch (type)
+                    {
+                        case "Confort":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.Comfort.Add(node.InnerText);
+                            break;
+                        case "Acabado Exterior":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.ExteriorFinish.Add(node.InnerText);
+                            break;
+                        case "Multimedia y Audio":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.MultimediaAudio.Add(node.InnerText);
+                            break;
+                        case "Seguridad":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.Security.Add(node.InnerText);
+                            break;
+                        case "Acabado Interior":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.InteriorFinish.Add(node.InnerText);
+                            break;
+                        case "Ficha Técnica":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.TechnicalSheet.Add(node.InnerText);
+                            break;
+                        case "Información Básica":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.BasicInformation.Add(node.InnerText);
+                            break;
+                        case "Otros extras":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.OtherExtras.Add(node.InnerText);
+                            break;
+                        case "Datos no clasificados":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.UnclassifiedData.Add(node.InnerText);
+                            break;
+                        case "Dimensiones":
+                            foreach (HtmlNode node in datanode)
+                                car.CarExtras.Dimensions.Add(node.InnerText);
+                            break;
+                        default:
+                            MessageBox.Show("Extras." + type);
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void GetCochesNetGeneralData(Car car, HtmlNodeCollection datanode, string type)
@@ -362,6 +549,22 @@ namespace WindowsFormsApp1
                         string property = node.SelectSingleNodeByClass("mt-ListModelDetails-tableItem").InnerText;
                         string value = node.SelectSingleNodeByClass("mt-ListModelDetails-tableItem--strong").InnerText;
                         car.ModelProperty(property, value);
+                    }
+                    break;
+                case "Motor y transmisión":
+                    foreach (HtmlNode node in datanode)
+                    {
+                        string property = node.SelectSingleNodeByClass("mt-ListModelDetails-tableItem").InnerText;
+                        string value = node.SelectSingleNodeByClass("mt-ListModelDetails-tableItem--strong").InnerText;
+                        car.EngineProperty(property, value);
+                    }
+                    break;
+                case "Consumo y prestaciones":
+                    foreach (HtmlNode node in datanode)
+                    {
+                        string property = node.SelectSingleNodeByClass("mt-ListModelDetails-tableItem").InnerText;
+                        string value = node.SelectSingleNodeByClass("mt-ListModelDetails-tableItem--strong").InnerText;
+                        car.ConsumptionProperty(property, value);
                     }
                     break;
             }
@@ -384,6 +587,10 @@ namespace WindowsFormsApp1
             private string file;
             private string techFile;
             private Model model = new Model();
+            private Engine engine = new Engine();
+            private Consumption consumption = new Consumption();
+            private StandardEquipment equipment = new StandardEquipment();
+            private Extras extras = new Extras();
 
             public string Title { get => title; set => title = value; }
             public string Price { get => price; set => price = value.Replace("&bnsp;", " "); }
@@ -400,6 +607,10 @@ namespace WindowsFormsApp1
             public string File { get => file; set => file = value; }
             public string TechFile { get => techFile; set => techFile = value; }
             public Model CarModel { get => model; set => model = value; }
+            public Engine CarEngine { get => engine; set => engine = value; }
+            public Consumption CarConsumption { get => consumption; set => consumption = value; }
+            public StandardEquipment CarStandardEquipment { get => equipment; set => equipment = value; }
+            public Extras CarExtras { get => extras; set => extras = value; }
 
             public class Model
             {
@@ -410,6 +621,8 @@ namespace WindowsFormsApp1
                 private string trunk;
                 private string seats;
                 private string weight;
+                private string maxHeight;
+                private string totalDistance;
 
                 public string Capacity { get => capacity; set => capacity = value; }
                 public string Version { get => version; set => version = value; }
@@ -418,26 +631,151 @@ namespace WindowsFormsApp1
                 public string Trunk { get => trunk; set => trunk = value; }
                 public string Seats { get => seats; set => seats = value; }
                 public string Weight { get => weight; set => weight = value; }
+                public string MaxHeight { get => maxHeight; set => maxHeight = value; }
+                public string TotalDistance { get => totalDistance; set => totalDistance = value; }
             }
 
             public class Engine
             {
+                private string gearbox;
+                private string fuel;
+                private string maxPower;
+                private string feed;
+                private string configuration;
+                private string watts;
+                private string maxElectricalPower;
+                private string electricalAutonomy;
+                private string batteryCapacity;
+                private string electricalEngineType;
+                private string electricalConnectorType;
+                private string averageElectricalConsumption;
+                private string chargingTime;
+                private string fastChargingTime88;
+                private string fastChargingTime100;
+                private string chargingAmperage;
+                private string chargingVoltage;
+                private string fastChargingTime92;
+                private string fastChargingVoltage;
+                private string fastchargingTime;
+                private string fastChargingTime74;
+                private string fastChargingTime115;
+                private string fastChargingTime150;
+                private string fastChargingTime21;
+                private string fastChargingTime101;
+                private string fastChargingTime102;
+                private string fastChargingTime135;
+                private string fastChargingTime83;
+                private string fastChargingTime240;
+                private string fastChargingTime153;
+                private string fastChargingTime130;
+                private string fastChargingTime350;
+                private string fastChargingTime50;
+                private string fastChargingTime200;
 
+                public string Gearbox { get => gearbox; set => gearbox = value; }
+                public string Fuel { get => fuel; set => fuel = value; }
+                public string MaxPower { get => maxPower; set => maxPower = value; }
+                public string Feed { get => feed; set => feed = value; }
+                public string Configuration { get => configuration; set => configuration = value; }
+                public string Watts { get => watts; set => watts = value; }
+                public string MaxElectricalPower { get => maxElectricalPower; set => maxElectricalPower = value; }
+                public string ElectricalAutonomy { get => electricalAutonomy; set => electricalAutonomy = value; }
+                public string BatteryCapacity { get => batteryCapacity; set => batteryCapacity = value; }
+                public string ElectricalEngineType { get => electricalEngineType; set => electricalEngineType = value; }
+                public string ElectricalConnectorType { get => electricalConnectorType; set => electricalConnectorType = value; }
+                public string AverageElectricalConsumption { get => averageElectricalConsumption; set => averageElectricalConsumption = value; }
+                public string ChargingTime { get => chargingTime; set => chargingTime = value; }
+                public string FastChargingTime100 { get => fastChargingTime100; set => fastChargingTime100 = value; }
+                public string ChargingAmperage { get => chargingAmperage; set => chargingAmperage = value; }
+                public string FastChargingTime88 { get => fastChargingTime100; set => fastChargingTime100 = value; }
+                public string ChargingVoltage { get => chargingVoltage; set => chargingVoltage = value; }
+                public string FastChargingTime92 { get => fastChargingTime92; set => fastChargingTime92 = value; }
+                public string FastChargingVoltage { get => fastChargingVoltage; set => fastChargingVoltage = value; }
+                public string FastchargingTime { get => fastchargingTime; set => fastchargingTime = value; }
+                public string FastChargingTime74 { get => fastChargingTime74; set => fastChargingTime74 = value; }
+                public string FastChargingTime115 { get => fastChargingTime115; set => fastChargingTime115 = value; }
+                public string FastChargingTime150 { get => fastChargingTime150; set => fastChargingTime150 = value; }
+                public string FastChargingTime22 { get => fastChargingTime21; set => fastChargingTime21 = value; }
+                public string FastChargingTime101 { get => fastChargingTime101; set => fastChargingTime101 = value; }
+                public string FastChargingTime102 { get => fastChargingTime102; set => fastChargingTime102 = value; }
+                public string FastChargingTime135 { get => fastChargingTime135; set => fastChargingTime135 = value; }
+                public string FastChargingTime83 { get => fastChargingTime83; set => fastChargingTime83 = value; }
+                public string FastChargingTime240 { get => fastChargingTime240; set => fastChargingTime240 = value; }
+                public string FastChargingTime153 { get => fastChargingTime153; set => fastChargingTime153 = value; }
+                public string FastChargingTime130 { get => fastChargingTime130; set => fastChargingTime130 = value; }
+                public string FastChargingTime350 { get => fastChargingTime350; set => fastChargingTime350 = value; }
+                public string FastChargingTime50 { get => fastChargingTime50; set => fastChargingTime50 = value; }
+                public string FastChargingTime200 { get => fastChargingTime200; set => fastChargingTime200 = value; }
             }
 
             public class Consumption
             {
+                private string traction;
+                private string acceleration;
+                private string maxSpeed;
+                private string urbanConsumption;
+                private string extraUrbanConsumption;
+                private string averageConsumption;
 
+                public string Traction { get => traction; set => traction = value; }
+                public string Acceleration { get => acceleration; set => acceleration = value; }
+                public string MaxSpeed { get => maxSpeed; set => maxSpeed = value; }
+                public string UrbanConsumption { get => urbanConsumption; set => urbanConsumption = value; }
+                public string ExtraUrbanConsumption { get => extraUrbanConsumption; set => extraUrbanConsumption = value; }
+                public string AverageConsumption { get => averageConsumption; set => averageConsumption = value; }
             }
 
-            private class Equipment
+            public class StandardEquipment
             {
+                List<string> technicalSheet = new List<string>();
+                List<string> multimediaAudio = new List<string>();
+                List<string> exteriorFinish = new List<string>();
+                List<string> security = new List<string>();
+                List<string> basicInformation = new List<string>();
+                List<string> comfort = new List<string>();
+                List<string> dimensions = new List<string>();
+                List<string> interiorFinish = new List<string>();
+                List<string> capability = new List<string>();
 
+                public List<string> TechnicalSheet { get => technicalSheet; set => technicalSheet = value; }
+                public List<string> MultimediaAudio { get => multimediaAudio; set => multimediaAudio = value; }
+                public List<string> ExteriorFinish { get => exteriorFinish; set => exteriorFinish = value; }
+                public List<string> Security { get => security; set => security = value; }
+                public List<string> BasicInformation { get => basicInformation; set => basicInformation = value; }
+                public List<string> Comfort { get => comfort; set => comfort = value; }
+                public List<string> Dimensions { get => dimensions; set => dimensions = value; }
+                public List<string> InteriorFinish { get => interiorFinish; set => interiorFinish = value; }
+                public List<string> Capability { get => capability; set => capability = value; }
+            }
+
+            public class Extras
+            {
+                List<string> otherExtras = new List<string>();
+                List<string> comfort = new List<string>();
+                List<string> exteriorFinish = new List<string>();
+                List<string> multimediaAudio = new List<string>();
+                List<string> security = new List<string>();
+                List<string> interiorFinish = new List<string>();
+                List<string> technicalSheet = new List<string>();
+                List<string> basicInformation = new List<string>();
+                List<string> unclassifiedData = new List<string>();
+                List<string> dimensions = new List<string>();
+
+                public List<string> Comfort { get => comfort; set => comfort = value; }
+                public List<string> ExteriorFinish { get => exteriorFinish; set => exteriorFinish = value; }
+                public List<string> OtherExtras { get => otherExtras; set => otherExtras = value; }
+                public List<string> MultimediaAudio { get => multimediaAudio; set => multimediaAudio = value; }
+                public List<string> Security { get => security; set => security = value; }
+                public List<string> InteriorFinish { get => interiorFinish; set => interiorFinish = value; }
+                public List<string> TechnicalSheet { get => technicalSheet; set => technicalSheet = value; }
+                public List<string> BasicInformation { get => basicInformation; set => basicInformation = value; }
+                public List<string> UnclassifiedData { get => unclassifiedData; set => unclassifiedData = value; }
+                public List<string> Dimensions { get => dimensions; set => dimensions = value; }
             }
 
             public void ModelProperty(string property, string value)
             {
-                switch(property)
+                switch (property)
                 {
                     case "Capacidad del depósito":
                         CarModel.Capacity = value;
@@ -459,6 +797,158 @@ namespace WindowsFormsApp1
                         break;
                     case "Peso":
                         CarModel.Weight = value;
+                        break;
+                    case "Altura máxima":
+                        CarModel.MaxHeight = value;
+                        break;
+                    case "Distancia total":
+                        CarModel.TotalDistance = value;
+                        break;
+                    default:
+                        MessageBox.Show("Model." + property);
+                        break;
+                }
+            }
+
+            public void EngineProperty(string property, string value)
+            {
+                switch(property.Trim())
+                {
+                    case "Caja de cambios":
+                        CarEngine.Gearbox = value;
+                        break;
+                    case "Combustible":
+                        CarEngine.Fuel = value;
+                        break;
+                    case "Potencia máxima":
+                        CarEngine.MaxPower = value;
+                        break;
+                    case "Alimentación":
+                        CarEngine.Feed = value;
+                        break;
+                    case "Configuración":
+                        CarEngine.Configuration = value;
+                        break;
+                    case "Wattios motor":
+                        CarEngine.Watts = value;
+                        break;
+                    case "Wattio":
+                        CarEngine.Watts = value;
+                        break;
+                    case "Potencia máxima eléctrica":
+                        CarEngine.MaxElectricalPower = value;
+                        break;
+                    case "Consumo medio eléctrico WLTP":
+                        CarEngine.AverageElectricalConsumption = value;
+                        break;
+                    case "Autonomía eléctrica WLTP":
+                        CarEngine.ElectricalAutonomy = value;
+                        break;
+                    case "Capacidad de la batería":
+                        CarEngine.BatteryCapacity = value;
+                        break;
+                    case "Tipo de motor eléctrico":
+                        CarEngine.ElectricalEngineType = value;
+                        break;
+                    case "Tipo de conector eléctrico":
+                        CarEngine.ElectricalConnectorType = value;
+                        break;
+                    case "Tiempo de carga":
+                        CarEngine.ChargingTime = value;
+                        break;
+                    case "Tiempo de carga rápida (100.0 kW)":
+                        CarEngine.FastChargingTime100 = value;
+                        break;
+                    case "Amperaje de carga":
+                        CarEngine.ChargingAmperage = value;
+                        break;
+                    case "Tiempo de carga rápida (88.0 kW)":
+                        CarEngine.FastChargingTime88 = value;
+                        break;
+                    case "Voltaje de carga":
+                        CarEngine.ChargingVoltage = value;
+                        break;
+                    case "Tiempo de carga rápida (92.0 kW)":
+                        CarEngine.FastChargingTime92 = value;
+                        break;
+                    case "Voltaje de carga rápida":
+                        CarEngine.FastChargingVoltage = value;
+                        break;
+                    case "Tiempo de carga rápida":
+                        CarEngine.FastchargingTime = value;
+                        break;
+                    case "Tiempo de carga rápida (74.0 kW)":
+                        CarEngine.FastChargingTime74 = value;
+                        break;
+                    case "Tiempo de carga rápida (115.0 kW)":
+                        CarEngine.FastChargingTime115 = value;
+                        break;
+                    case "Tiempo de carga rápida (150.0 kW)":
+                        CarEngine.FastChargingTime150 = value;
+                        break;
+                    case "Tiempo de carga rápida (22.0 kW)":
+                        CarEngine.FastChargingTime22 = value;
+                        break;
+                    case "Tiempo de carga rápida (101.0 kW)":
+                        CarEngine.FastChargingTime101 = value;
+                        break;
+                    case "Tiempo de carga rápida (102.0 kW)":
+                        CarEngine.FastChargingTime102 = value;
+                        break;
+                    case "Tiempo de carga rápida (135.0 kW)":
+                        CarEngine.FastChargingTime135 = value;
+                        break;
+                    case "Tiempo de carga rápida (83.8 kW)":
+                        CarEngine.FastChargingTime83 = value;
+                        break;
+                    case "Tiempo de carga rápida (240.0 kW)":
+                        CarEngine.FastChargingTime240 = value;
+                        break;
+                    case "Tiempo de carga rápida (153.0 kW)":
+                        CarEngine.FastChargingTime153 = value;
+                        break;
+                    case "Tiempo de carga rápida (130.0 kW)":
+                        CarEngine.FastChargingTime130 = value;
+                        break;
+                    case "Tiempo de carga rápida (350.0 kW)":
+                        CarEngine.FastChargingTime350 = value;
+                        break;
+                    case "Tiempo de carga rápida (50.0 kW)":
+                        CarEngine.FastChargingTime50 = value;
+                        break;
+                    case "Tiempo de carga rápida (200.0 kW)":
+                        CarEngine.FastChargingTime200 = value;
+                        break;
+                    default:
+                        MessageBox.Show("Engine." + property);
+                        break;
+                }
+            }
+
+            public void ConsumptionProperty(string property, string value)
+            {
+                switch(property)
+                {
+                    case "Tracción":
+                        CarConsumption.Traction = value;
+                        break;
+                    case "Aceleración (0-100km/h)":
+                        CarConsumption.Acceleration = value;
+                        break;
+                    case "Velocidad Máxima":
+                        CarConsumption.MaxSpeed = value;
+                        break;
+                    case "Consumo urbano":
+                        CarConsumption.UrbanConsumption = value;
+                        break;
+                    case "Consumo extraurbano":
+                        CarConsumption.ExtraUrbanConsumption = value;
+                        break;
+                    case "Consumo medio":
+                        CarConsumption.AverageConsumption = value;
+                        break;
+                    default:
+                        MessageBox.Show("Consumption." + property);
                         break;
                 }
             }
