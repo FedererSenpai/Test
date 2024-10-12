@@ -52,6 +52,16 @@ namespace WindowsFormsApp1
             chromiumWebBrowser1.LoadUrl(url);
         }
 
+        public AutoWeb(string url, System.EventHandler<CefSharp.LoadingStateChangedEventArgs> myevent, string file, string script)
+        {
+            this.cerrar = true;
+            this.file = file;
+            this.script = script;
+                    InitializeComponent();
+                    this.chromiumWebBrowser1.LoadingStateChanged += myevent;
+                    chromiumWebBrowser1.LoadUrl(url);
+        }
+
         private async void chromiumWebBrowserFile_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
             if (!e.IsLoading)
@@ -109,6 +119,17 @@ namespace WindowsFormsApp1
             chromiumWebBrowser1.LoadUrl(url);
             this.script = script;
         }
+
+        public string GetFile()
+        {
+            return this.file;
+        }
+
+        public string GetScript()
+        {
+            return this.script;
+        }
+
         public HtmlDocument GetDoc()
         {
             Task<string> task = chromiumWebBrowser1.GetSourceAsync();
@@ -214,7 +235,7 @@ namespace WindowsFormsApp1
         }
 
         delegate void OnOpacity(int opacity, bool reload);
-        private void ChangeOpacity(int opacity, bool reload)
+        public void ChangeOpacity(int opacity, bool reload)
         {
             if (this.InvokeRequired)
             {
@@ -230,7 +251,7 @@ namespace WindowsFormsApp1
         }
 
         delegate void OnCerrar();
-        private void Cerrar()
+        public void Cerrar()
         {
             try
             {

@@ -35,6 +35,8 @@ namespace WindowsFormsApp1
             InitializeComponent();
             FilePath = GetType().Name + extension;
             ResultPath = Path.Combine(FolderPath, "Result");
+            if(!Directory.Exists(OwnPath))
+                Directory.CreateDirectory(OwnPath);
         }
 
         public string FolderPath {

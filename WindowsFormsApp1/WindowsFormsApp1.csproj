@@ -465,6 +465,12 @@
     <Compile Include="DibalForm.Designer.cs">
       <DependentUpon>DibalForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Flights.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Flights.Designer.cs">
+      <DependentUpon>Flights.cs</DependentUpon>
+    </Compile>
     <Compile Include="LoL.cs" />
     <Compile Include="Lyrics.cs">
       <SubType>Form</SubType>
@@ -698,6 +704,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DibalForm.resx">
       <DependentUpon>DibalForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Flights.resx">
+      <DependentUpon>Flights.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Lyrics.resx">
       <DependentUpon>Lyrics.cs</DependentUpon>

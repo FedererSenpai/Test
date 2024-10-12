@@ -165,14 +165,15 @@ namespace WindowsFormsApp1
             while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
                 Thread.Sleep(10);
             carsList.ToFile(OwnFullPath);
-            
+
             myProgressBar1.Value = 0;
             myProgressBar1.Maximum = carsList.Count;
             foreach (Car car in carsList)
             {
                 car.TechLink = File.ReadAllText(car.File);
-                File.Delete(car.File);
-                GetCochesNetTechCar(car);
+                //File.Delete(car.File);
+                if (!string.IsNullOrEmpty(car.TechLink))
+                    GetCochesNetTechCar(car);
                 myProgressBar1.Value++;
             }
             while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
@@ -183,11 +184,21 @@ namespace WindowsFormsApp1
             myProgressBar1.Maximum = carsList.Count;
             foreach (Car car in carsList)
             {
-                ReadCochesNetTechCar(car);
+                if (!string.IsNullOrEmpty(car.TechFile))
+                    ReadCochesNetTechCar(car);
                 myProgressBar1.Value++;
                 //File.Delete(car.TechFile);
             }
             carsList.ToFile(OwnFullPath);
+
+            if(MessageBox.Show("Delete files", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                foreach (Car car in carsList)
+                {
+                    File.Delete(car.File); 
+                    File.Delete(car.TechFile);
+                }
+            }
 
             dataGridView1.DataSource = carsList;
             carsList.ToFile(OwnFullPath);
@@ -225,7 +236,6 @@ namespace WindowsFormsApp1
             //foreach (Car car in carsList)
             //{
             //    car.TechLink = File.ReadAllText(car.File);
-            //    //File.Delete(car.File);
             //    if(!string.IsNullOrEmpty(car.TechLink))
             //    GetCochesNetTechCar(car);
             //    myProgressBar1.Value++;
@@ -233,16 +243,25 @@ namespace WindowsFormsApp1
             //while (Application.OpenForms.OfType<AutoWeb>().Count() > 0)
             //    Thread.Sleep(10);
             //carsList.ToFile(OwnFullPath);
-            myProgressBar1.Value = 0;
-            myProgressBar1.Maximum = carsList.Count;
-            foreach (Car car in carsList)
-            {
-                if(!string.IsNullOrEmpty(car.TechFile))
-                ReadCochesNetTechCar(car);
-                myProgressBar1.Value++;
-                //File.Delete(car.TechFile);
-            }
-            carsList.ToFile(OwnFullPath);
+            //myProgressBar1.Value = 0;
+            //myProgressBar1.Maximum = carsList.Count;
+            //foreach (Car car in carsList)
+            //{
+            //    if (!string.IsNullOrEmpty(car.TechFile))
+            //        ReadCochesNetTechCar(car);
+            //    myProgressBar1.Value++;
+            //}
+            //carsList.ToFile(OwnFullPath);
+
+            //if (MessageBox.Show("Delete files", "Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            //{
+            //    foreach (Car car in carsList)
+            //    {
+            //        File.Delete(car.File);
+            //        File.Delete(car.TechFile);
+            //    }
+            //}
+
             dataGridView1.DataSource = carsList;
         }
 
@@ -572,6 +591,7 @@ namespace WindowsFormsApp1
 
         private class Car
         {
+            private bool favourite;
             private string title;
             private string price;
             private string financing;
@@ -611,6 +631,7 @@ namespace WindowsFormsApp1
             public Consumption CarConsumption { get => consumption; set => consumption = value; }
             public StandardEquipment CarStandardEquipment { get => equipment; set => equipment = value; }
             public Extras CarExtras { get => extras; set => extras = value; }
+            public bool Favourite { get => favourite; set => favourite = value; }
 
             public class Model
             {
@@ -656,21 +677,7 @@ namespace WindowsFormsApp1
                 private string chargingVoltage;
                 private string fastChargingTime92;
                 private string fastChargingVoltage;
-                private string fastchargingTime;
-                private string fastChargingTime74;
-                private string fastChargingTime115;
-                private string fastChargingTime150;
-                private string fastChargingTime21;
-                private string fastChargingTime101;
-                private string fastChargingTime102;
-                private string fastChargingTime135;
-                private string fastChargingTime83;
-                private string fastChargingTime240;
-                private string fastChargingTime153;
-                private string fastChargingTime130;
-                private string fastChargingTime350;
-                private string fastChargingTime50;
-                private string fastChargingTime200;
+                private string fastChargingTime;
 
                 public string Gearbox { get => gearbox; set => gearbox = value; }
                 public string Fuel { get => fuel; set => fuel = value; }
@@ -691,21 +698,7 @@ namespace WindowsFormsApp1
                 public string ChargingVoltage { get => chargingVoltage; set => chargingVoltage = value; }
                 public string FastChargingTime92 { get => fastChargingTime92; set => fastChargingTime92 = value; }
                 public string FastChargingVoltage { get => fastChargingVoltage; set => fastChargingVoltage = value; }
-                public string FastchargingTime { get => fastchargingTime; set => fastchargingTime = value; }
-                public string FastChargingTime74 { get => fastChargingTime74; set => fastChargingTime74 = value; }
-                public string FastChargingTime115 { get => fastChargingTime115; set => fastChargingTime115 = value; }
-                public string FastChargingTime150 { get => fastChargingTime150; set => fastChargingTime150 = value; }
-                public string FastChargingTime22 { get => fastChargingTime21; set => fastChargingTime21 = value; }
-                public string FastChargingTime101 { get => fastChargingTime101; set => fastChargingTime101 = value; }
-                public string FastChargingTime102 { get => fastChargingTime102; set => fastChargingTime102 = value; }
-                public string FastChargingTime135 { get => fastChargingTime135; set => fastChargingTime135 = value; }
-                public string FastChargingTime83 { get => fastChargingTime83; set => fastChargingTime83 = value; }
-                public string FastChargingTime240 { get => fastChargingTime240; set => fastChargingTime240 = value; }
-                public string FastChargingTime153 { get => fastChargingTime153; set => fastChargingTime153 = value; }
-                public string FastChargingTime130 { get => fastChargingTime130; set => fastChargingTime130 = value; }
-                public string FastChargingTime350 { get => fastChargingTime350; set => fastChargingTime350 = value; }
-                public string FastChargingTime50 { get => fastChargingTime50; set => fastChargingTime50 = value; }
-                public string FastChargingTime200 { get => fastChargingTime200; set => fastChargingTime200 = value; }
+                public string FastChargingTime { get => fastChargingTime; set => fastChargingTime = value; }
             }
 
             public class Consumption
@@ -875,49 +868,61 @@ namespace WindowsFormsApp1
                         CarEngine.FastChargingVoltage = value;
                         break;
                     case "Tiempo de carga rápida":
-                        CarEngine.FastchargingTime = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (74.0 kW)":
-                        CarEngine.FastChargingTime74 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (115.0 kW)":
-                        CarEngine.FastChargingTime115 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (150.0 kW)":
-                        CarEngine.FastChargingTime150 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (22.0 kW)":
-                        CarEngine.FastChargingTime22 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (101.0 kW)":
-                        CarEngine.FastChargingTime101 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (102.0 kW)":
-                        CarEngine.FastChargingTime102 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (135.0 kW)":
-                        CarEngine.FastChargingTime135 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (83.8 kW)":
-                        CarEngine.FastChargingTime83 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (240.0 kW)":
-                        CarEngine.FastChargingTime240 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (153.0 kW)":
-                        CarEngine.FastChargingTime153 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (130.0 kW)":
-                        CarEngine.FastChargingTime130 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (350.0 kW)":
-                        CarEngine.FastChargingTime350 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (50.0 kW)":
-                        CarEngine.FastChargingTime50 = value;
+                        CarEngine.FastChargingTime = value;
                         break;
                     case "Tiempo de carga rápida (200.0 kW)":
-                        CarEngine.FastChargingTime200 = value;
+                        CarEngine.FastChargingTime = value;
+                        break;
+                    case "Tiempo de carga rápida (90.0 kW)":
+                        CarEngine.FastChargingTime = value;
+                        break;
+                    case "Tiempo de carga rápida (160.0 kW)":
+                        CarEngine.FastChargingTime = value;
+                        break;
+                    case "Tiempo de carga rápida (180.0 kW)":
+                        CarEngine.FastChargingTime = value;
+                        break;
+                    case "Tiempo de carga rápida (2.3 kW)":
+                        CarEngine.FastChargingTime = value;
                         break;
                     default:
                         MessageBox.Show("Engine." + property);
