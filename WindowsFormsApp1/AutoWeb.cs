@@ -142,8 +142,6 @@ namespace WindowsFormsApp1
         }
         private void Start(object sender, EventArgs e)
         {
-            AddMenu("Senpai", new EventHandler(Senpai));
-            AddMenu("Json", new EventHandler(Json));
             this.BringToFront();
         }
 
@@ -312,6 +310,12 @@ namespace WindowsFormsApp1
                 Thread.Sleep(1000);
 
                 string s = await chromiumWebBrowser1.GetSourceAsync();
+
+                if (s.Contains("Human Verification"))
+                {
+                    return;
+                }
+                
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(s);
                 HtmlNodeCollection col = doc.DocumentNode.SelectNodes("//tbody[@class='list-item']");

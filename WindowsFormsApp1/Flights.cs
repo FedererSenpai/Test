@@ -8,7 +8,9 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,9 +18,10 @@ using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace WindowsFormsApp1
 {
+    //PDTE: EVENTO CLICK HEADER PARA ORDENAR POR COLUMNAS.
     public partial class Flights : Base
     {
-        private string urlBase => $"https://www.skyscanner.es/transporte/vuelos/{textBox1.Text}/{textBox2.Text}/?adultsv2=1&cabinclass=economy&childrenv2=&ref=home&rtn=1&preferdirects={checkBox3.Checked}&outboundaltsenabled={checkBox1.Checked}&inboundaltsenabled={checkBox2.Checked}&oym={dateTimePicker1.Text}&iym={dateTimePicker2.Text}&selectedoday={"{0}"}&selectediday=01";
+        private string urlBase => $"https://www.skyscanner.es/transporte/vuelos/{textBox1.Text}/{textBox2.Text}/?adultsv2=1&cabinclass=economy&childrenv2=&ref=home&rtn=1&preferdirects={checkBox3.Checked}&outboundaltsenabled={checkBox1.Checked}&inboundaltsenabled={checkBox2.Checked}&oym={"{0}"}&iym={"{1}"}&selectedoday=01&selectediday=01";
         List<Prices> prices = new List<Prices>();
         string prefix;
         int pricesCount = 0;
@@ -27,12 +30,26 @@ namespace WindowsFormsApp1
             InitializeComponent();
             prefix = DateTime.Now.ToString("yyyyMMddHHmmss");
             textBox1.Text = "bio";
-            textBox2.Text = "rome";
+            textBox2.Text = "tyoa";
         }
 
         public override void Initialize()
         {
-            AddMenuItems(new EventHandler(Fill));
+            AddMenuItems(new EventHandler(Fill), new EventHandler(HomePage), new EventHandler(ToFile));
+        }
+
+        private void ToFile(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.DefaultExt = ".json";
+            saveFileDialog.InitialDirectory = OwnPath;
+            if(saveFileDialog.ShowDialog(this) == DialogResult.OK)
+                prices.ToFile(saveFileDialog.FileName);
+        }
+
+        private void HomePage(object sender, EventArgs e)
+        {
+            ExtensionMethods.DefaultBrowser("https://www.skyscanner.com");
         }
 
         private void Fill(object sender, EventArgs e)
@@ -42,15 +59,35 @@ namespace WindowsFormsApp1
             dataGridView1.DataSource = prices;
         }
 
+        private DateTime GetFirstDay(DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, 1);
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
-            label3.Text = urlBase;
-            AutoWeb aw = new AutoWeb(urlBase, chromiumWebBrowserPrices_LoadingStateChanged, "", "");
+            for (DateTime i = GetFirstDay(dateTimePicker1.Value); i <= dateTimePicker2.Value; i = i.AddMonths(1))
+            {
+                for (DateTime j = i; j <= dateTimePicker2.Value; j = j.AddMonths(1))
+                    GetPrices(i, j);
+            }
+
+            prices.ToFile(OwnFullPath);
+
+            dataGridView1.DataSource = prices;
+            //dataGridView1.Sort(dataGridView1.Columns["TotalPrice"], ListSortDirection.Ascending);
+
+        }
+
+        private void GetPrices(DateTime from, DateTime to)
+        {
+            label3.Text = string.Format(urlBase, from.ToString("yyMM"), to.ToString("yyMM"));
+            AutoWeb aw = new AutoWeb(label3.Text, chromiumWebBrowserPrices_LoadingStateChanged, "", "");
             aw.Opacity = 0;
             aw.Owner = this;
             aw.ShowInTaskbar = false;
             aw.ShowDialog();
-            while(pricesCount <= 0)
+            while (pricesCount <= 0)
             {
                 Thread.Sleep(100);
             }
@@ -61,7 +98,7 @@ namespace WindowsFormsApp1
             myProgressBar1.Value = 0;
             for (int i = 0; i <= pricesCount; i++)
             {
-                Prices p = new Prices() { DepartureMonth = dateTimePicker1.Value.Month, ReturnMonth = dateTimePicker2.Value.Month};
+                Prices p = new Prices() { DepartureYear = from.Year, ReturnYear = to.Year, DepartureMonth = from.Month, ReturnMonth = to.Month };
                 string file = string.Empty;
                 while (string.IsNullOrEmpty(file) || File.Exists(file))
                 {
@@ -69,7 +106,7 @@ namespace WindowsFormsApp1
                     file = ResultFile(randomFile);
                 }
 
-                aw = new AutoWeb(urlBase, chromiumWebBrowserFlights_LoadingStateChanged, file, i == pricesCount ? string.Empty : $"if(document.getElementsByClassName('month-view-calendar outbound-calendar')[0].getElementsByClassName('BpkCalendarWeek_bpk-calendar-week__date__MTRlO bpk-calendar-week__date--none')[{i}].getElementsByClassName('price')[0].innerText != '')document.getElementsByClassName('month-view-calendar outbound-calendar')[0].getElementsByClassName('BpkCalendarWeek_bpk-calendar-week__date__MTRlO bpk-calendar-week__date--none')[{i}].firstChild.click();");
+                aw = new AutoWeb(label3.Text, chromiumWebBrowserFlights_LoadingStateChanged, file, i == pricesCount ? string.Empty : $"if(document.getElementsByClassName('month-view-calendar outbound-calendar')[0].getElementsByClassName('BpkCalendarWeek_bpk-calendar-week__date__MTRlO bpk-calendar-week__date--none')[{i}].getElementsByClassName('price')[0].innerText != '')document.getElementsByClassName('month-view-calendar outbound-calendar')[0].getElementsByClassName('BpkCalendarWeek_bpk-calendar-week__date__MTRlO bpk-calendar-week__date--none')[{i}].firstChild.click();");
                 aw.Opacity = 0;
                 aw.Owner = this;
                 aw.ShowInTaskbar = false;
@@ -88,12 +125,6 @@ namespace WindowsFormsApp1
                 myProgressBar1.Value++;
                 File.Delete(p.File);
             }
-
-            prices.ToFile(OwnFullPath);
-
-            dataGridView1.DataSource = prices;
-            //dataGridView1.Sort(dataGridView1.Columns["TotalPrice"], ListSortDirection.Ascending);
-
         }
 
         private async void chromiumWebBrowserPrices_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
@@ -195,6 +226,8 @@ namespace WindowsFormsApp1
         
         private class Prices
         {
+            private int departureYear;
+            private int returnYear;
             private int departureMonth;
             private int returnMonth;
             private string departureDay;
@@ -203,6 +236,8 @@ namespace WindowsFormsApp1
             private string returnPrice;
             private string file;
 
+            public int DepartureYear { get => departureYear; set => departureYear = value; }
+            public int ReturnYear { get => returnYear; set => returnYear = value; }
             public int DepartureMonth { get => departureMonth; set => departureMonth = value; }
             public int ReturnMonth { get => returnMonth; set => returnMonth = value; }
             public string DepartureDay { get => departureDay; set => departureDay = value; }
@@ -211,6 +246,14 @@ namespace WindowsFormsApp1
             public string ReturnPrice { get => returnPrice; set => returnPrice = value; }
             public int TotalPrice { get => GetTotalPrice(); }
             public string File { get => file; set => file = value; }
+            [JsonIgnore]
+            public int Days => CalculateDays();
+
+
+            private int CalculateDays()
+            {
+                return new DateTime(ReturnYear, ReturnMonth, Convert.ToInt16(ReturnDay)).Subtract(new DateTime(DepartureYear, DepartureMonth, Convert.ToInt16(DepartureDay))).Days;
+            }
 
             private int GetTotalPrice()
             {
@@ -222,30 +265,44 @@ namespace WindowsFormsApp1
             public Prices Clone()
             {
                 Prices p = new Prices();
+                p.DepartureYear = departureYear;
+                p.ReturnYear = returnYear;
                 p.DepartureMonth = departureMonth;
                 p.ReturnMonth = returnMonth;
                 p.DeparturePrice = departurePrice;
                 p.DepartureDay = departureDay;
+                p.File = file;
                 return p;
             }
 
             public List<Prices> ReadPriceFile()
             {
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(System.IO.File.ReadAllText(File));
-                HtmlNode departureNode = doc.DocumentNode.SelectSingleNodeByClass("month-view-calendar outbound-calendar", true).SelectSingleNodeByClass("BpkCalendarWeek_bpk-calendar-week__date__MTRlO bpk-calendar-week__date--single");
-                DepartureDay = departureNode.SelectSingleNodeByClass("date").InnerText;
-                DeparturePrice = departureNode.SelectSingleNodeByClass("price").InnerText;
-                HtmlNode calendarNode = doc.DocumentNode.SelectSingleNodeByClass("month-view-calendar inbound-calendar", true);
-                HtmlNodeCollection dateNodes = calendarNode.SelectSingleNodeByClass("BpkCalendarGrid_bpk-calendar-grid__YjU0O month-view-grid--data-loaded").SelectNodes(".//button");
                 List<Prices> priceList = new List<Prices>();
-                foreach(HtmlNode node in dateNodes)
+                try
                 {
-                    Prices p = Clone();
-                    p.ReturnDay = node.SelectSingleNodeByClass("date").InnerText;
-                    p.ReturnPrice = node.SelectSingleNodeByClass("price").InnerText;
-                    if(!string.IsNullOrEmpty(p.DeparturePrice) && !string.IsNullOrEmpty(p.ReturnPrice))
-                        priceList.Add(p);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(System.IO.File.ReadAllText(File));
+                    HtmlNode departureNode = doc.DocumentNode.SelectSingleNodeByClass("month-view-calendar outbound-calendar", true).SelectSingleNodeByClass("BpkCalendarWeek_bpk-calendar-week__date__MTRlO bpk-calendar-week__date--single");
+                    DepartureDay = departureNode.SelectSingleNodeByClass("date").InnerText;
+                    DeparturePrice = departureNode.SelectSingleNodeByClass("price").InnerText;
+                    HtmlNode calendarNode = doc.DocumentNode.SelectSingleNodeByClass("month-view-calendar inbound-calendar", true);
+                    HtmlNode dateNodes = calendarNode.SelectSingleNodeByClass("BpkCalendarGrid_bpk-calendar-grid__YjU0O month-view-grid--data-loaded");
+                    if(dateNodes == null)
+                        dateNodes = calendarNode.SelectSingleNodeByClass("BpkCalendarGrid_bpk-calendar-grid__YjU0O month-view-grid--data-loading");
+                    HtmlNodeCollection pricesNodes = dateNodes.SelectNodesByClass("price");
+                    foreach (HtmlNode node in pricesNodes)
+                    {
+                        HtmlNode parent = node.ParentNode;
+                        Prices p = Clone();
+                        p.ReturnDay = parent.SelectSingleNodeByClass("date").InnerText;
+                        p.ReturnPrice = parent.SelectSingleNodeByClass("price").InnerText;
+                        if (!string.IsNullOrEmpty(p.DeparturePrice) && !string.IsNullOrEmpty(p.ReturnPrice))
+                            priceList.Add(p);
+                    }
+                }
+                catch(Exception e)
+                {
+                    return ReadPriceFile();
                 }
                 return priceList;
             }

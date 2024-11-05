@@ -182,7 +182,7 @@
             this.myProgressBar1.BorderWidth = 1F;
             this.myProgressBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.myProgressBar1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.myProgressBar1.Location = new System.Drawing.Point(0, 587);
+            this.myProgressBar1.Location = new System.Drawing.Point(0, 647);
             this.myProgressBar1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.myProgressBar1.Maximum = 100D;
             this.myProgressBar1.Minimum = 0D;
@@ -197,19 +197,20 @@
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.AllowUserToOrderColumns = true;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.Location = new System.Drawing.Point(0, 38);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.Size = new System.Drawing.Size(943, 549);
+            this.dataGridView1.Size = new System.Drawing.Size(943, 609);
             this.dataGridView1.TabIndex = 3;
             // 
             // Flights
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(943, 610);
+            this.ClientSize = new System.Drawing.Size(943, 670);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.myProgressBar1);
             this.Controls.Add(this.label3);

@@ -678,6 +678,7 @@ namespace WindowsFormsApp1
                 private string fastChargingTime92;
                 private string fastChargingVoltage;
                 private string fastChargingTime;
+                private string fastChargingPower;
 
                 public string Gearbox { get => gearbox; set => gearbox = value; }
                 public string Fuel { get => fuel; set => fuel = value; }
@@ -699,6 +700,7 @@ namespace WindowsFormsApp1
                 public string FastChargingTime92 { get => fastChargingTime92; set => fastChargingTime92 = value; }
                 public string FastChargingVoltage { get => fastChargingVoltage; set => fastChargingVoltage = value; }
                 public string FastChargingTime { get => fastChargingTime; set => fastChargingTime = value; }
+                public string FastChargingPower { get => fastChargingPower; set => fastChargingPower = value; }
             }
 
             public class Consumption
@@ -805,7 +807,10 @@ namespace WindowsFormsApp1
 
             public void EngineProperty(string property, string value)
             {
-                switch(property.Trim())
+                if (property.Contains("Tiempo de carga rápida"))
+                    property = "Tiempo de carga rápida";
+
+                switch (property.Trim())
                 {
                     case "Caja de cambios":
                         CarEngine.Gearbox = value;
@@ -849,79 +854,16 @@ namespace WindowsFormsApp1
                     case "Tiempo de carga":
                         CarEngine.ChargingTime = value;
                         break;
-                    case "Tiempo de carga rápida (100.0 kW)":
-                        CarEngine.FastChargingTime100 = value;
-                        break;
                     case "Amperaje de carga":
                         CarEngine.ChargingAmperage = value;
                         break;
-                    case "Tiempo de carga rápida (88.0 kW)":
-                        CarEngine.FastChargingTime88 = value;
-                        break;
                     case "Voltaje de carga":
                         CarEngine.ChargingVoltage = value;
-                        break;
-                    case "Tiempo de carga rápida (92.0 kW)":
-                        CarEngine.FastChargingTime92 = value;
                         break;
                     case "Voltaje de carga rápida":
                         CarEngine.FastChargingVoltage = value;
                         break;
                     case "Tiempo de carga rápida":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (74.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (115.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (150.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (22.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (101.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (102.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (135.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (83.8 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (240.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (153.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (130.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (350.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (50.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (200.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (90.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (160.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (180.0 kW)":
-                        CarEngine.FastChargingTime = value;
-                        break;
-                    case "Tiempo de carga rápida (2.3 kW)":
                         CarEngine.FastChargingTime = value;
                         break;
                     default:

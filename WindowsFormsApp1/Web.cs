@@ -27,6 +27,12 @@ using static WindowsFormsApp1.Web;
 using Microsoft.Office.Interop.Excel;
 using System.Net;
 using Swan.Logging;
+using Google.Apis.YouTube.v3;
+using Google.Apis.Auth.OAuth2.Requests;
+using Google.Apis.Auth.OAuth2;
+using System.Windows.Media.Animation;
+using Google.Apis.Util;
+using Google.Apis.Util.Store;
 
 namespace WindowsFormsApp1
 {
@@ -62,6 +68,7 @@ namespace WindowsFormsApp1
             AddMenu("Senpai", new EventHandler(Senpai));
             AddMenu("Kpoop", new EventHandler(Kpoop));
             AddMenu("Add", new EventHandler(Add));
+            AddMenu("Youtube", new EventHandler(Youtube));
             Task t = new Task(async () => await Auth());
             t.Start();
             this.BringToFront();
@@ -192,7 +199,7 @@ namespace WindowsFormsApp1
 
             var config = SpotifyClientConfig.CreateDefault();
             var tokenResponse = await new OAuthClient(config).RequestToken(
-              new AuthorizationCodeTokenRequest(
+              new SpotifyAPI.Web.AuthorizationCodeTokenRequest(
                 clientid, clientsecret, response.Code, new Uri("http://localhost:5543/callback")
               )
             );
@@ -222,6 +229,78 @@ namespace WindowsFormsApp1
             await spotify.Playlists.AddItems(playlist, new PlaylistAddItemsRequest(new List<string>() { "spotify:track:" + asfd.Tracks.Items.First().Id }));
             //var sdafgklh= asfd.Tracks.Items.Min(x => x.Artists.Min(y => ExtensionMethods.Distance(y.Name, "AvrilLavigne")));
             await spotify.Playlists.Create("316b4swabpspq4guu4yzvz5jnz4q", new PlaylistCreateRequest("Prueba"));
+        }
+
+        private async void Youtube(object sender, EventArgs e)
+        {
+            //https://developers.google.com/youtube/v3/docs?apix=true&hl=es-419
+
+            WebRequest request = WebRequest.Create($"https://accounts.spotify.com/api/token");
+            request.ContentType = "application/x-www-form-urlencoded";
+            //request.Headers.Add($"Basic {clientid}: {clientsecret}");
+            request.Method = "POST";
+            string stringData = $"grant_type=client_credentials&client_id={clientid}&client_secret={clientsecret}"; // place body here
+            var data = Encoding.Default.GetBytes(stringData); // note: choose appropriate encoding
+            using (Stream writer = request.GetRequestStream())
+            {
+                writer.Write(data, 0, data.Length);
+            }
+
+            WebResponse response = request.GetResponse();
+            AccessToken accessToken;
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responsestring = reader.ReadToEnd();
+                accessToken = JsonConvert.DeserializeObject<AccessToken>(responsestring);
+            }
+
+            request = WebRequest.Create($"https://api.spotify.com/v1/users/{userid}/playlists");
+            request.Method = "GET";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.Headers.Add("Authorization", $"Bearer {accessToken.access_token}");
+            response = request.GetResponse();
+            PlaylistList playlist;
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responsestring = reader.ReadToEnd();
+                playlist = JsonConvert.DeserializeObject<PlaylistList>(responsestring);
+            }
+
+            ComboBox cb = new ComboBox();
+            cb.DisplayMember = "name";
+            cb.DataSource = playlist.items;
+            MyControl mc = new MyControl(cb);
+            if (mc.isOK())
+            {
+                UserCredential uc = GoogleWebAuthorizationBroker.AuthorizeAsync(new ClientSecrets() { ClientId = "481114111248-u5ipv6go48scmilhra8r6dmrafp3fvhq.apps.googleusercontent.com", ClientSecret = "\r\n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" }, new List<string>() { "https://www.googleapis.com/auth/youtbe" }, "user", CancellationToken.None).Result;
+                if (uc.Token.IsStale)
+                    uc.RefreshTokenAsync(CancellationToken.None).Wait();
+
+                YouTubeService ys = new YouTubeService(new Google.Apis.Services.BaseClientService.Initializer() { HttpClientInitializer = uc});
+                ys.Playlists.Insert(new Google.Apis.YouTube.v3.Data.Playlist() { Snippet = new Google.Apis.YouTube.v3.Data.PlaylistSnippet() { Title = "Test" } }, new List<string>());
+
+                return;
+                request = WebRequest.Create("https://accounts.google.com/o/oauth2/v2/auth");
+                request.ContentType = "application/x-www-form-urlencoded";
+                //request.Headers.Add($"Basic {clientid}: {clientsecret}");
+                request.Method = "POST";
+                stringData = $"client_id=481114111248-u5ipv6go48scmilhra8r6dmrafp3fvhq.apps.googleusercontent.com&redirect_uri=http://localhost:5543/callback&response_type=code&scope=https://www.googleapis.com/auth/youtbe"; // place body here
+                data = Encoding.Default.GetBytes(stringData); // note: choose appropriate encoding
+                using (Stream writer = request.GetRequestStream())
+                {
+                    writer.Write(data, 0, data.Length);
+                }
+                /*request.Headers.Add("client_id", "481114111248-u5ipv6go48scmilhra8r6dmrafp3fvhq.apps.googleusercontent.com");
+                request.Headers.Add("redirect_uri", "http://localhost:5543/callback");
+                request.Headers.Add("response_type", "code");
+                request.Headers.Add("scope", "youtube");*/
+                response = request.GetResponse();
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    string responsestring = reader.ReadToEnd();
+                    //accessToken = JsonConvert.DeserializeObject<AccessToken>(responsestring);
+                }
+            }
         }
 
         private async void Add(object sender, EventArgs e)
