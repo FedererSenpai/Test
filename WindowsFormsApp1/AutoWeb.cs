@@ -21,6 +21,9 @@ using CefSharp.DevTools.DOM;
 using System.Runtime.Remoting.Messaging;
 using Swan;
 using System.Xml.Linq;
+using CefSharp.Fluent;
+using CefSharp.WinForms.Handler;
+using CefSharp.Internals.Wcf;
 
 
 namespace WindowsFormsApp1
@@ -33,7 +36,8 @@ namespace WindowsFormsApp1
         private string file;
         private string check;
         public string prefix;
-        public AutoWeb()
+        public int step;
+        public AutoWeb() //Main
         {
                 InitializeComponent();
                 this.chromiumWebBrowser1.LoadingStateChanged += new System.EventHandler<CefSharp.LoadingStateChangedEventArgs>(this.chromiumWebBrowser1_LoadingStateChanged);
@@ -147,7 +151,12 @@ namespace WindowsFormsApp1
 
         public override void Initialize()
         {
-            AddMenuItems(new EventHandler(Senpai), new EventHandler(Json), new EventHandler(Source));
+            AddMenuItems(new EventHandler(Senpai), new EventHandler(Json), new EventHandler(Source), new EventHandler(Mp3), new EventHandler(Developer));
+        }
+
+        private void Developer(object sender, EventArgs e)
+        {
+            chromiumWebBrowser1.ShowDevTools();
         }
 
         private void Source(object sender, EventArgs e)
@@ -157,6 +166,7 @@ namespace WindowsFormsApp1
                 var html = taskHtml.Result;
             });
              JavascriptResponse res = chromiumWebBrowser1.EvaluateScriptAsync ("document.getElementsByClassName('sui-AtomButton sui-AtomButton--primary sui-AtomButton--outline sui-AtomButton--center sui-AtomButton--link sui-AtomButton--circular')[0].innerHTML;").Result;
+            chromiumWebBrowser1.ShowDevTools();
         }
 
         private async void Json(object sender, EventArgs e)
@@ -186,6 +196,28 @@ namespace WindowsFormsApp1
                 Application.DoEvents();
             }
             ready = true;
+        }
+
+        private async void Mp3(object sender, EventArgs e)
+        {
+            chromiumWebBrowser1.LoadingStateChanged -= this.chromiumWebBrowser1_LoadingStateChanged;
+            chromiumWebBrowser1.DownloadHandler = new DownloadHandler(string.Empty, false, true);
+            chromiumWebBrowser1.LoadUrl("https://spotydown.com");
+            Thread.Sleep(1000);
+            Application.DoEvents();
+            bool keep = true;
+            while (keep)
+            {
+                if (!chromiumWebBrowser1.IsLoading)
+                {
+                    while (!chromiumWebBrowser1.CanExecuteJavascriptInMainFrame)
+                        Thread.Sleep(10);
+
+                        await chromiumWebBrowser1.EvaluateScriptAsPromiseAsync("document.getElementsByTagName('input')[0].value = 'https://open.spotify.com/intl-es/track/'");
+                        keep = false;
+                }
+                Thread.Sleep(100);
+            }
         }
 
         private async void chromiumWebBrowser1Senpai_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
@@ -353,4 +385,52 @@ namespace WindowsFormsApp1
         public string Url { get => url; set => url = "https://myanimelist.net" + value; }
     }
 
+    public class DownloadHandler : IDownloadHandler
+    {
+        private string filename = string.Empty;
+
+        private bool close = false;
+
+        private bool dialog = false;
+
+        public event EventHandler<DownloadItem> OnBeforeDownloadFired;
+
+        public event EventHandler<DownloadItem> OnDownloadUpdatedFired;
+
+        public bool OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
+        {
+            OnBeforeDownloadFired?.Invoke(this, downloadItem);
+
+            if (!callback.IsDisposed)
+            {
+                using (callback)
+                {
+                    callback.Continue(string.IsNullOrEmpty(filename) ? Path.Combine("C:\\Users\\danie\\Downloads", downloadItem.SuggestedFileName) : filename, showDialog: false);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void OnDownloadUpdated(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
+        {
+            if (downloadItem.IsComplete && close)
+            {
+                browser.CloseBrowser(true);
+            }
+            OnDownloadUpdatedFired?.Invoke(this, downloadItem);
+        }
+
+        bool IDownloadHandler.CanDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, string url, string requestMethod)
+        {
+            return true;
+        }
+
+        public DownloadHandler(string _filename, bool _close, bool _dialog)
+        {
+            filename = _filename;
+            close = _close;
+            dialog = _dialog;
+        }
+    }
 }

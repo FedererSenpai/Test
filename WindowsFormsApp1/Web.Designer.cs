@@ -33,12 +33,12 @@
             this.Column1 = new System.Windows.Forms.DataGridViewButtonColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewButtonColumn();
             this.myProgressBar1 = new WindowsFormsApp1.MyProgressBar();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
             // 
-            this.dataGridView1.AllowUserToResizeColumns = true;
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -51,11 +51,11 @@
             this.Column2});
             this.dataGridView1.Location = new System.Drawing.Point(24, 13);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(745, 730);
+            this.dataGridView1.Size = new System.Drawing.Size(745, 850);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
-            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormating);
             this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
+            this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormating);
             // 
             // Column1
             // 
@@ -77,7 +77,7 @@
             this.myProgressBar1.BorderColor = System.Drawing.Color.Black;
             this.myProgressBar1.BorderWidth = 1F;
             this.myProgressBar1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.myProgressBar1.Location = new System.Drawing.Point(24, 760);
+            this.myProgressBar1.Location = new System.Drawing.Point(24, 880);
             this.myProgressBar1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.myProgressBar1.Maximum = 100D;
             this.myProgressBar1.Minimum = 0D;
@@ -88,19 +88,34 @@
             this.myProgressBar1.TabIndex = 1;
             this.myProgressBar1.Value = 0D;
             // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(738, 887);
+            this.label1.Name = "label1";
+            this.label1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.label1.Size = new System.Drawing.Size(50, 16);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "label1";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // Web
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 810);
+            this.ClientSize = new System.Drawing.Size(800, 930);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.myProgressBar1);
             this.Controls.Add(this.dataGridView1);
             this.Name = "Web";
+            this.Opacity = 0D;
             this.Text = "Web";
-            this.Opacity = 0;
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -111,5 +126,6 @@
         private System.Windows.Forms.DataGridViewButtonColumn Column1;
         private System.Windows.Forms.DataGridViewButtonColumn Column2;
         private MyProgressBar myProgressBar1;
+        private System.Windows.Forms.Label label1;
     }
 }

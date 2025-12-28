@@ -552,6 +552,12 @@
     <Compile Include="TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="TierList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TierList.Designer.cs">
+      <DependentUpon>TierList.cs</DependentUpon>
+    </Compile>
     <Compile Include="TwoList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -743,6 +749,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TestForm.resx">
       <DependentUpon>TestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TierList.resx">
+      <DependentUpon>TierList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TwoList.resx">
       <DependentUpon>TwoList.cs</DependentUpon>

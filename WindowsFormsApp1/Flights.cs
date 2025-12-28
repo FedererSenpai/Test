@@ -22,6 +22,7 @@ namespace WindowsFormsApp1
     public partial class Flights : Base
     {
         private string urlBase => $"https://www.skyscanner.es/transporte/vuelos/{textBox1.Text}/{textBox2.Text}/?adultsv2=1&cabinclass=economy&childrenv2=&ref=home&rtn=1&preferdirects={checkBox3.Checked}&outboundaltsenabled={checkBox1.Checked}&inboundaltsenabled={checkBox2.Checked}&oym={"{0}"}&iym={"{1}"}&selectedoday=01&selectediday=01";
+        private string japanurl => $"https://www.skyscanner.es/transporte/d/mad/{dateTimePicker1.Value.ToString("yyyy-MM-dd")}/osaa/tyoa/{dateTimePicker2.Value.ToString("yyyy-MM-dd")}/mad?adultsv2=1&cabinclass=economy&childrenv2=&ref=home";
         List<Prices> prices = new List<Prices>();
         string prefix;
         int pricesCount = 0;
@@ -29,13 +30,30 @@ namespace WindowsFormsApp1
         {
             InitializeComponent();
             prefix = DateTime.Now.ToString("yyyyMMddHHmmss");
-            textBox1.Text = "bio";
+            textBox1.Text = "mad";
             textBox2.Text = "tyoa";
         }
 
         public override void Initialize()
         {
-            AddMenuItems(new EventHandler(Fill), new EventHandler(HomePage), new EventHandler(ToFile));
+            AddMenuItems(new EventHandler(Fill), new EventHandler(HomePage), new EventHandler(ToFile), new EventHandler(Japan));
+        }
+
+        private void Japan(object sender, EventArgs e)
+        {
+            string file = string.Empty;
+            while (string.IsNullOrEmpty(file) || File.Exists(file))
+            {
+                string randomFile = prefix + "JAPAN" + Path.GetRandomFileName();
+                file = ResultFile(randomFile);
+            }
+            string script = "";//"document.getElementsByClassName('BpkButton_bpk-button__NDRjO bpk-button--primary CookieBanner_cookie-banner__button__YjkwY CookieBanner_cookie-banner__button-accept__MWE4M')[0].click(); document.body.getHTML();";
+            AutoWeb aw = new AutoWeb(japanurl, script, file, true);
+            //aw.Opacity = 0;
+            aw.Owner = this;
+            aw.ShowInTaskbar = false;
+            aw.ShowDialog();
+            aw.Dispose();
         }
 
         private void ToFile(object sender, EventArgs e)
@@ -83,7 +101,7 @@ namespace WindowsFormsApp1
         {
             label3.Text = string.Format(urlBase, from.ToString("yyMM"), to.ToString("yyMM"));
             AutoWeb aw = new AutoWeb(label3.Text, chromiumWebBrowserPrices_LoadingStateChanged, "", "");
-            aw.Opacity = 0;
+            //aw.Opacity = 0;
             aw.Owner = this;
             aw.ShowInTaskbar = false;
             aw.ShowDialog();
@@ -258,7 +276,7 @@ namespace WindowsFormsApp1
             private int GetTotalPrice()
             {
                 int.TryParse(DeparturePrice.Replace("€", string.Empty), out int dep);
-                int.TryParse(ReturnPrice.Replace("€", string.Empty), out int ret);
+                int.TryParse(ReturnPrice.Replace("€", string.Empty).Replace("mil", "* 1000"), out int ret);
                 return dep + ret;
             }
 
@@ -306,6 +324,12 @@ namespace WindowsFormsApp1
                 }
                 return priceList;
             }
+        }
+
+        private void dataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            object p = prices.AsQueryable().OrderBy(dataGridView1.Columns[e.ColumnIndex].DataPropertyName).ToList();
+            dataGridView1.DataSource = p;
         }
     }
 }

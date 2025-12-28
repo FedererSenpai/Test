@@ -1,38 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using HtmlAgilityPack;
-using CefSharp;
+﻿using CefSharp;
 using CefSharp.WinForms;
-using System.Security.Policy;
-using SpotifyAPI;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.YouTube.v3;
+using Newtonsoft.Json;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
-using RiotSharp.Endpoints.SpectatorEndpoint;
-using System.Diagnostics;
 using Swan;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using Newtonsoft.Json;
-using System.Runtime.CompilerServices;
-using CefSharp.DevTools.Audits;
-using System.Threading;
-using System.Net.Mail;
-using static WindowsFormsApp1.Web;
-using Microsoft.Office.Interop.Excel;
+using System.Linq;
 using System.Net;
-using Swan.Logging;
-using Google.Apis.YouTube.v3;
-using Google.Apis.Auth.OAuth2.Requests;
-using Google.Apis.Auth.OAuth2;
-using System.Windows.Media.Animation;
-using Google.Apis.Util;
-using Google.Apis.Util.Store;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
@@ -69,6 +54,7 @@ namespace WindowsFormsApp1
             AddMenu("Kpoop", new EventHandler(Kpoop));
             AddMenu("Add", new EventHandler(Add));
             AddMenu("Youtube", new EventHandler(Youtube));
+            AddMenu("Mp3", new EventHandler(Mp3));
             Task t = new Task(async () => await Auth());
             t.Start();
             this.BringToFront();
@@ -303,45 +289,144 @@ namespace WindowsFormsApp1
             }
         }
 
+        private async void Mp3(object sender, EventArgs e)
+        {
+            PlaylistList playlist = SpotifyRequest<PlaylistList>($"https://api.spotify.com/v1/users/{userid}/playlists");
+
+            ComboBox cb = new ComboBox();
+            cb.DisplayMember = "name";
+            cb.DataSource = playlist.items;
+            MyControl mc = new MyControl(cb);
+            mc.isOK();
+
+            Paging<PlaylistTrack<IPlayableItem>> pag = await spotify.Playlists.GetItems((cb.SelectedItem as Item).id);
+            myProgressBar1.Maximum = (cb.SelectedItem as Item).tracks.total;
+            myProgressBar1.Value = 0;
+            label1.Text = string.Empty;
+            bool keep = true;
+            while(keep)
+            {
+                foreach(PlaylistTrack<IPlayableItem> plt in pag.Items)
+                {
+                    bool error = true;
+                    myProgressBar1.Value++;
+                    FullTrack ft = (FullTrack)plt.Track;
+                    string script = "https://open.spotify.com/intl-es/track/" + ft.Id;
+                    string filename = Path.Combine("C:\\Daniel\\musicatest", $"{string.Concat(ft.Name.Split(Path.GetInvalidFileNameChars())) + "_" + ft.Id}.mp3");
+                    label1.Text = filename;
+                    if (File.Exists(filename))
+                        continue;
+                    int i = 0;
+                    while (error)
+                    {
+                        AutoWeb aw = new AutoWeb("www.google.com", Mp3Changed, filename, script);
+                        aw.Owner = this;
+                        aw.ShowInTaskbar = false;
+                        aw.Opacity = 0;
+                        aw.ShowDialog();
+                        aw.Dispose();
+                        if (File.Exists(filename))
+                        {
+                            FileInfo fi = new FileInfo(filename);
+                            var fas = fi.Attributes;
+                            float d = fi.Length * 8 / 128;
+                            if (Math.Abs(d - ft.DurationMs) > 5000)
+                            {
+                                File.Delete(filename);
+                            }
+                            else
+                            {
+                                error = false;
+                            }
+                        }
+                        i++;
+                        if (i > 5)
+                        {
+                            error = false;
+                            File.Create(Path.Combine("C:\\Daniel\\musicatest","ERROR_" + ft.Id));
+                        }
+                    }
+                }
+                if (pag.Next != null)
+                    pag = await spotify.NextPage(pag);
+                else
+                    keep = false;
+            }
+        }
+
+        private async void Mp3Changed(object sender, LoadingStateChangedEventArgs e)
+        {
+            if (!e.IsLoading)
+            {
+                ChromiumWebBrowser cwb = sender as ChromiumWebBrowser;
+                AutoWeb aw = cwb.TopLevelControl as AutoWeb;
+                if (e.Browser.MainFrame.Url.Contains("www.google.com"))
+                {
+                    cwb.LoadUrl("https://spotydown.com");
+                }
+                else
+                { 
+                    cwb.LoadingStateChanged -= this.Mp3Changed;
+                    //chromiumWebBrowser1.LoadingStateChanged += this.Mp3Changed;
+                    cwb.DownloadHandler = new DownloadHandler(aw.GetFile(), true, false);
+                    Thread.Sleep(1000);
+                    Application.DoEvents();
+                    bool keep = true;
+                    int step = 0;
+                    while (keep)
+                    {
+                        if (!cwb.IsLoading)
+                        {
+                            while (!cwb.CanExecuteJavascriptInMainFrame)
+                                Thread.Sleep(10);
+
+                            if (step == 0)
+                            {
+                                await cwb.EvaluateScriptAsPromiseAsync($"document.getElementsByTagName('input')[0].value = '{aw.GetScript()}'");
+                                await cwb.EvaluateScriptAsPromiseAsync("document.getElementsByTagName('button')[0].click()");
+                                step = 1;
+                            }
+                            if (step == 1)
+                            {
+                                JavascriptResponse res = await cwb.EvaluateScriptAsPromiseAsync("document.getElementsByTagName('button')[0]");
+                                if (res != null)
+                                {
+                                    try
+                                    {
+                                        string s = await cwb.GetSourceAsync();
+                                        if (!s.Contains("input"))
+                                            step = 2;
+                                    }
+                                    catch (Exception ex) { }
+                                }
+                            }
+                            if (step == 2)
+                            {
+                                step = 3;
+                                Thread.Sleep(1000);
+                                await cwb.EvaluateScriptAsPromiseAsync("document.getElementsByTagName('button')[0].click()");
+                                keep = false;
+                            }
+
+                        }
+                        Thread.Sleep(100);
+                    }
+                }
+            }
+        }
+
         private async void Add(object sender, EventArgs e)
         {
-            WebRequest request = WebRequest.Create($"https://accounts.spotify.com/api/token");
-            request.ContentType = "application/x-www-form-urlencoded";
-            //request.Headers.Add($"Basic {clientid}: {clientsecret}");
-            request.Method = "POST";
-            string stringData = $"grant_type=client_credentials&client_id={clientid}&client_secret={clientsecret}"; // place body here
-            var data = Encoding.Default.GetBytes(stringData); // note: choose appropriate encoding
-            using (Stream writer = request.GetRequestStream())
-            {
-                writer.Write(data, 0, data.Length);
-            }
-
-            WebResponse response = request.GetResponse();
+            WebRequest request;
             AccessToken accessToken;
-            using(StreamReader reader = new StreamReader(response.GetResponseStream()))
-            {
-                string responsestring = reader.ReadToEnd();
-                accessToken = JsonConvert.DeserializeObject<AccessToken>(responsestring);
-            }
-
-            request = WebRequest.Create($"https://api.spotify.com/v1/users/{userid}/playlists");
-            request.Method = "GET";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.Headers.Add("Authorization", $"Bearer {accessToken.access_token}");
-            response = request.GetResponse();
-            PlaylistList playlist;
-            using(StreamReader reader = new StreamReader(response.GetResponseStream()))
-            {
-                string responsestring = reader.ReadToEnd();
-                playlist = JsonConvert.DeserializeObject<PlaylistList>(responsestring);
-            }
+            PlaylistList playlist = SpotifyRequest<PlaylistList>($"https://api.spotify.com/v1/users/{userid}/playlists");
 
             ComboBox cb = new ComboBox();
             cb.DisplayMember = "name";
             cb.DataSource = playlist.items;
             MyControl mc = new MyControl(cb);
             if (mc.isOK())
-            {            
+            {
                 List<Spotify> list = (web.dataGridView1.DataSource as List<Spotify>).Where(x => x.Add).ToList();
                 foreach (List<string> l2 in list.Select(x => "spotify:track:" + x.Id).ToList().Split(100))
                 {
@@ -377,14 +462,60 @@ namespace WindowsFormsApp1
                     myProgressBar1.Value++;
                 }
                 dataGridView1.DataSource = list;
-                    dataGridView1.Tag = "Address";
-                    web.WindowState = FormWindowState.Maximized;
+                dataGridView1.Tag = "Address";
+                web.WindowState = FormWindowState.Maximized;
             }
 
         }
+
+        private static T SpotifyRequest<T>(string url)
+        {
+            WebResponse response;
+            WebRequest request;
+            T item;
+
+            request = WebRequest.Create(url);
+            request.Method = "GET";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.Headers.Add("Authorization", $"Bearer {Login().access_token}");
+            response = request.GetResponse();
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responsestring = reader.ReadToEnd();
+                item = JsonConvert.DeserializeObject<T>(responsestring);
+            }
+            return item;
+        }
+
+        private static AccessToken Login()
+        {
+            WebResponse response;
+            WebRequest request;
+            AccessToken accessToken;
+
+            request = WebRequest.Create($"https://accounts.spotify.com/api/token");
+            request.ContentType = "application/x-www-form-urlencoded";
+            //request.Headers.Add($"Basic {clientid}: {clientsecret}");
+            request.Method = "POST";
+            string stringData = $"grant_type=client_credentials&client_id={clientid}&client_secret={clientsecret}"; // place body here
+            var data = Encoding.Default.GetBytes(stringData); // note: choose appropriate encoding
+            using (Stream writer = request.GetRequestStream())
+            {
+                writer.Write(data, 0, data.Length);
+            }
+
+            response = request.GetResponse();
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responsestring = reader.ReadToEnd();
+                accessToken = JsonConvert.DeserializeObject<AccessToken>(responsestring);
+            }
+            return accessToken;
+        }
+
         private async void Kpoop(object sender, EventArgs e)
         {
-            Paging<PlaylistTrack<IPlayableItem>> kpopmix = await spotify.Playlists.GetItems("37i9dQZF1EQpesGsmIyqcW");
+            Paging<PlaylistTrack<IPlayableItem>> kpopmix = await spotify.Playlists.GetItems("37i9dQZF1DX9tPFwDMOaN1");//("37i9dQZF1EQpesGsmIyqcW");
             Paging <PlaylistTrack<IPlayableItem>> kpoop = await spotify.Playlists.GetItems("2w4i6mlSsBMOE3BwVEKxux");
             List<string> kpopmixlist = kpopmix.Items.Select(x => ((FullTrack)x.Track).Uri).ToList();
             List<string> kpooplist = kpoop.Items.Select(x => ((FullTrack)x.Track).Uri).ToList();
